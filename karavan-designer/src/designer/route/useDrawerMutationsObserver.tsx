@@ -18,7 +18,7 @@
 import { useLayoutEffect, useRef } from 'react';
 
 function useMutationsObserver<T extends HTMLElement>(callback: (target: T, mutations: any) => void) {
-    const ref = useRef<T>(null)
+    const ref = useRef<T>(null);
 
     useLayoutEffect(() => {
         const element = ref?.current;
@@ -26,15 +26,19 @@ function useMutationsObserver<T extends HTMLElement>(callback: (target: T, mutat
             return;
         }
         const drawer = element.childNodes[0].childNodes[0].childNodes[1];
-        const observer2 = new MutationObserver(mutations => callback(element, mutations));
-        observer2.observe(drawer, {attributes: true, attributeOldValue: true, attributeFilter: ['style']});
+        const observer2 = new MutationObserver((mutations) => callback(element, mutations));
+        observer2.observe(drawer, {
+            attributes: true,
+            attributeOldValue: true,
+            attributeFilter: ['style'],
+        });
         return () => {
             // observer1.disconnect();
             observer2.disconnect();
         };
     }, [callback, ref]);
 
-    return ref
+    return ref;
 }
 
 export default useMutationsObserver;

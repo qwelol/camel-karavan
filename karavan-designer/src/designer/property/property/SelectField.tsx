@@ -25,17 +25,17 @@ import {
     TextInputGroup,
     TextInputGroupMain,
     TextInputGroupUtilities,
-    Button
+    Button,
 } from '@patternfly/react-core';
 import TimesIcon from '@patternfly/react-icons/dist/esm/icons/times-icon';
 
 interface Props {
-    id: string
-    name: string
-    value?: string
-    placeholder: string
-    onChange: (name: string, value: string | number | undefined) => void,
-    selectOptions: SelectOptionProps[]
+    id: string;
+    name: string;
+    value?: string;
+    placeholder: string;
+    onChange: (name: string, value: string | number | undefined) => void;
+    selectOptions: SelectOptionProps[];
 }
 
 export function SelectField(props: Props) {
@@ -51,26 +51,33 @@ export function SelectField(props: Props) {
     const CREATE_NEW = 'create';
 
     React.useEffect(() => {
-        const v = props.selectOptions.filter(so => so.value === props.value)?.at(0)?.children?.toString() || '';
+        const v =
+            props.selectOptions
+                .filter((so) => so.value === props.value)
+                ?.at(0)
+                ?.children?.toString() || '';
         setInputValue(v);
     }, []);
 
     React.useEffect(() => {
-        let initialSelectOptions = props.selectOptions;
+        const initialSelectOptions = props.selectOptions;
         let newSelectOptions: SelectOptionProps[] = initialSelectOptions;
 
         // Filter menu items based on the text input value when one exists
         if (filterValue) {
             newSelectOptions = props.selectOptions.filter((menuItem) =>
-                String(menuItem.children).toLowerCase().includes(filterValue.toLowerCase())
+                String(menuItem.children).toLowerCase().includes(filterValue.toLowerCase()),
             );
 
             // If no option matches the filter exactly, display creation option
             if (!initialSelectOptions.some((option) => option.value === filterValue)) {
-                newSelectOptions = [...newSelectOptions, {
-                    children: `Create new option "${filterValue}"`,
-                    value: filterValue
-                }];
+                newSelectOptions = [
+                    ...newSelectOptions,
+                    {
+                        children: `Create new option "${filterValue}"`,
+                        value: filterValue,
+                    },
+                ];
             }
 
             // Open the menu when the input value changes and the new value is not empty
@@ -116,12 +123,15 @@ export function SelectField(props: Props) {
         closeMenu();
     };
 
-    const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
+    const onSelect = (
+        _event: React.MouseEvent<Element, MouseEvent> | undefined,
+        value: string | number | undefined,
+    ) => {
         let initialSelectOptions = props.selectOptions;
         if (value) {
             if (value === CREATE_NEW) {
                 if (!initialSelectOptions.some((item) => item.children === filterValue)) {
-                    initialSelectOptions = [...initialSelectOptions, {value: filterValue, children: filterValue}];
+                    initialSelectOptions = [...initialSelectOptions, { value: filterValue, children: filterValue }];
                 }
                 setSelected(filterValue);
                 setFilterValue('');
@@ -231,8 +241,8 @@ export function SelectField(props: Props) {
     const toggle = (toggleRef: React.Ref<MenuToggleElement>) => (
         <MenuToggle
             ref={toggleRef}
-            variant="typeahead"
-            aria-label="Typeahead creatable menu toggle"
+            variant='typeahead'
+            aria-label='Typeahead creatable menu toggle'
             onClick={onToggleClick}
             isExpanded={isOpen}
             isFullWidth
@@ -243,19 +253,19 @@ export function SelectField(props: Props) {
                     onClick={onInputClick}
                     onChange={onTextInputChange}
                     onKeyDown={onInputKeyDown}
-                    id="create-typeahead-select-input"
-                    autoComplete="off"
+                    id='create-typeahead-select-input'
+                    autoComplete='off'
                     innerRef={textInputRef}
                     placeholder={props.placeholder}
-                    {...(activeItemId && {'aria-activedescendant': activeItemId})}
-                    role="combobox"
+                    {...(activeItemId && { 'aria-activedescendant': activeItemId })}
+                    role='combobox'
                     isExpanded={isOpen}
-                    aria-controls="select-create-typeahead-listbox"
+                    aria-controls='select-create-typeahead-listbox'
                 />
 
-                <TextInputGroupUtilities {...(!inputValue ? {style: {display: 'none'}} : {})}>
-                    <Button variant="plain" onClick={onClearButtonClick} aria-label="Clear input value">
-                        <TimesIcon aria-hidden/>
+                <TextInputGroupUtilities {...(!inputValue ? { style: { display: 'none' } } : {})}>
+                    <Button variant='plain' onClick={onClearButtonClick} aria-label='Clear input value'>
+                        <TimesIcon aria-hidden />
                     </Button>
                 </TextInputGroupUtilities>
             </TextInputGroup>
@@ -264,7 +274,7 @@ export function SelectField(props: Props) {
 
     return (
         <Select
-            id="create-typeahead-select"
+            id='create-typeahead-select'
             isOpen={isOpen}
             selected={selected}
             onSelect={onSelect}
@@ -274,9 +284,10 @@ export function SelectField(props: Props) {
             toggle={toggle}
             shouldFocusToggleOnSelect={false}
         >
-            <SelectList id="select-create-typeahead-listbox">
+            <SelectList id='select-create-typeahead-listbox'>
                 {selectOptions.map((option, index) => {
-                        return <SelectOption
+                    return (
+                        <SelectOption
                             key={option.value}
                             isFocused={focusedItemIndex === index}
                             className={option.className}
@@ -286,9 +297,9 @@ export function SelectField(props: Props) {
                             {...option}
                             ref={null}
                         />
-                    }
-                )}
+                    );
+                })}
             </SelectList>
         </Select>
     );
-};
+}

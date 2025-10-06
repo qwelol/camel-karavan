@@ -15,21 +15,17 @@
  * limitations under the License.
  */
 
-import React, {useEffect, useState} from 'react';
-import {
-    Alert,
-    AlertActionCloseButton, AlertGroup,
-} from '@patternfly/react-core';
+import React, { useEffect, useState } from 'react';
+import { Alert, AlertActionCloseButton, AlertGroup } from '@patternfly/react-core';
 import '../karavan.css';
-import {EventBus, ToastMessage} from "./EventBus";
+import { EventBus, ToastMessage } from './EventBus';
 
-export function Notification () {
-
+export function Notification() {
     const [alerts, setAlerts] = useState<ToastMessage[]>([]);
 
     useEffect(() => {
         const sub = EventBus.onAlert()?.subscribe((result: ToastMessage) => {
-            setAlerts(prevState => {
+            setAlerts((prevState) => {
                 return [...prevState, result];
             });
         });
@@ -38,22 +34,30 @@ export function Notification () {
         };
     }, []);
 
-    useEffect(() => {
-    }, [alerts]);
+    useEffect(() => {}, [alerts]);
 
     return (
         <AlertGroup isToast isLiveRegion>
             {alerts.map((e: ToastMessage) => (
-                <Alert key={e.id} className="main-alert" variant={e.variant} title={e.title}
-                       timeout={['success', 'info', 'custom'].includes(e.variant) ? 2300 : 20000}
-                       actionClose={<AlertActionCloseButton onClose={() => {
-                           setAlerts(prevState => {
-                               return [...prevState.filter(t => t.id !== e.id)];
-                           });
-                       }}/>}>
+                <Alert
+                    key={e.id}
+                    className='main-alert'
+                    variant={e.variant}
+                    title={e.title}
+                    timeout={['success', 'info', 'custom'].includes(e.variant) ? 2300 : 20000}
+                    actionClose={
+                        <AlertActionCloseButton
+                            onClose={() => {
+                                setAlerts((prevState) => {
+                                    return [...prevState.filter((t) => t.id !== e.id)];
+                                });
+                            }}
+                        />
+                    }
+                >
                     {e.text}
                 </Alert>
             ))}
         </AlertGroup>
-    )
+    );
 }

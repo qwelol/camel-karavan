@@ -14,105 +14,111 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, {useEffect, useState} from 'react';
-import {
-    Button, Modal, Title, TitleSizes
-} from '@patternfly/react-core';
-import Editor from "@monaco-editor/react";
-import {ExpressionBottomPanel} from "./ExpressionBottomPanel";
-import './ExpressionModalEditor.css'
-import {ExpressionFunctions, ExpressionVariables} from "./ExpressionContextModel";
-import ArrowDown from "@patternfly/react-icons/dist/esm/icons/angle-down-icon";
-import ArrowUp from "@patternfly/react-icons/dist/esm/icons/angle-up-icon";
+import React, { useEffect, useState } from 'react';
+import { Button, Modal, Title, TitleSizes } from '@patternfly/react-core';
+import Editor from '@monaco-editor/react';
+import { ExpressionBottomPanel } from './ExpressionBottomPanel';
+import './ExpressionModalEditor.css';
+import { ExpressionFunctions, ExpressionVariables } from './ExpressionContextModel';
+import ArrowDown from '@patternfly/react-icons/dist/esm/icons/angle-down-icon';
+import ArrowUp from '@patternfly/react-icons/dist/esm/icons/angle-up-icon';
 
 interface Props {
-    name: string,
-    customCode: any,
-    onSave: (fieldId: string, value: string | number | boolean | any) => void,
-    onClose: () => void,
-    title: string,
-    dslLanguage?: [string, string, string],
-    dark: boolean
-    showEditor: boolean
+    name: string;
+    customCode: any;
+    onSave: (fieldId: string, value: string | number | boolean | any) => void;
+    onClose: () => void;
+    title: string;
+    dslLanguage?: [string, string, string];
+    dark: boolean;
+    showEditor: boolean;
 }
 
 export function ExpressionModalEditor(props: Props) {
-
     const [customCode, setCustomCode] = useState<string | undefined>();
     const [showVariables, setShowVariables] = useState<boolean>(true);
     const [key, setKey] = useState<string>('');
 
     useEffect(() => {
-        setCustomCode(props.customCode)
-    },[]);
+        setCustomCode(props.customCode);
+    }, []);
 
-    function close(){
+    function close() {
         props.onClose();
     }
 
-    function closeAndSave(){
+    function closeAndSave() {
         props.onSave(props.name, customCode);
     }
 
-    const {dark, dslLanguage, title, showEditor} = props;
+    const { dark, dslLanguage, title, showEditor } = props;
     const language = dslLanguage?.[0];
-    const showVars = ExpressionVariables.findIndex(e => e.name === language) > - 1;
-    const showFuncs = ExpressionFunctions.findIndex(e => e.name === language) > - 1;
+    const showVars = ExpressionVariables.findIndex((e) => e.name === language) > -1;
+    const showFuncs = ExpressionFunctions.findIndex((e) => e.name === language) > -1;
     const show = showVars || showFuncs;
 
     return (
         <Modal
-            aria-label="Expression"
+            aria-label='Expression'
             className='expression-modal'
-            width={"80%"}
-            header={<React.Fragment>
-                <Title id="modal-custom-header-label" headingLevel="h1" size={TitleSizes['2xl']}>
-                    {title}
-                </Title>
-                <p className="pf-v5-u-pt-sm">{dslLanguage?.[2]}</p>
-            </React.Fragment>}
+            width={'80%'}
+            header={
+                <React.Fragment>
+                    <Title id='modal-custom-header-label' headingLevel='h1' size={TitleSizes['2xl']}>
+                        {title}
+                    </Title>
+                    <p className='pf-v5-u-pt-sm'>{dslLanguage?.[2]}</p>
+                </React.Fragment>
+            }
             isOpen={showEditor}
             onClose={() => close()}
             actions={[
-                <Button key="save" variant="primary" size="sm"
-                        onClick={e => closeAndSave()}>Save</Button>,
-                <Button key="cancel" variant="secondary" size="sm"
-                        onClick={e => close()}>Close</Button>
+                <Button key='save' variant='primary' size='sm' onClick={(e) => closeAndSave()}>
+                    Save
+                </Button>,
+                <Button key='cancel' variant='secondary' size='sm' onClick={(e) => close()}>
+                    Close
+                </Button>,
             ]}
-            onEscapePress={e => close()}>
+            onEscapePress={(e) => close()}
+        >
             <div className='container'>
                 <div className='panel-top'>
                     <Editor
                         key={key}
-                        height={"100%"}
-                        width="100%"
+                        height={'100%'}
+                        width='100%'
                         defaultLanguage={'java'}
                         language={'java'}
                         theme={dark ? 'vs-dark' : 'light'}
                         options={{
-                            lineNumbers: "off",
+                            lineNumbers: 'off',
                             folding: false,
                             lineNumbersMinChars: 10,
                             showUnused: false,
                             fontSize: 12,
-                            minimap: {enabled: false}
+                            minimap: { enabled: false },
                         }}
                         value={customCode?.toString()}
                         className={'code-editor'}
                         onChange={(value, _) => setCustomCode(value)}
                     />
                 </div>
-                <Button style={{padding:"0"}} variant="link" icon={showVariables ? <ArrowDown/> : <ArrowUp/>} onClick={e => {
-                    setShowVariables(!showVariables);
-                    setKey(Math.random().toString());
+                <Button
+                    style={{ padding: '0' }}
+                    variant='link'
+                    icon={showVariables ? <ArrowDown /> : <ArrowUp />}
+                    onClick={(e) => {
+                        setShowVariables(!showVariables);
+                        setKey(Math.random().toString());
                     }}
                 />
-                {show && showVariables &&
+                {show && showVariables && (
                     <div className='panel-bottom'>
-                        {dslLanguage && <ExpressionBottomPanel  dslLanguage={dslLanguage}/>}
+                        {dslLanguage && <ExpressionBottomPanel dslLanguage={dslLanguage} />}
                     </div>
-                }
+                )}
             </div>
         </Modal>
-    )
+    );
 }

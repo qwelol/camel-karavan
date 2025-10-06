@@ -15,52 +15,46 @@
  * limitations under the License.
  */
 import React from 'react';
-import {ClipboardCopy, Text, TextContent} from '@patternfly/react-core';
-import './ExpressionModalEditor.css'
-import {Table, Tbody, Td, Tr} from "@patternfly/react-table";
-import {Context, ExpressionFunctions, ExpressionVariables} from "./ExpressionContextModel";
+import { ClipboardCopy, Text, TextContent } from '@patternfly/react-core';
+import './ExpressionModalEditor.css';
+import { Table, Tbody, Td, Tr } from '@patternfly/react-table';
+import { Context, ExpressionFunctions, ExpressionVariables } from './ExpressionContextModel';
 
 interface Props {
-    dslLanguage?: [string, string, string],
+    dslLanguage?: [string, string, string];
 }
 
 export function ExpressionBottomPanel(props: Props) {
-
-    const {dslLanguage} = props;
+    const { dslLanguage } = props;
     const language = dslLanguage?.[0];
-    const vars: Context[] = ExpressionVariables.filter(e => e.name === language)?.[0]?.information || [];
-    const funcs: Context[] = ExpressionFunctions.filter(e => e.name === language)?.at(0)?.information || []
+    const vars: Context[] = ExpressionVariables.filter((e) => e.name === language)?.[0]?.information || [];
+    const funcs: Context[] = ExpressionFunctions.filter((e) => e.name === language)?.at(0)?.information || [];
     const showVars = vars.length > 0;
     const showFuncs = funcs.length > 0;
 
     function getRows(data: Context[]) {
-        return (
-            data?.map((context, index, array) =>
-                <Tr key={index} style={{padding: '0'}}>
-                    <Td style={{padding: '0px 0px 6px 0px'}} modifier='fitContent'>
-                        <ClipboardCopy key={index} hoverTip="Copy" clickTip="Copied"
-                                       variant="inline-compact">
-                            {context.key}
-                        </ClipboardCopy>
-                    </Td>
-                    <Td style={{padding: '0px 0px 0px 16px'}}>
-                        {context.value}
-                    </Td>
-                </Tr>
-            )
-        )
+        return data?.map((context, index, array) => (
+            <Tr key={index} style={{ padding: '0' }}>
+                <Td style={{ padding: '0px 0px 6px 0px' }} modifier='fitContent'>
+                    <ClipboardCopy key={index} hoverTip='Copy' clickTip='Copied' variant='inline-compact'>
+                        {context.key}
+                    </ClipboardCopy>
+                </Td>
+                <Td style={{ padding: '0px 0px 0px 16px' }}>{context.value}</Td>
+            </Tr>
+        ));
     }
 
     function getRowHeader(data: string) {
         return (
-            <Tr key='vars' style={{padding: '0'}}>
-                <Td style={{padding: '16px 6px 6px 0px'}}>
+            <Tr key='vars' style={{ padding: '0' }}>
+                <Td style={{ padding: '16px 6px 6px 0px' }}>
                     <TextContent>
                         <Text component='h3'>{data}</Text>
                     </TextContent>
                 </Td>
             </Tr>
-        )
+        );
     }
 
     return (
@@ -76,5 +70,5 @@ export function ExpressionBottomPanel(props: Props) {
                 </Table>
             </div>
         </div>
-    )
+    );
 }

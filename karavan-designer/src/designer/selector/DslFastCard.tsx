@@ -15,26 +15,20 @@
  * limitations under the License.
  */
 import React from 'react';
-import {
-    Button,
-    Card,
-    CardHeader,
-    Text,
-} from '@patternfly/react-core';
+import { Button, Card, CardHeader, Text } from '@patternfly/react-core';
 import './DslSelector.css';
-import {CamelUi} from "../utils/CamelUi";
-import {DslMetaModel} from "../utils/DslMetaModel";
-import TimesIcon from "@patternfly/react-icons/dist/esm/icons/outlined-times-circle-icon";
+import { CamelUi } from '../utils/CamelUi';
+import { DslMetaModel } from '../utils/DslMetaModel';
+import TimesIcon from '@patternfly/react-icons/dist/esm/icons/outlined-times-circle-icon';
 
 interface Props {
-    dsl: DslMetaModel,
-    index: number
-    onDslSelect: (evt: React.MouseEvent, dsl: DslMetaModel) => void
-    onDeleteFast: (evt: React.MouseEvent, dsl: DslMetaModel) => void
+    dsl: DslMetaModel;
+    index: number;
+    onDslSelect: (evt: React.MouseEvent, dsl: DslMetaModel) => void;
+    onDeleteFast: (evt: React.MouseEvent, dsl: DslMetaModel) => void;
 }
 
-export function DslFastCard (props: Props) {
-
+export function DslFastCard(props: Props) {
     function selectDsl(evt: React.MouseEvent, dsl: DslMetaModel) {
         props.onDslSelect(evt, dsl);
     }
@@ -43,16 +37,23 @@ export function DslFastCard (props: Props) {
         props.onDeleteFast(evt, dsl);
     }
 
-    const {dsl, index} = props;
+    const { dsl, index } = props;
 
     return (
-        <Card key={dsl.dsl + index} isCompact isPlain isFlat isRounded className="dsl-card dsl-fast-card"
-              onClick={event => selectDsl(event, dsl)}>
-            <Button className='fast-delete' variant='link' icon={<TimesIcon/>} onClick={deleteFast}/>
+        <Card
+            key={dsl.dsl + index}
+            isCompact
+            isPlain
+            isFlat
+            isRounded
+            className='dsl-card dsl-fast-card'
+            onClick={(event) => selectDsl(event, dsl)}
+        >
+            <Button className='fast-delete' variant='link' icon={<TimesIcon />} onClick={deleteFast} />
             <CardHeader className='header'>
                 {CamelUi.getIconForDsl(dsl)}
                 <Text className='dsl-fast-card-title'>{dsl.title}</Text>
             </CardHeader>
         </Card>
-    )
+    );
 }

@@ -16,44 +16,58 @@
  */
 import React from 'react';
 import {
-    Badge, capitalize,
-    Card, CardBody, CardFooter,
+    Badge,
+    capitalize,
+    Card,
+    CardBody,
+    CardFooter,
     CardHeader,
     Text,
     Tooltip,
     TooltipPosition,
 } from '@patternfly/react-core';
 import './DslSelector.css';
-import {CamelUi} from "../utils/CamelUi";
-import {DslMetaModel} from "../utils/DslMetaModel";
-import {KameletApi} from "karavan-core/lib/api/KameletApi";
+import { CamelUi } from '../utils/CamelUi';
+import { DslMetaModel } from '../utils/DslMetaModel';
+import { KameletApi } from 'karavan-core/lib/api/KameletApi';
 
 interface Props {
-    dsl: DslMetaModel,
-    index: number
-    onDslSelect: (evt: React.MouseEvent, dsl: DslMetaModel) => void
+    dsl: DslMetaModel;
+    index: number;
+    onDslSelect: (evt: React.MouseEvent, dsl: DslMetaModel) => void;
 }
 
-export function DslCard (props: Props) {
-
+export function DslCard(props: Props) {
     function selectDsl(evt: React.MouseEvent, dsl: DslMetaModel) {
         props.onDslSelect(evt, dsl);
     }
 
-    const {dsl, index} = props;
+    const { dsl, index } = props;
     const navigation = dsl.navigation === 'eip' ? 'EIP' : capitalize(dsl.navigation);
-    const labels = dsl.labels !== undefined ? dsl.labels.split(",").filter(label => label !== 'eip') : [];
+    const labels = dsl.labels !== undefined ? dsl.labels.split(',').filter((label) => label !== 'eip') : [];
     const isCustom = KameletApi.getCustomKameletNames().includes(dsl.name);
-    const isRemote =  dsl.remote;
-    const classNameBadge = "navigation-label label-" + dsl.navigation + ((dsl.navigation === 'eip' || dsl?.supportLevel.toLowerCase() === 'stable')? '' : '-preview');
+    const isRemote = dsl.remote;
+    const classNameBadge =
+        'navigation-label label-' +
+        dsl.navigation +
+        (dsl.navigation === 'eip' || dsl?.supportLevel.toLowerCase() === 'stable' ? '' : '-preview');
     return (
-        <Card key={dsl.dsl + index} isCompact isPlain isFlat isRounded className="dsl-card"
-              onClick={event => selectDsl(event, dsl)}>
-            <CardHeader className="header-labels">
+        <Card
+            key={dsl.dsl + index}
+            isCompact
+            isPlain
+            isFlat
+            isRounded
+            className='dsl-card'
+            onClick={(event) => selectDsl(event, dsl)}
+        >
+            <CardHeader className='header-labels'>
                 <Badge className={classNameBadge}>{navigation}</Badge>
-                {['kamelet', 'component'].includes(dsl.navigation.toLowerCase()) &&
-                    <Badge isRead className="support-level labels">{dsl.supportLevel}</Badge>
-                }
+                {['kamelet', 'component'].includes(dsl.navigation.toLowerCase()) && (
+                    <Badge isRead className='support-level labels'>
+                        {dsl.supportLevel}
+                    </Badge>
+                )}
             </CardHeader>
             <CardHeader>
                 {CamelUi.getIconForDsl(dsl)}
@@ -62,17 +76,30 @@ export function DslCard (props: Props) {
             <CardBody>
                 {/*<Text>{dsl.description}</Text>*/}
                 <Tooltip content={dsl.description} position={TooltipPosition.bottom} entryDelay={1000}>
-                    <Text className="pf-v5-u-color-200">{dsl.description}</Text>
+                    <Text className='pf-v5-u-color-200'>{dsl.description}</Text>
                 </Tooltip>
             </CardBody>
-            <CardFooter className="footer-labels">
-                <div style={{display: "flex", flexDirection: "row", justifyContent: "start"}}>
-                    {labels.map((label, index) => <Badge key={label + "-" + index} isRead
-                                                         className="labels">{label}</Badge>)}
+            <CardFooter className='footer-labels'>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'start',
+                    }}
+                >
+                    {labels.map((label, index) => (
+                        <Badge key={label + '-' + index} isRead className='labels'>
+                            {label}
+                        </Badge>
+                    ))}
                 </div>
-                {dsl.navigation === 'component' && <Badge isRead className="labels">{isRemote ? 'remote' : 'internal'}</Badge>}
-                {isCustom && <Badge className="custom">custom</Badge>}
+                {dsl.navigation === 'component' && (
+                    <Badge isRead className='labels'>
+                        {isRemote ? 'remote' : 'internal'}
+                    </Badge>
+                )}
+                {isCustom && <Badge className='custom'>custom</Badge>}
             </CardFooter>
         </Card>
-    )
+    );
 }

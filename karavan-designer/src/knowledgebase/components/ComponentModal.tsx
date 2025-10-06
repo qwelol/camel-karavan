@@ -14,46 +14,58 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
     Button,
     Modal,
     ActionGroup,
     Text,
     CardHeader,
-    Badge, Flex, Tabs, Tab, TabTitleText,
+    Badge,
+    Flex,
+    Tabs,
+    Tab,
+    TabTitleText,
 } from '@patternfly/react-core';
 import '../../designer/karavan.css';
-import {Table, Tbody, Td, Th, Thead, Tr} from "@patternfly/react-table";
-import {CamelUi} from "../../designer/utils/CamelUi";
-import {ComponentApi} from "karavan-core/lib/api/ComponentApi";
-import {ComponentHeader, ComponentProperty} from "karavan-core/lib/model/ComponentModels";
-import {useKnowledgebaseStore} from "../KnowledgebaseStore";
-import {shallow} from "zustand/shallow";
+import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { CamelUi } from '../../designer/utils/CamelUi';
+import { ComponentApi } from 'karavan-core/lib/api/ComponentApi';
+import { ComponentHeader, ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
+import { useKnowledgebaseStore } from '../KnowledgebaseStore';
+import { shallow } from 'zustand/shallow';
 
 export function ComponentModal() {
-
-    const [component, isModalOpen, setModalOpen] = useKnowledgebaseStore((s) =>
-        [s.component, s.isModalOpen, s.setModalOpen], shallow)
+    const [component, isModalOpen, setModalOpen] = useKnowledgebaseStore(
+        (s) => [s.component, s.isModalOpen, s.setModalOpen],
+        shallow,
+    );
 
     const [tab, setTab] = useState<string | number>('properties');
 
     const props = new Map<string, ComponentProperty>();
     if (component) {
-        ComponentApi.getComponentProperties(component?.component.name, "consumer").forEach(cp => props.set(cp.name, cp));
-        ComponentApi.getComponentProperties(component?.component.name, "producer").forEach(cp => props.set(cp.name, cp));
+        ComponentApi.getComponentProperties(component?.component.name, 'consumer').forEach((cp) =>
+            props.set(cp.name, cp),
+        );
+        ComponentApi.getComponentProperties(component?.component.name, 'producer').forEach((cp) =>
+            props.set(cp.name, cp),
+        );
     }
 
     const headers = new Map<string, ComponentHeader>();
     if (component) {
-        ComponentApi.getComponentHeaders(component?.component.name, "consumer").forEach(cp => headers.set(cp.name, cp));
-        ComponentApi.getComponentHeaders(component?.component.name, "producer").forEach(cp => headers.set(cp.name, cp));
+        ComponentApi.getComponentHeaders(component?.component.name, 'consumer').forEach((cp) =>
+            headers.set(cp.name, cp),
+        );
+        ComponentApi.getComponentHeaders(component?.component.name, 'producer').forEach((cp) =>
+            headers.set(cp.name, cp),
+        );
     }
-
 
     function getPropertiesTable() {
         return (
-            <Table aria-label="Properties table" variant='compact'>
+            <Table aria-label='Properties table' variant='compact'>
                 <Thead>
                     <Tr>
                         <Th key='name'>Display Name / Name</Th>
@@ -74,8 +86,9 @@ export function ComponentModal() {
                             <Td key={`${idx}_desc`}>
                                 <div>
                                     <div>{p.description}</div>
-                                    {p.defaultValue && p.defaultValue.toString().length > 0 &&
-                                        <div>{"Default value: " + p.defaultValue}</div>}
+                                    {p.defaultValue && p.defaultValue.toString().length > 0 && (
+                                        <div>{'Default value: ' + p.defaultValue}</div>
+                                    )}
                                 </div>
                             </Td>
                             <Td key={`${idx}_type`}>{p.type}</Td>
@@ -84,16 +97,18 @@ export function ComponentModal() {
                     ))}
                 </Tbody>
             </Table>
-        )
+        );
     }
 
     function getHeadersTable() {
         return (
-            <Table aria-label="Headers table" variant='compact'>
+            <Table aria-label='Headers table' variant='compact'>
                 <Thead>
                     <Tr>
                         <Th key='name'>Name</Th>
-                        <Th key='desc' modifier={"breakWord"}>Description</Th>
+                        <Th key='desc' modifier={'breakWord'}>
+                            Description
+                        </Th>
                         <Th key='type'>Group</Th>
                         <Th key='label'>Java Type</Th>
                         <Th key='label'>Default Value</Th>
@@ -118,7 +133,7 @@ export function ComponentModal() {
                     ))}
                 </Tbody>
             </Table>
-        )
+        );
     }
 
     const showProps = props.size !== 0;
@@ -126,45 +141,52 @@ export function ComponentModal() {
 
     return (
         <Modal
-            aria-label={"Kamelet"}
+            aria-label={'Kamelet'}
             width={'80%'}
             maxLength={200}
             title={component?.component.title}
             isOpen={isModalOpen}
             onClose={() => setModalOpen(false)}
             actions={[
-                <div className="modal-footer">
-                    <ActionGroup className="deploy-buttons">
-                        <Button key="cancel" variant="primary"
-                                onClick={e => setModalOpen(false)}>Close</Button>
+                <div className='modal-footer'>
+                    <ActionGroup className='deploy-buttons'>
+                        <Button key='cancel' variant='primary' onClick={(e) => setModalOpen(false)}>
+                            Close
+                        </Button>
                     </ActionGroup>
-                </div>
+                </div>,
             ]}
         >
-            <Flex direction={{default: 'column'}} key={component?.component.name}
-                  className="kamelet-modal-card">
-                <CardHeader actions={{
-                    actions: <><Badge className="badge"
-                                      isRead> {component?.component.label}</Badge></>,
-                    hasNoOffset: false,
-                    className: undefined
-                }}>
+            <Flex direction={{ default: 'column' }} key={component?.component.name} className='kamelet-modal-card'>
+                <CardHeader
+                    actions={{
+                        actions: (
+                            <>
+                                <Badge className='badge' isRead>
+                                    {' '}
+                                    {component?.component.label}
+                                </Badge>
+                            </>
+                        ),
+                        hasNoOffset: false,
+                        className: undefined,
+                    }}
+                >
                     {component && CamelUi.getIconForComponent(component.component.title, component.component.label)}
-
                 </CardHeader>
-                <Text className="description">{component?.component.description}</Text>
+                <Text className='description'>{component?.component.description}</Text>
                 <Tabs
                     activeKey={tab}
                     onSelect={(event, eventKey) => setTab(eventKey)}
-                    aria-label="Tabs in the default example"
-                    role="region"
+                    aria-label='Tabs in the default example'
+                    role='region'
                 >
-                    <Tab eventKey={'properties'} title={<TabTitleText>Properties</TabTitleText>}/>
-                    <Tab eventKey={'headers'} title={<TabTitleText>Headers</TabTitleText>}/>
+                    <Tab eventKey={'properties'} title={<TabTitleText>Properties</TabTitleText>} />
+                    <Tab eventKey={'headers'} title={<TabTitleText>Headers</TabTitleText>} />
                 </Tabs>
                 {tab === 'properties' && showProps && getPropertiesTable()}
                 {tab === 'headers' && showHeaders && getHeadersTable()}
             </Flex>
         </Modal>
-    )
+    );
 }

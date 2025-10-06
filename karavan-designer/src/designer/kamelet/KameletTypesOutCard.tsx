@@ -20,23 +20,24 @@ import {
     Card,
     CardBody,
     CardTitle,
-    FormGroup, FormHelperText, HelperText, HelperTextItem,
+    FormGroup,
+    FormHelperText,
+    HelperText,
+    HelperTextItem,
     Label,
     LabelGroup,
 } from '@patternfly/react-core';
 import '../karavan.css';
 import './kamelet.css';
-import {useIntegrationStore} from "../DesignerStore";
-import {shallow} from "zustand/shallow";
-import AddIcon from "@patternfly/react-icons/dist/js/icons/plus-circle-icon";
-import {CamelUtil} from "karavan-core/lib/api/CamelUtil";
+import { useIntegrationStore } from '../DesignerStore';
+import { shallow } from 'zustand/shallow';
+import AddIcon from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
+import { CamelUtil } from 'karavan-core/lib/api/CamelUtil';
 
 export function KameletTypesOutCard() {
-
-    const [integration, setIntegration] = useIntegrationStore((s) => [s.integration, s.setIntegration], shallow)
+    const [integration, setIntegration] = useIntegrationStore((s) => [s.integration, s.setIntegration], shallow);
 
     const dependencies: string[] = [...(integration.spec.dependencies || [])];
-
 
     function setDependencies(deps: string[]) {
         const i = CamelUtil.cloneIntegration(integration);
@@ -45,12 +46,12 @@ export function KameletTypesOutCard() {
     }
 
     function addDepencency() {
-        dependencies.push("dependency")
+        dependencies.push('dependency');
         setDependencies(dependencies);
     }
 
     function deleteDependency(val: string) {
-        setDependencies(dependencies.filter(e => e !== val));
+        setDependencies(dependencies.filter((e) => e !== val));
     }
 
     function renameDependency(index: number, newVal: string) {
@@ -59,14 +60,14 @@ export function KameletTypesOutCard() {
     }
 
     return (
-        <Card isClickable isCompact isFlat ouiaId="PropertyCard" className="property-card">
-            <CardTitle>
-                Dependencies
-            </CardTitle>
+        <Card isClickable isCompact isFlat ouiaId='PropertyCard' className='property-card'>
+            <CardTitle>Dependencies</CardTitle>
             <CardBody>
                 <FormHelperText>
                     <HelperText>
-                        <HelperTextItem>Dependencies required, ex: camel:component or mvn:groupId:artifactId:version</HelperTextItem>
+                        <HelperTextItem>
+                            Dependencies required, ex: camel:component or mvn:groupId:artifactId:version
+                        </HelperTextItem>
                     </HelperText>
                 </FormHelperText>
             </CardBody>
@@ -77,7 +78,7 @@ export function KameletTypesOutCard() {
                         numLabels={dependencies.length}
                         isEditable
                         addLabelControl={
-                            <Button variant="link" icon={<AddIcon/>} onClick={event => addDepencency()}>
+                            <Button variant='link' icon={<AddIcon />} onClick={(event) => addDepencency()}>
                                 Add
                             </Button>
                         }
@@ -86,19 +87,19 @@ export function KameletTypesOutCard() {
                             <Label
                                 key={val}
                                 id={val}
-                                color="grey"
+                                color='grey'
                                 isEditable
                                 onClose={() => deleteDependency(val)}
                                 onEditCancel={(_event, prevText) => {}}
                                 onEditComplete={(event, newText) => {
                                     if (event.type === 'mousedown') {
-                                        renameDependency(index, val)
+                                        renameDependency(index, val);
                                     } else if (event.type === 'keydown' && (event as KeyboardEvent).key === 'Tab') {
-                                        renameDependency(index, newText)
+                                        renameDependency(index, newText);
                                     } else if (event.type === 'keydown' && (event as KeyboardEvent).key === 'Enter') {
-                                        renameDependency(index, newText)
+                                        renameDependency(index, newText);
                                     } else {
-                                        renameDependency(index, val)
+                                        renameDependency(index, val);
                                     }
                                 }}
                             >
@@ -109,5 +110,5 @@ export function KameletTypesOutCard() {
                 </FormGroup>
             </CardBody>
         </Card>
-    )
+    );
 }

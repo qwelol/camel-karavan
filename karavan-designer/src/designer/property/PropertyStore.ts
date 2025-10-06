@@ -14,29 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {createWithEqualityFn} from "zustand/traditional";
-import {shallow} from "zustand/shallow";
+import { createWithEqualityFn } from 'zustand/traditional';
+import { shallow } from 'zustand/shallow';
 
 interface PropertiesState {
     propertyFilter: string;
-    setPropertyFilter: (propertyFilter: string) => void
+    setPropertyFilter: (propertyFilter: string) => void;
     requiredOnly: boolean;
-    setRequiredOnly: (requiredOnly: boolean) => void
+    setRequiredOnly: (requiredOnly: boolean) => void;
     changedOnly: boolean;
-    setChangedOnly: (changedOnly: boolean) => void
+    setChangedOnly: (changedOnly: boolean) => void;
 }
 
-export const usePropertiesStore = createWithEqualityFn<PropertiesState>((set, get) => ({
-    requiredOnly: false,
-    changedOnly: false,
-    propertyFilter: '',
-    setPropertyFilter: (propertyFilter: string) => {
-        set({propertyFilter: propertyFilter});
-    },
-    setRequiredOnly: (requiredOnly: boolean) => {
-        set({requiredOnly: requiredOnly});
-    },
-    setChangedOnly: (changedOnly: boolean) => {
-        set({changedOnly: changedOnly});
-    },
-}), shallow)
+export const usePropertiesStore = createWithEqualityFn<PropertiesState>(
+    (set, get) => ({
+        requiredOnly: false,
+        changedOnly: false,
+        propertyFilter: '',
+        setPropertyFilter: (propertyFilter: string) => {
+            set({ propertyFilter: propertyFilter });
+        },
+        setRequiredOnly: (requiredOnly: boolean) => {
+            set({ requiredOnly: requiredOnly });
+        },
+        setChangedOnly: (changedOnly: boolean) => {
+            set({ changedOnly: changedOnly });
+        },
+    }),
+    shallow,
+);

@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Subject} from 'rxjs';
-import {CamelElement, Integration} from "karavan-core/lib/model/IntegrationDefinition";
-import {v4 as uuidv4} from "uuid";
+import { Subject } from 'rxjs';
+import { CamelElement, Integration } from 'karavan-core/lib/model/IntegrationDefinition';
+import { v4 as uuidv4 } from 'uuid';
 
 export class DslPosition {
-    step: CamelElement = new CamelElement("");
+    step: CamelElement = new CamelElement('');
     prevStep: CamelElement | undefined;
     nextstep: CamelElement | undefined;
     parent: CamelElement | undefined;
@@ -29,19 +29,21 @@ export class DslPosition {
     inStepsLength: number = 0;
     rect: DOMRect = new DOMRect();
     headerRect: DOMRect = new DOMRect();
-    command: "add" | "delete" | "clean" = "add";
+    command: 'add' | 'delete' | 'clean' = 'add';
 
-    constructor(command: "add" | "delete" | "clean",
-                step: CamelElement,
-                prevStep: CamelElement | undefined,
-                nextstep: CamelElement | undefined,
-                parent:CamelElement | undefined,
-                rect: DOMRect,
-                headerRect:DOMRect,
-                position: number,
-                inStepsLength: number,
-                inSteps: boolean = false,
-                isSelected: boolean = false) {
+    constructor(
+        command: 'add' | 'delete' | 'clean',
+        step: CamelElement,
+        prevStep: CamelElement | undefined,
+        nextstep: CamelElement | undefined,
+        parent: CamelElement | undefined,
+        rect: DOMRect,
+        headerRect: DOMRect,
+        position: number,
+        inStepsLength: number,
+        inSteps: boolean = false,
+        isSelected: boolean = false,
+    ) {
         this.command = command;
         this.step = step;
         this.nextstep = nextstep;
@@ -80,9 +82,9 @@ export class IntegrationUpdate {
 
 const alerts = new Subject<ToastMessage>();
 export class ToastMessage {
-    id: string = ''
-    text: string = ''
-    title: string = ''
+    id: string = '';
+    text: string = '';
+    title: string = '';
     variant: 'success' | 'danger' | 'warning' | 'info' | 'custom';
 
     constructor(title: string, text: string, variant: 'success' | 'danger' | 'warning' | 'info' | 'custom') {
@@ -95,27 +97,47 @@ export class ToastMessage {
 const dslPositions = new Subject<DslPosition>();
 
 export const EventBus = {
-    sendPosition: (command: "add" | "delete" | "clean",
-                   step: CamelElement,
-                   prevStep: CamelElement | undefined,
-                   nextstep: CamelElement | undefined,
-                   parent: CamelElement | undefined,
-                   rect: DOMRect,
-                   headerRect: DOMRect,
-                   position: number,
-                   inStepsLength: number,
-                   inSteps: boolean = false,
-                   isSelected: boolean = false) => dslPositions.next(
-                       new DslPosition(command, step, prevStep, nextstep, parent, rect, headerRect, position, inStepsLength, inSteps, isSelected)),
+    sendPosition: (
+        command: 'add' | 'delete' | 'clean',
+        step: CamelElement,
+        prevStep: CamelElement | undefined,
+        nextstep: CamelElement | undefined,
+        parent: CamelElement | undefined,
+        rect: DOMRect,
+        headerRect: DOMRect,
+        position: number,
+        inStepsLength: number,
+        inSteps: boolean = false,
+        isSelected: boolean = false,
+    ) =>
+        dslPositions.next(
+            new DslPosition(
+                command,
+                step,
+                prevStep,
+                nextstep,
+                parent,
+                rect,
+                headerRect,
+                position,
+                inStepsLength,
+                inSteps,
+                isSelected,
+            ),
+        ),
     onPosition: () => dslPositions.asObservable(),
 
-    sendIntegrationUpdate: (i: Integration, propertyOnly: boolean) => updates.next(new IntegrationUpdate(i, propertyOnly)),
+    sendIntegrationUpdate: (i: Integration, propertyOnly: boolean) =>
+        updates.next(new IntegrationUpdate(i, propertyOnly)),
     onIntegrationUpdate: () => updates.asObservable(),
 
     sendCommand: (command: string, data?: any) => commands.next(new Command(command, data)),
     onCommand: () => commands.asObservable(),
 
-    sendAlert: (title: string, text: string, variant: 'success' | 'danger' | 'warning' | 'info' | 'custom' = 'success') =>
-        alerts.next(new ToastMessage(title, text, variant)),
+    sendAlert: (
+        title: string,
+        text: string,
+        variant: 'success' | 'danger' | 'warning' | 'info' | 'custom' = 'success',
+    ) => alerts.next(new ToastMessage(title, text, variant)),
     onAlert: () => alerts.asObservable(),
-}
+};

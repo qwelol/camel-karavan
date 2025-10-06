@@ -14,29 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
     Toolbar,
     ToolbarContent,
     ToolbarItem,
-    PageSection, TextContent, Text, Flex, FlexItem, Button, Tooltip
+    PageSection,
+    TextContent,
+    Text,
+    Flex,
+    FlexItem,
+    Button,
+    Tooltip,
 } from '@patternfly/react-core';
 import './designer/karavan.css';
-import DownloadIcon from "@patternfly/react-icons/dist/esm/icons/download-icon";
-import DownloadImageIcon from "@patternfly/react-icons/dist/esm/icons/image-icon";
-import {KaravanDesigner} from "./designer/KaravanDesigner";
-import {EventBus} from "./designer/utils/EventBus";
-import {IntegrationFile} from "karavan-core/lib/model/IntegrationDefinition";
+import DownloadIcon from '@patternfly/react-icons/dist/esm/icons/download-icon';
+import DownloadImageIcon from '@patternfly/react-icons/dist/esm/icons/image-icon';
+import { KaravanDesigner } from './designer/KaravanDesigner';
+import { EventBus } from './designer/utils/EventBus';
+import { IntegrationFile } from 'karavan-core/lib/model/IntegrationDefinition';
 
 interface Props {
-    name: string,
-    yaml: string,
-    dark: boolean,
-    onSave: (filename: string, yaml: string, propertyOnly: boolean) => void
+    name: string;
+    yaml: string;
+    dark: boolean;
+    onSave: (filename: string, yaml: string, propertyOnly: boolean) => void;
 }
 
 export const DesignerPage = (props: Props) => {
-
     const [yaml, setYaml] = useState<string>(props.yaml);
 
     function save(filename: string, yaml: string, propertyOnly: boolean) {
@@ -45,7 +50,7 @@ export const DesignerPage = (props: Props) => {
     }
 
     function download() {
-        const {name, yaml} = props;
+        const { name, yaml } = props;
         if (name && yaml) {
             const a = document.createElement('a');
             a.setAttribute('download', 'example.yaml');
@@ -55,7 +60,7 @@ export const DesignerPage = (props: Props) => {
     }
 
     function downloadImage() {
-        EventBus.sendCommand("downloadImage");
+        EventBus.sendCommand('downloadImage');
     }
 
     function getDesigner() {
@@ -66,46 +71,55 @@ export const DesignerPage = (props: Props) => {
                 showCodeTab={true}
                 yaml={yaml}
                 onSave={(filename, yaml, propertyOnly) => save(filename, yaml, propertyOnly)}
-                onGetCustomCode={name => {
-                    return new Promise<string | undefined>(resolve => resolve(undefined))
+                onGetCustomCode={(name) => {
+                    return new Promise<string | undefined>((resolve) => resolve(undefined));
                 }}
                 onSaveCustomCode={(name1, code) => {}}
-                propertyPlaceholders={[
-                    // "timer.delay",
-                    // "sql.query"
-                ]}
+                propertyPlaceholders={
+                    [
+                        // "timer.delay",
+                        // "sql.query"
+                    ]
+                }
                 onSavePropertyPlaceholder={(key, value) => {}}
                 beans={[]}
                 onInternalConsumerClick={(uri, name, routeId) => {}}
-                files={[new IntegrationFile("demo.camel.yaml", yaml)]}
+                files={[new IntegrationFile('demo.camel.yaml', yaml)]}
             />
-        )
+        );
     }
 
     return (
-        <PageSection className="designer-page" padding={{default: 'noPadding'}}>
-            <div className="tools-section" //padding={{default: 'noPadding'}}
-                 style={{paddingLeft: "var(--pf-v5-c-page__main-section--PaddingLeft)"}}>
-                <Flex className="tools" justifyContent={{default: 'justifyContentSpaceBetween'}}>
+        <PageSection className='designer-page' padding={{ default: 'noPadding' }}>
+            <div
+                className='tools-section' //padding={{default: 'noPadding'}}
+                style={{
+                    paddingLeft: 'var(--pf-v5-c-page__main-section--PaddingLeft)',
+                }}
+            >
+                <Flex className='tools' justifyContent={{ default: 'justifyContentSpaceBetween' }}>
                     <FlexItem>
-                        <TextContent className="header">
-                            <Text component="h2">Designer</Text>
+                        <TextContent className='header'>
+                            <Text component='h2'>Designer</Text>
                         </TextContent>
                     </FlexItem>
                     <FlexItem>
-                        <Toolbar id="toolbar-group-types">
+                        <Toolbar id='toolbar-group-types'>
                             <ToolbarContent>
                                 <ToolbarItem>
-                                    <Tooltip content="Download YAML" position={"bottom"}>
-                                        <Button variant="primary" icon={<DownloadIcon/>} onClick={e => download()}>
+                                    <Tooltip content='Download YAML' position={'bottom'}>
+                                        <Button variant='primary' icon={<DownloadIcon />} onClick={(e) => download()}>
                                             YAML
                                         </Button>
                                     </Tooltip>
                                 </ToolbarItem>
                                 <ToolbarItem>
-                                    <Tooltip content="Download image" position={"bottom"}>
-                                        <Button variant="secondary" icon={<DownloadImageIcon/>}
-                                                onClick={e => downloadImage()}>
+                                    <Tooltip content='Download image' position={'bottom'}>
+                                        <Button
+                                            variant='secondary'
+                                            icon={<DownloadImageIcon />}
+                                            onClick={(e) => downloadImage()}
+                                        >
                                             Image
                                         </Button>
                                     </Tooltip>
@@ -117,5 +131,5 @@ export const DesignerPage = (props: Props) => {
             </div>
             {getDesigner()}
         </PageSection>
-    )
+    );
 };

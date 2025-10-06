@@ -17,33 +17,38 @@
 import React from 'react';
 import {
     Badge,
-    Card, CardBody, CardFooter, CardHeader, Gallery, PageSection,
-    Tab, Tabs, TabTitleText,
-    Text
+    Card,
+    CardBody,
+    CardFooter,
+    CardHeader,
+    Gallery,
+    PageSection,
+    Tab,
+    Tabs,
+    TabTitleText,
+    Text,
 } from '@patternfly/react-core';
 import '../karavan.css';
-import {CamelUi} from "../utils/CamelUi";
-import {DslMetaModel} from "../utils/DslMetaModel";
-import {useDesignerStore} from "../DesignerStore";
-import {shallow} from "zustand/shallow";
+import { CamelUi } from '../utils/CamelUi';
+import { DslMetaModel } from '../utils/DslMetaModel';
+import { useDesignerStore } from '../DesignerStore';
+import { shallow } from 'zustand/shallow';
 
 interface Props {
-    onMethodSelect: (method: DslMetaModel) => void
+    onMethodSelect: (method: DslMetaModel) => void;
 }
 
 export function RestMethodSelector(props: Props) {
+    const [dark] = useDesignerStore((s) => [s.dark], shallow);
 
-    const [dark] = useDesignerStore((s) => [s.dark], shallow)
-
-    function selectMethod (evt: React.MouseEvent, method: any) {
-        evt.stopPropagation()
+    function selectMethod(evt: React.MouseEvent, method: any) {
+        evt.stopPropagation();
         props.onMethodSelect(method);
     }
 
     function getCard(dsl: DslMetaModel, index: number) {
         return (
-            <Card key={dsl.dsl + index}  isCompact className="dsl-card"
-                  onClick={event => selectMethod(event, dsl)}>
+            <Card key={dsl.dsl + index} isCompact className='dsl-card' onClick={(event) => selectMethod(event, dsl)}>
                 <CardHeader>
                     {CamelUi.getIconForDsl(dsl)}
                     <Text>{dsl.title}</Text>
@@ -52,29 +57,41 @@ export function RestMethodSelector(props: Props) {
                     <Text>{dsl.description}</Text>
                 </CardBody>
                 <CardFooter>
-                    {dsl.navigation.toLowerCase() === "kamelet"
-                        && <div className="footer" style={{justifyContent: "space-between"}}>
-                            <Badge isRead className="labels">{dsl.labels}</Badge>
-                            <Badge isRead className="version">{dsl.version}</Badge>
-                        </div>}
-                    {dsl.navigation.toLowerCase() === "component"
-                        && <div className="footer" style={{justifyContent: "flex-start"}}>
-                            {dsl.labels.split(',').map((s: string) => <Badge key={s} isRead className="labels">{s}</Badge>)}
-                        </div>}
+                    {dsl.navigation.toLowerCase() === 'kamelet' && (
+                        <div className='footer' style={{ justifyContent: 'space-between' }}>
+                            <Badge isRead className='labels'>
+                                {dsl.labels}
+                            </Badge>
+                            <Badge isRead className='version'>
+                                {dsl.version}
+                            </Badge>
+                        </div>
+                    )}
+                    {dsl.navigation.toLowerCase() === 'component' && (
+                        <div className='footer' style={{ justifyContent: 'flex-start' }}>
+                            {dsl.labels.split(',').map((s: string) => (
+                                <Badge key={s} isRead className='labels'>
+                                    {s}
+                                </Badge>
+                            ))}
+                        </div>
+                    )}
                 </CardFooter>
             </Card>
-        )
+        );
     }
 
     return (
-        <PageSection variant={dark ? "darker" : "light"}>
-            <Tabs style={{overflow: 'hidden'}} activeKey="methods" onSelect={event => {}}>
-                <Tab eventKey="methods" title={<TabTitleText>Methods</TabTitleText>}>
-                    <Gallery hasGutter className="dsl-gallery">
-                        {CamelUi.getSelectorRestMethodModels().map((dsl: DslMetaModel, index: number) => getCard(dsl, index))}
+        <PageSection variant={dark ? 'darker' : 'light'}>
+            <Tabs style={{ overflow: 'hidden' }} activeKey='methods' onSelect={(event) => {}}>
+                <Tab eventKey='methods' title={<TabTitleText>Methods</TabTitleText>}>
+                    <Gallery hasGutter className='dsl-gallery'>
+                        {CamelUi.getSelectorRestMethodModels().map((dsl: DslMetaModel, index: number) =>
+                            getCard(dsl, index),
+                        )}
                     </Gallery>
                 </Tab>
             </Tabs>
         </PageSection>
-    )
+    );
 }

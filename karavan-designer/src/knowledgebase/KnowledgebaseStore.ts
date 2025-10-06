@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import {createWithEqualityFn} from "zustand/traditional";
-import {shallow} from "zustand/shallow";
-import {Component} from "karavan-core/lib/model/ComponentModels";
-import {ElementMeta} from "karavan-core/lib/model/CamelMetadata";
-import {KameletModel} from "karavan-core/lib/model/KameletModels";
+import { createWithEqualityFn } from 'zustand/traditional';
+import { shallow } from 'zustand/shallow';
+import { Component } from 'karavan-core/lib/model/ComponentModels';
+import { ElementMeta } from 'karavan-core/lib/model/CamelMetadata';
+import { KameletModel } from 'karavan-core/lib/model/KameletModels';
 
 interface KnowledgebaseState {
     isModalOpen: boolean;
@@ -34,32 +34,35 @@ interface KnowledgebaseState {
     setKamelet: (kamelet: KameletModel) => void;
 }
 
-export const useKnowledgebaseStore = createWithEqualityFn<KnowledgebaseState>((set) => ({
-    isModalOpen: false,
-    setModalOpen: (isModalOpen: boolean) => {
-        set((state: KnowledgebaseState) => {
-            return {isModalOpen: isModalOpen};
-        })
-    },
-    showBlockCheckbox: false,
-    setShowBlockCheckbox: (showBlockCheckbox: boolean) => {
-        set((state: KnowledgebaseState) => {
-            return {showBlockCheckbox: showBlockCheckbox};
-        })
-    },
-    setComponent: (component: Component) => {
-        set((state: KnowledgebaseState) => {
-            return {component: component};
-        })
-    },
-    setElement: (element: ElementMeta) => {
-        set((state: KnowledgebaseState) => {
-            return {element: element};
-        })
-    },
-    setKamelet: (kamelet: KameletModel) => {
-        set((state: KnowledgebaseState) => {
-            return {kamelet: kamelet};
-        })
-    }
-}), shallow)
+export const useKnowledgebaseStore = createWithEqualityFn<KnowledgebaseState>(
+    (set) => ({
+        isModalOpen: false,
+        setModalOpen: (isModalOpen: boolean) => {
+            set((state: KnowledgebaseState) => {
+                return { isModalOpen: isModalOpen };
+            });
+        },
+        showBlockCheckbox: false,
+        setShowBlockCheckbox: (showBlockCheckbox: boolean) => {
+            set((state: KnowledgebaseState) => {
+                return { showBlockCheckbox: showBlockCheckbox };
+            });
+        },
+        setComponent: (component: Component) => {
+            set((state: KnowledgebaseState) => {
+                return { component: component };
+            });
+        },
+        setElement: (element: ElementMeta) => {
+            set((state: KnowledgebaseState) => {
+                return { element: element };
+            });
+        },
+        setKamelet: (kamelet: KameletModel) => {
+            set((state: KnowledgebaseState) => {
+                return { kamelet: kamelet };
+            });
+        },
+    }),
+    shallow,
+);

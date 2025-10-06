@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {DslMetaModel} from "../utils/DslMetaModel";
+import { DslMetaModel } from '../utils/DslMetaModel';
 
 export class PreferredElements {
     eip: PreferredElement[] = [];
@@ -36,10 +36,10 @@ export class PreferredElement {
     }
 }
 
-const PREFERRED_ELEMENTS_STORAGE_NAME = 'PREFERRED_ELEMENTS'
+const PREFERRED_ELEMENTS_STORAGE_NAME = 'PREFERRED_ELEMENTS';
 
 function addCount(pe: PreferredElement): PreferredElement {
-    return new PreferredElement({dslKey: pe.dslKey, count: pe.count + 1});
+    return new PreferredElement({ dslKey: pe.dslKey, count: pe.count + 1 });
 }
 
 export function getPreferredElements(type: 'eip' | 'components' | 'kamelets'): string[] {
@@ -50,40 +50,34 @@ export function getPreferredElements(type: 'eip' | 'components' | 'kamelets'): s
             const pes = new PreferredElements(JSON.parse(local));
             (pes as any)[type].forEach((pe: PreferredElement) => result.push(pe.dslKey));
         }
-    } catch (e) {
-        
-    }
+    } catch (e) {}
     return result;
 }
 
 export function addPreferredElement(type: 'eip' | 'components' | 'kamelets', dsl: DslMetaModel) {
     try {
-        const dslKey = type === 'eip' ? dsl.dsl : (type === 'components' ? dsl.uri : dsl.name);
+        const dslKey = type === 'eip' ? dsl.dsl : type === 'components' ? dsl.uri : dsl.name;
         const local = localStorage.getItem(PREFERRED_ELEMENTS_STORAGE_NAME);
         const pes = local !== null ? new PreferredElements(JSON.parse(local)) : new PreferredElements();
         let list: PreferredElement[] = (pes as any)[type];
-        if (list.findIndex(pe => pe.dslKey === dslKey) !== -1) {
-            list = list.map(pe => pe.dslKey === dslKey ? addCount(pe) : pe);
+        if (list.findIndex((pe) => pe.dslKey === dslKey) !== -1) {
+            list = list.map((pe) => (pe.dslKey === dslKey ? addCount(pe) : pe));
         } else {
-            list.push(new PreferredElement({dslKey: dslKey, count: 1}))
+            list.push(new PreferredElement({ dslKey: dslKey, count: 1 }));
         }
         list = list.sort((a, b) => b.count - a.count).filter((_, i) => i < 20);
         (pes as any)[type] = [...list];
         localStorage.setItem(PREFERRED_ELEMENTS_STORAGE_NAME, JSON.stringify(pes));
-    } catch (e) {
-        
-    }
+    } catch (e) {}
 }
 
 export function deletePreferredElement(type: 'eip' | 'components' | 'kamelets', dsl: DslMetaModel) {
     try {
-        const dslKey = type === 'eip' ? dsl.dsl : (type === 'components' ? dsl.uri : dsl.name);
+        const dslKey = type === 'eip' ? dsl.dsl : type === 'components' ? dsl.uri : dsl.name;
         const local = localStorage.getItem(PREFERRED_ELEMENTS_STORAGE_NAME);
         const pes = local !== null ? new PreferredElements(JSON.parse(local)) : new PreferredElements();
-        let list: PreferredElement[] = (pes as any)[type];
-        (pes as any)[type] = [...list.filter(l => l.dslKey !== dslKey)];
+        const list: PreferredElement[] = (pes as any)[type];
+        (pes as any)[type] = [...list.filter((l) => l.dslKey !== dslKey)];
         localStorage.setItem(PREFERRED_ELEMENTS_STORAGE_NAME, JSON.stringify(pes));
-    } catch (e) {
-        
-    }
+    } catch (e) {}
 }

@@ -15,30 +15,49 @@
  * limitations under the License.
  */
 import React from 'react';
-import {FormGroup, TextInput} from "@patternfly/react-core";
-import {useIntegrationStore} from "../DesignerStore";
-import {shallow} from "zustand/shallow";
+import { FormGroup, TextInput } from '@patternfly/react-core';
+import { useIntegrationStore } from '../DesignerStore';
+import { shallow } from 'zustand/shallow';
 
-export function IntegrationHeader () {
-
-    const [integration] = useIntegrationStore((state) => [state.integration], shallow)
+export function IntegrationHeader() {
+    const [integration] = useIntegrationStore((state) => [state.integration], shallow);
 
     const isKamelet = integration.type === 'kamelet';
 
     return (
-        <div className="headers">
-            <FormGroup label="Kind" fieldId="kind" isRequired>
-                <TextInput className="text-field" type="text" id="kind" name="kind"
-                           value={integration.kind} readOnlyVariant="default"/>
+        <div className='headers'>
+            <FormGroup label='Kind' fieldId='kind' isRequired>
+                <TextInput
+                    className='text-field'
+                    type='text'
+                    id='kind'
+                    name='kind'
+                    value={integration.kind}
+                    readOnlyVariant='default'
+                />
             </FormGroup>
-            <FormGroup label="Name" fieldId="name" isRequired>
-                <TextInput className="text-field" type="text" id="name" name="name"
-                           value={integration.metadata.name} readOnlyVariant="default"/>
+            <FormGroup label='Name' fieldId='name' isRequired>
+                <TextInput
+                    className='text-field'
+                    type='text'
+                    id='name'
+                    name='name'
+                    value={integration.metadata.name}
+                    readOnlyVariant='default'
+                />
             </FormGroup>
-            {isKamelet && <FormGroup label="Kamelet type" fieldId="type" isRequired>
-                <TextInput className="text-field" type="text" id="type" name="type"
-                           value={integration.metadata.labels?.["camel.apache.org/kamelet.type"]} readOnlyVariant="default"/>
-            </FormGroup>}
+            {isKamelet && (
+                <FormGroup label='Kamelet type' fieldId='type' isRequired>
+                    <TextInput
+                        className='text-field'
+                        type='text'
+                        id='type'
+                        name='type'
+                        value={integration.metadata.labels?.['camel.apache.org/kamelet.type']}
+                        readOnlyVariant='default'
+                    />
+                </FormGroup>
+            )}
         </div>
-    )
+    );
 }

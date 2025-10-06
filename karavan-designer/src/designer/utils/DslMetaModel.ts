@@ -15,17 +15,17 @@
  * limitations under the License.
  */
 export class DslMetaModel {
-    dsl: string = ''
-    name: string = ''
-    type: string = ''
-    uri?: string
-    title: string = ''
-    description: string = ''
-    labels: string = ''
-    navigation: string = ''
-    version: string = ''
-    supportLevel: string = ''
-    remote: boolean = false
+    dsl: string = '';
+    name: string = '';
+    type: string = '';
+    uri?: string;
+    title: string = '';
+    description: string = '';
+    labels: string = '';
+    navigation: string = '';
+    version: string = '';
+    supportLevel: string = '';
+    remote: boolean = false;
     properties: any;
 
     public constructor(init?: Partial<DslMetaModel>) {
@@ -34,13 +34,13 @@ export class DslMetaModel {
 }
 
 export class DslProperty {
-    name: string = ''
-    type: string = ''
-    title: string = ''
-    description: string = ''
+    name: string = '';
+    type: string = '';
+    title: string = '';
+    description: string = '';
     required: boolean = false;
-    secret: boolean = false
-    enum: any[] = []
+    secret: boolean = false;
+    enum: any[] = [];
 
     public constructor(init?: Partial<DslProperty>) {
         Object.assign(this, init);
@@ -48,7 +48,7 @@ export class DslProperty {
 }
 
 export class DslConstraints {
-    constraints: DslConstraint[] = []
+    constraints: DslConstraint[] = [];
 
     public constructor(init?: Partial<DslConstraints>) {
         Object.assign(this, init);
@@ -56,8 +56,8 @@ export class DslConstraints {
 }
 
 export class DslConstraint {
-    name: string = ''
-    steps: string[] = []
+    name: string = '';
+    steps: string[] = [];
 
     public constructor(init?: Partial<DslConstraint>) {
         Object.assign(this, init);
@@ -65,9 +65,9 @@ export class DslConstraint {
 }
 
 export class DslLanguage {
-    name: string = ''
-    title: string = ''
-    description: string = ''
+    name: string = '';
+    title: string = '';
+    description: string = '';
 
     public constructor(init?: Partial<DslLanguage>) {
         Object.assign(this, init);

@@ -15,25 +15,27 @@
  * limitations under the License.
  */
 import '../karavan.css';
-import {CamelUtil} from "karavan-core/lib/api/CamelUtil";
-import {
-    DataFormatDefinition, ExpressionDefinition, ToDefinition,
-} from "karavan-core/lib/model/CamelDefinition";
-import {CamelElement} from "karavan-core/lib/model/IntegrationDefinition";
-import {CamelDefinitionApiExt} from "karavan-core/lib/api/CamelDefinitionApiExt";
-import {CamelDefinitionApi} from "karavan-core/lib/api/CamelDefinitionApi";
-import {RouteToCreate} from "../utils/CamelUi";
-import {useDesignerStore, useIntegrationStore} from "../DesignerStore";
-import {shallow} from "zustand/shallow";
-import {CamelMetadataApi} from "karavan-core/lib/model/CamelMetadata";
-import {EventBus} from "../utils/EventBus";
-import {INTERNAL_COMPONENTS} from "karavan-core/lib/api/ComponentApi";
+import { CamelUtil } from 'karavan-core/lib/api/CamelUtil';
+import { DataFormatDefinition, ExpressionDefinition, ToDefinition } from 'karavan-core/lib/model/CamelDefinition';
+import { CamelElement } from 'karavan-core/lib/model/IntegrationDefinition';
+import { CamelDefinitionApiExt } from 'karavan-core/lib/api/CamelDefinitionApiExt';
+import { CamelDefinitionApi } from 'karavan-core/lib/api/CamelDefinitionApi';
+import { RouteToCreate } from '../utils/CamelUi';
+import { useDesignerStore, useIntegrationStore } from '../DesignerStore';
+import { shallow } from 'zustand/shallow';
+import { CamelMetadataApi } from 'karavan-core/lib/model/CamelMetadata';
+import { EventBus } from '../utils/EventBus';
+import { INTERNAL_COMPONENTS } from 'karavan-core/lib/api/ComponentApi';
 
 export function usePropertiesHook(designerType: 'routes' | 'rest' | 'beans' = 'routes') {
-
-    const [integration, setIntegration] = useIntegrationStore((state) => [state.integration, state.setIntegration], shallow)
-    const [selectedStep, setSelectedStep, setSelectedUuids] = useDesignerStore((s) =>
-        [s.selectedStep, s.setSelectedStep, s.setSelectedUuids], shallow)
+    const [integration, setIntegration] = useIntegrationStore(
+        (state) => [state.integration, state.setIntegration],
+        shallow,
+    );
+    const [selectedStep, setSelectedStep, setSelectedUuids] = useDesignerStore(
+        (s) => [s.selectedStep, s.setSelectedStep, s.setSelectedUuids],
+        shallow,
+    );
 
     function onPropertyUpdate(element: CamelElement, newRoute?: RouteToCreate) {
         if (designerType === 'routes') {
@@ -50,9 +52,12 @@ export function usePropertiesHook(designerType: 'routes' | 'rest' | 'beans' = 'r
             let i = CamelDefinitionApiExt.updateIntegrationRouteElement(integration, element);
             const f = CamelDefinitionApi.createFromDefinition({
                 uri: newRoute.componentName,
-                parameters: {name: newRoute.name}
+                parameters: { name: newRoute.name },
             });
-            const r = CamelDefinitionApi.createRouteDefinition({from: f, id: newRoute.name})
+            const r = CamelDefinitionApi.createRouteDefinition({
+                from: f,
+                id: newRoute.name,
+            });
             i = CamelDefinitionApiExt.addStepToIntegration(i, r, '');
             const clone = CamelUtil.cloneIntegration(i);
             setIntegration(clone, false);
@@ -70,9 +75,12 @@ export function usePropertiesHook(designerType: 'routes' | 'rest' | 'beans' = 'r
             let i = CamelDefinitionApiExt.updateIntegrationRestElement(integration, element);
             const f = CamelDefinitionApi.createFromDefinition({
                 uri: newRoute.componentName,
-                parameters: {name: newRoute.name}
+                parameters: { name: newRoute.name },
             });
-            const r = CamelDefinitionApi.createRouteDefinition({from: f, id: newRoute.name})
+            const r = CamelDefinitionApi.createRouteDefinition({
+                from: f,
+                id: newRoute.name,
+            });
             i = CamelDefinitionApiExt.addStepToIntegration(i, r, '');
             const clone = CamelUtil.cloneIntegration(i);
             setIntegration(clone, false);
@@ -90,9 +98,12 @@ export function usePropertiesHook(designerType: 'routes' | 'rest' | 'beans' = 'r
             let i = CamelDefinitionApiExt.updateIntegrationBeanElement(integration, element);
             const f = CamelDefinitionApi.createFromDefinition({
                 uri: newRoute.componentName,
-                parameters: {name: newRoute.name}
+                parameters: { name: newRoute.name },
             });
-            const r = CamelDefinitionApi.createRouteDefinition({from: f, id: newRoute.name})
+            const r = CamelDefinitionApi.createRouteDefinition({
+                from: f,
+                id: newRoute.name,
+            });
             i = CamelDefinitionApiExt.addStepToIntegration(i, r, '');
             const clone = CamelUtil.cloneIntegration(i);
             setIntegration(clone, false);
@@ -110,7 +121,7 @@ export function usePropertiesHook(designerType: 'routes' | 'rest' | 'beans' = 'r
         if (selectedStep) {
             const clone = CamelUtil.cloneStep(selectedStep);
             (clone as any)[fieldId] = value;
-            setSelectedStep(clone)
+            setSelectedStep(clone);
             onPropertyUpdate(clone, newRoute);
         }
     }
@@ -123,18 +134,23 @@ export function usePropertiesHook(designerType: 'routes' | 'rest' | 'beans' = 'r
 
     function onExpressionChange(propertyName: string, exp: ExpressionDefinition) {
         if (selectedStep) {
-            const clone = (CamelUtil.cloneStep(selectedStep));
+            const clone = CamelUtil.cloneStep(selectedStep);
             (clone as any)[propertyName] = exp;
             setSelectedStep(clone);
             onPropertyUpdate(clone);
         }
     }
 
-    function onParametersChange(parameter: string, value: string | number | boolean | any, pathParameter?: boolean, newRoute?: RouteToCreate) {
+    function onParametersChange(
+        parameter: string,
+        value: string | number | boolean | any,
+        pathParameter?: boolean,
+        newRoute?: RouteToCreate,
+    ) {
         value = value === '' ? undefined : value;
         if (selectedStep) {
-            const clone = (CamelUtil.cloneStep(selectedStep));
-            const parameters: any = {...(clone as any).parameters};
+            const clone = CamelUtil.cloneStep(selectedStep);
+            const parameters: any = { ...(clone as any).parameters };
             parameters[parameter] = value;
             (clone as any).parameters = parameters;
             setSelectedStep(clone);
@@ -145,7 +161,7 @@ export function usePropertiesHook(designerType: 'routes' | 'rest' | 'beans' = 'r
     function getInternalComponentName(propertyName: string, element?: CamelElement): string {
         if (element && element.dslName === 'ToDefinition' && (propertyName === 'name' || propertyName === 'address')) {
             const uri: string = (element as ToDefinition).uri || '';
-            const parts = uri.split(":");
+            const parts = uri.split(':');
             if (parts.length > 0 && INTERNAL_COMPONENTS.includes(parts[0])) {
                 return parts[0];
             }
@@ -162,15 +178,21 @@ export function usePropertiesHook(designerType: 'routes' | 'rest' | 'beans' = 'r
     function saveAsRoute(step: CamelElement, stepsOnly: boolean) {
         if (step && step.hasSteps()) {
             const stepClone = CamelUtil.cloneStep(step, true);
-            const from = CamelDefinitionApi.createFromDefinition({uri: "direct", parameters: {name: (step as any).id}});
+            const from = CamelDefinitionApi.createFromDefinition({
+                uri: 'direct',
+                parameters: { name: (step as any).id },
+            });
             if (stepsOnly) {
                 from.steps = (stepClone as any).steps;
             } else {
-                from.steps = [stepClone]
+                from.steps = [stepClone];
             }
-            const route = CamelDefinitionApi.createRouteDefinition({from: from, nodePrefixId: (step as any).id});
+            const route = CamelDefinitionApi.createRouteDefinition({
+                from: from,
+                nodePrefixId: (step as any).id,
+            });
             const clone = CamelUtil.cloneIntegration(integration);
-            clone.spec.flows?.push(route)
+            clone.spec.flows?.push(route);
             setIntegration(clone, false);
             // setSelectedStep(element);
         }
@@ -188,7 +210,7 @@ export function usePropertiesHook(designerType: 'routes' | 'rest' | 'beans' = 'r
                 const choice = CamelDefinitionApi.createChoiceDefinition({
                     uuid: step.uuid,
                     when: [when],
-                    otherwise: otherwise
+                    otherwise: otherwise,
                 });
                 onPropertyUpdate(choice);
                 setSelectedStep(choice);
@@ -196,12 +218,12 @@ export function usePropertiesHook(designerType: 'routes' | 'rest' | 'beans' = 'r
                 const clone = CamelUtil.cloneStep(step, false);
                 const metaSource = CamelMetadataApi.getCamelModelMetadataByClassName(clone.dslName);
                 const metaTarget = CamelMetadataApi.getCamelModelMetadataByClassName(targetDslName);
-                metaSource?.properties.forEach(pro => {
-                    const toDelete = metaTarget?.properties.findIndex(x => x.name === pro.name) === -1;
+                metaSource?.properties.forEach((pro) => {
+                    const toDelete = metaTarget?.properties.findIndex((x) => x.name === pro.name) === -1;
                     if (toDelete) {
                         delete (clone as any)[pro.name];
                     }
-                })
+                });
                 delete (clone as any).dslName;
                 delete (clone as any).stepName;
                 const converted = CamelDefinitionApi.createStep(targetDslName, clone, true);
@@ -209,9 +231,9 @@ export function usePropertiesHook(designerType: 'routes' | 'rest' | 'beans' = 'r
                 setSelectedStep(converted);
             }
         } catch (e: any) {
-            EventBus.sendAlert('Error converting step', e.message, 'danger')
+            EventBus.sendAlert('Error converting step', e.message, 'danger');
         }
-    }
+    };
 
     return {
         saveAsRoute,
@@ -221,6 +243,6 @@ export function usePropertiesHook(designerType: 'routes' | 'rest' | 'beans' = 'r
         onParametersChange,
         onDataFormatChange,
         onExpressionChange,
-        getInternalComponentName
-    }
+        getInternalComponentName,
+    };
 }

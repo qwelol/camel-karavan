@@ -15,38 +15,42 @@
  * limitations under the License.
  */
 import React from 'react';
-import {
-    Gallery,
-    PageSection, PageSectionVariants
-} from '@patternfly/react-core';
+import { Gallery, PageSection, PageSectionVariants } from '@patternfly/react-core';
 import '../../designer/karavan.css';
-import {ComponentCard} from "./ComponentCard";
-import {ComponentModal} from "./ComponentModal";
-import {shallow} from "zustand/shallow";
-import {useKnowledgebaseStore} from "../KnowledgebaseStore";
+import { ComponentCard } from './ComponentCard';
+import { ComponentModal } from './ComponentModal';
+import { shallow } from 'zustand/shallow';
+import { useKnowledgebaseStore } from '../KnowledgebaseStore';
 import { Component } from 'karavan-core/lib/model/ComponentModels';
 
 interface Props {
-    dark: boolean,
-    components: Component[],
-    onChange: (name: string, checked: boolean) => void,
+    dark: boolean;
+    components: Component[];
+    onChange: (name: string, checked: boolean) => void;
 }
 
 export function ComponentsTab(props: Props) {
+    const [isModalOpen] = useKnowledgebaseStore((s) => [s.isModalOpen], shallow);
 
-    const [isModalOpen] = useKnowledgebaseStore((s) => [s.isModalOpen], shallow)
-
-    const {components} = props;
+    const { components } = props;
     return (
-        <PageSection variant={props.dark ? PageSectionVariants.darker : PageSectionVariants.light} padding={{ default: 'noPadding' }} className="kamelet-section">
-            {isModalOpen && <ComponentModal/>}
-            <PageSection isFilled className="kamelets-page" variant={props.dark ? PageSectionVariants.darker : PageSectionVariants.light}>
+        <PageSection
+            variant={props.dark ? PageSectionVariants.darker : PageSectionVariants.light}
+            padding={{ default: 'noPadding' }}
+            className='kamelet-section'
+        >
+            {isModalOpen && <ComponentModal />}
+            <PageSection
+                isFilled
+                className='kamelets-page'
+                variant={props.dark ? PageSectionVariants.darker : PageSectionVariants.light}
+            >
                 <Gallery hasGutter>
-                    {components.map(c => (
-                        <ComponentCard key={c.component.name} component={c} onChange={props.onChange}  />
+                    {components.map((c) => (
+                        <ComponentCard key={c.component.name} component={c} onChange={props.onChange} />
                     ))}
                 </Gallery>
             </PageSection>
         </PageSection>
-    )
+    );
 }

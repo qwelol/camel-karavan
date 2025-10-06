@@ -15,47 +15,55 @@
  * limitations under the License.
  */
 import React from 'react';
-import {
-    Button, Flex, FlexItem
-} from '@patternfly/react-core';
+import { Button, Flex, FlexItem } from '@patternfly/react-core';
 import './bean.css';
-import {BeanFactoryDefinition} from "karavan-core/lib/model/CamelDefinition";
-import {DeleteElementIcon} from "../utils/ElementIcons";
-import {CamelElement} from "karavan-core/lib/model/IntegrationDefinition";
+import { BeanFactoryDefinition } from 'karavan-core/lib/model/CamelDefinition';
+import { DeleteElementIcon } from '../utils/ElementIcons';
+import { CamelElement } from 'karavan-core/lib/model/IntegrationDefinition';
 
 interface Props {
-    bean: BeanFactoryDefinition
-    selectedStep?: CamelElement
-    selectElement: (element: BeanFactoryDefinition) => void
-    deleteElement: (element: BeanFactoryDefinition) => void
+    bean: BeanFactoryDefinition;
+    selectedStep?: CamelElement;
+    selectElement: (element: BeanFactoryDefinition) => void;
+    deleteElement: (element: BeanFactoryDefinition) => void;
 }
 
-export function BeanCard (props: Props) {
-
-    function selectElement (evt: React.MouseEvent) {
+export function BeanCard(props: Props) {
+    function selectElement(evt: React.MouseEvent) {
         evt.stopPropagation();
         props.selectElement(props.bean);
     }
 
-    function onDelete (evt: React.MouseEvent) {
+    function onDelete(evt: React.MouseEvent) {
         evt.stopPropagation();
         props.deleteElement(props.bean);
     }
 
     const bean = props.bean;
     return (
-        <Flex direction={{default: "row"}}
-              className={props.selectedStep?.uuid === bean.uuid ? "bean-card bean-card-selected" : "bean-card bean-card-unselected"}
-              onClick={e => selectElement(e)}
+        <Flex
+            direction={{ default: 'row' }}
+            className={
+                props.selectedStep?.uuid === bean.uuid
+                    ? 'bean-card bean-card-selected'
+                    : 'bean-card bean-card-unselected'
+            }
+            onClick={(e) => selectElement(e)}
         >
-            <FlexItem flex={{default:"flex_1"}} className="title">Bean</FlexItem>
-            <FlexItem flex={{default:"flex_2"}} className="title">{bean.name}</FlexItem>
-            <FlexItem flex={{default:"flex_3"}} align={{default: "alignRight"}} className="description">{bean.type}</FlexItem>
+            <FlexItem flex={{ default: 'flex_1' }} className='title'>
+                Bean
+            </FlexItem>
+            <FlexItem flex={{ default: 'flex_2' }} className='title'>
+                {bean.name}
+            </FlexItem>
+            <FlexItem flex={{ default: 'flex_3' }} align={{ default: 'alignRight' }} className='description'>
+                {bean.type}
+            </FlexItem>
             <FlexItem>
-                <Button variant="link" className="delete-button" onClick={e => onDelete(e)}>
+                <Button variant='link' className='delete-button' onClick={(e) => onDelete(e)}>
                     {DeleteElementIcon()}
                 </Button>
             </FlexItem>
         </Flex>
-    )
+    );
 }

@@ -15,30 +15,20 @@
  * limitations under the License.
  */
 import React from 'react';
-import {
-    Button,
-    Card,
-    CardBody,
-    CardTitle,
-    Flex,
-    FlexItem,
-    Form,
-    Grid,
-} from '@patternfly/react-core';
+import { Button, Card, CardBody, CardTitle, Flex, FlexItem, Form, Grid } from '@patternfly/react-core';
 import '../karavan.css';
 import './kamelet.css';
-import {useIntegrationStore} from "../DesignerStore";
-import {shallow} from "zustand/shallow";
-import AddIcon from "@patternfly/react-icons/dist/js/icons/plus-circle-icon";
-import {KameletDefinitionPropertyCard} from "./KameletDefinitionPropertyCard";
-import {CamelUtil} from "karavan-core/lib/api/CamelUtil";
-import {DefinitionProperty} from "karavan-core/lib/model/IntegrationDefinition";
-import { KameletDependenciesCard } from "./KameletDependenciesCard";
+import { useIntegrationStore } from '../DesignerStore';
+import { shallow } from 'zustand/shallow';
+import AddIcon from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
+import { KameletDefinitionPropertyCard } from './KameletDefinitionPropertyCard';
+import { CamelUtil } from 'karavan-core/lib/api/CamelUtil';
+import { DefinitionProperty } from 'karavan-core/lib/model/IntegrationDefinition';
+import { KameletDependenciesCard } from './KameletDependenciesCard';
 import { KameletInput } from './KameletInput';
 
 export function KameletDefinitionsPanel() {
-
-    const [integration, setIntegration] = useIntegrationStore((s) => [s.integration, s.setIntegration], shallow)
+    const [integration, setIntegration] = useIntegrationStore((s) => [s.integration, s.setIntegration], shallow);
 
     function setValue(key: string, value: string) {
         if (key && value && value.length > 0) {
@@ -57,22 +47,45 @@ export function KameletDefinitionsPanel() {
     }
 
     function getElementTextInput(key: string, label: string, span: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12) {
-        return (<KameletInput elementKey={key} label={label} span={span} value={getValue(key)} setValue={(value: string) => setValue(key, value)} type='text' isRequired={true}/>);
-
+        return (
+            <KameletInput
+                elementKey={key}
+                label={label}
+                span={span}
+                value={getValue(key)}
+                setValue={(value: string) => setValue(key, value)}
+                type='text'
+                isRequired={true}
+            />
+        );
     }
 
     function getElementTextArea(key: string, label: string, span: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12) {
-        return (<KameletInput elementKey={key} label={label} span={span} value={getValue(key)} setValue={(value: string) => setValue(key, value)} type='textArea' isRequired={true}/>);
-
+        return (
+            <KameletInput
+                elementKey={key}
+                label={label}
+                span={span}
+                value={getValue(key)}
+                setValue={(value: string) => setValue(key, value)}
+                type='textArea'
+                isRequired={true}
+            />
+        );
     }
 
-    const properties = integration.spec.definition?.properties ? Object.keys(integration.spec.definition?.properties) : [];
+    const properties = integration.spec.definition?.properties
+        ? Object.keys(integration.spec.definition?.properties)
+        : [];
 
     function addNewProperty() {
         const i = CamelUtil.cloneIntegration(integration);
         if (i.spec.definition && integration.spec.definition?.properties) {
             const propertyName = generatePropertyName();
-            i.spec.definition.properties = Object.assign({[propertyName]: new DefinitionProperty()}, integration.spec.definition.properties);
+            i.spec.definition.properties = Object.assign(
+                { [propertyName]: new DefinitionProperty() },
+                integration.spec.definition.properties,
+            );
             setIntegration(i, true);
         }
     }
@@ -93,7 +106,7 @@ export function KameletDefinitionsPanel() {
 
     return (
         <>
-            <Card isCompact ouiaId="DefinitionsCard">
+            <Card isCompact ouiaId='DefinitionsCard'>
                 <CardTitle>Definitions</CardTitle>
                 <CardBody>
                     <Form>
@@ -105,13 +118,13 @@ export function KameletDefinitionsPanel() {
                     </Form>
                 </CardBody>
             </Card>
-            <div style={{height: "20px"}}/>
-            <Card isCompact ouiaId="PropertiesCard">
+            <div style={{ height: '20px' }} />
+            <Card isCompact ouiaId='PropertiesCard'>
                 <CardTitle>
                     <Flex>
                         <FlexItem>Properties</FlexItem>
-                        <FlexItem align={{default: "alignRight"}}>
-                            <Button variant={"link"} icon={<AddIcon/>} onClick={event => addNewProperty()}>
+                        <FlexItem align={{ default: 'alignRight' }}>
+                            <Button variant={'link'} icon={<AddIcon />} onClick={(event) => addNewProperty()}>
                                 Add property
                             </Button>
                         </FlexItem>
@@ -121,17 +134,20 @@ export function KameletDefinitionsPanel() {
                     <Form>
                         {properties.map((key: string, index: number) => {
                             const property = (integration.spec.definition?.properties as any)[key];
-                            return <KameletDefinitionPropertyCard key={key}
-                                                                  index={index}
-                                                                  propKey={key}
-                                                                  property={property}/>
+                            return (
+                                <KameletDefinitionPropertyCard
+                                    key={key}
+                                    index={index}
+                                    propKey={key}
+                                    property={property}
+                                />
+                            );
                         })}
                     </Form>
                 </CardBody>
             </Card>
-            <div style={{height: "20px"}}/>
-            <KameletDependenciesCard/>
+            <div style={{ height: '20px' }} />
+            <KameletDependenciesCard />
         </>
-
-    )
+    );
 }

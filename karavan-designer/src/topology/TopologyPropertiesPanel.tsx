@@ -16,30 +16,40 @@
  */
 import React from 'react';
 import '../designer/karavan.css';
-import {shallow} from "zustand/shallow";
-import {TopologySideBar} from "@patternfly/react-topology";
-import {useTopologyStore} from "./TopologyStore";
-import {DslProperties} from "../designer/property/DslProperties";
+import { shallow } from 'zustand/shallow';
+import { TopologySideBar } from '@patternfly/react-topology';
+import { useTopologyStore } from './TopologyStore';
+import { DslProperties } from '../designer/property/DslProperties';
 import {
-    Button, DescriptionList,
-    DescriptionListDescription, DescriptionListGroup, DescriptionListTerm,
+    Button,
+    DescriptionList,
+    DescriptionListDescription,
+    DescriptionListGroup,
+    DescriptionListTerm,
     Flex,
-    FlexItem, Panel, PanelHeader, PanelMain, PanelMainBody,
-    Text, TextContent, TextVariants,
+    FlexItem,
+    Panel,
+    PanelHeader,
+    PanelMain,
+    PanelMainBody,
+    Text,
+    TextContent,
+    TextVariants,
     Tooltip,
-    TooltipPosition
-} from "@patternfly/react-core";
-import CloseIcon from "@patternfly/react-icons/dist/esm/icons/times-icon";
-import {INTERNAL_COMPONENTS} from "karavan-core/lib/api/ComponentApi";
+    TooltipPosition,
+} from '@patternfly/react-core';
+import CloseIcon from '@patternfly/react-icons/dist/esm/icons/times-icon';
+import { INTERNAL_COMPONENTS } from 'karavan-core/lib/api/ComponentApi';
 
 interface Props {
-    onSetFile: (fileName: string) => void
+    onSetFile: (fileName: string) => void;
 }
 
 export function TopologyPropertiesPanel(props: Props) {
-
-    const [selectedIds, setSelectedIds, fileName, nodeData] = useTopologyStore((s) =>
-        [s.selectedIds, s.setSelectedIds, s.fileName, s.nodeData], shallow);
+    const [selectedIds, setSelectedIds, fileName, nodeData] = useTopologyStore(
+        (s) => [s.selectedIds, s.setSelectedIds, s.fileName, s.nodeData],
+        shallow,
+    );
 
     function isRoute() {
         if (nodeData && nodeData.type === 'route') {
@@ -50,17 +60,17 @@ export function TopologyPropertiesPanel(props: Props) {
     }
 
     function isRouteConfiguration() {
-        return (nodeData && nodeData.type === 'routeConfiguration');
+        return nodeData && nodeData.type === 'routeConfiguration';
     }
 
     function isRest() {
-        return (nodeData && nodeData.type === 'rest');
+        return nodeData && nodeData.type === 'rest';
     }
 
     function isKamelet() {
         if (nodeData && nodeData.type === 'step') {
             const uri: string = nodeData?.step?.uri || '';
-            return uri.startsWith("kamelet");
+            return uri.startsWith('kamelet');
         }
         return false;
     }
@@ -70,30 +80,30 @@ export function TopologyPropertiesPanel(props: Props) {
             const uri: string = nodeData?.step?.from.uri || '';
             const name: string = nodeData?.step?.from.parameters?.name || '';
             if (INTERNAL_COMPONENTS.includes(uri)) {
-                return uri.concat(":").concat(name);
+                return uri.concat(':').concat(name);
             } else {
                 return uri;
             }
         }
-        return ""
+        return '';
     }
 
-    function getTitle () {
+    function getTitle() {
         if (isRoute()) {
-            return "Route";
+            return 'Route';
         } else if (isKamelet()) {
-            return "Kamelet";
+            return 'Kamelet';
         } else if (isRouteConfiguration()) {
-            return "Route Configuration";
+            return 'Route Configuration';
         } else if (isRest()) {
-            return "REST";
+            return 'REST';
         }
-        return "Component";
+        return 'Component';
     }
 
     function getHeader() {
         return (
-            <Flex direction={{default: "row"}} justifyContent={{default: "justifyContentFlexStart"}}>
+            <Flex direction={{ default: 'row' }} justifyContent={{ default: 'justifyContentFlexStart' }}>
                 <FlexItem spacer={{ default: 'spacerNone' }}>
                     <Panel>
                         <PanelHeader>
@@ -107,39 +117,42 @@ export function TopologyPropertiesPanel(props: Props) {
                                     <DescriptionListGroup>
                                         <DescriptionListTerm>File</DescriptionListTerm>
                                         <DescriptionListDescription>
-                                            <Button className="file-button" variant="link" onClick={_ => {
-                                                if (fileName) {
-                                                    props.onSetFile(fileName);
-                                                }
-                                            }}>{fileName}
+                                            <Button
+                                                className='file-button'
+                                                variant='link'
+                                                onClick={(_) => {
+                                                    if (fileName) {
+                                                        props.onSetFile(fileName);
+                                                    }
+                                                }}
+                                            >
+                                                {fileName}
                                             </Button>
                                         </DescriptionListDescription>
                                     </DescriptionListGroup>
-                                    {isRoute() && <DescriptionListGroup>
-                                        <DescriptionListTerm>From</DescriptionListTerm>
-                                        <DescriptionListDescription>{getFromInfo()}</DescriptionListDescription>
-                                    </DescriptionListGroup>}
+                                    {isRoute() && (
+                                        <DescriptionListGroup>
+                                            <DescriptionListTerm>From</DescriptionListTerm>
+                                            <DescriptionListDescription>{getFromInfo()}</DescriptionListDescription>
+                                        </DescriptionListGroup>
+                                    )}
                                 </DescriptionList>
                             </PanelMainBody>
                         </PanelMain>
                     </Panel>
                 </FlexItem>
                 <FlexItem align={{ default: 'alignRight' }}>
-                    <Tooltip content={"Close"} position={TooltipPosition.top}>
-                        <Button variant="link" icon={<CloseIcon/>} onClick={event => setSelectedIds([])}/>
+                    <Tooltip content={'Close'} position={TooltipPosition.top}>
+                        <Button variant='link' icon={<CloseIcon />} onClick={(event) => setSelectedIds([])} />
                     </Tooltip>
                 </FlexItem>
             </Flex>
-        )
+        );
     }
 
     return (
-        <TopologySideBar
-            className="topology-sidebar"
-            show={selectedIds.length > 0 && nodeData}
-            header={getHeader()}
-        >
-            <DslProperties designerType={'routes'}/>
+        <TopologySideBar className='topology-sidebar' show={selectedIds.length > 0 && nodeData} header={getHeader()}>
+            <DslProperties designerType={'routes'} />
         </TopologySideBar>
-    )
+    );
 }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as React from "react";
+import * as React from 'react';
 import {
     Bullseye,
     Button,
@@ -27,21 +27,21 @@ import {
     PageSidebarBody,
     Spinner,
     Tooltip,
-} from "@patternfly/react-core";
-import {KameletApi} from "karavan-core/lib/api/KameletApi";
-import {ComponentApi} from "karavan-core/lib/api/ComponentApi";
-import {BlueprintIcon} from "@patternfly/react-icons";
-import TopologyIcon from "@patternfly/react-icons/dist/js/icons/topology-icon";
-import {KaravanIcon} from "./designer/icons/KaravanIcons";
+} from '@patternfly/react-core';
+import { KameletApi } from 'karavan-core/lib/api/KameletApi';
+import { ComponentApi } from 'karavan-core/lib/api/ComponentApi';
+import { BlueprintIcon } from '@patternfly/react-icons';
+import TopologyIcon from '@patternfly/react-icons/dist/js/icons/topology-icon';
+import { KaravanIcon } from './designer/icons/KaravanIcons';
 import './designer/karavan.css';
-import {DesignerPage} from "./DesignerPage";
-import {TemplateApi} from "karavan-core/lib/api/TemplateApi";
-import {Notification} from "./designer/utils/Notification";
-import {EventBus} from "./designer/utils/EventBus";
-import {TopologyTab} from "./topology/TopologyTab";
-import {useEffect, useState} from "react";
-import {IntegrationFile} from "karavan-core/lib/model/IntegrationDefinition";
-import {SpiBeanApi} from "karavan-core/lib/api/SpiBeanApi";
+import { DesignerPage } from './DesignerPage';
+import { TemplateApi } from 'karavan-core/lib/api/TemplateApi';
+import { Notification } from './designer/utils/Notification';
+import { EventBus } from './designer/utils/EventBus';
+import { TopologyTab } from './topology/TopologyTab';
+import { useEffect, useState } from 'react';
+import { IntegrationFile } from 'karavan-core/lib/model/IntegrationDefinition';
+import { SpiBeanApi } from 'karavan-core/lib/api/SpiBeanApi';
 
 class MenuItem {
     pageId: string = '';
@@ -56,7 +56,6 @@ class MenuItem {
 }
 
 export function App() {
-
     const [pageId, setPageId] = useState<string>('designer');
     const [name, setName] = useState<string>('example.yaml');
     const [key, setKey] = useState<string>('');
@@ -65,12 +64,12 @@ export function App() {
 
     useEffect(() => {
         Promise.all([
-            fetch("metadata/kamelets.yaml"),
-            fetch("metadata/components.json"),
-            fetch("metadata/spiBeans.json"),
-            fetch("snippets/org.apache.camel.AggregationStrategy"),
-            fetch("snippets/org.apache.camel.Processor"),
-            fetch("example/demo.camel.yaml"),
+            fetch('metadata/kamelets.yaml'),
+            fetch('metadata/components.json'),
+            fetch('metadata/spiBeans.json'),
+            fetch('snippets/org.apache.camel.AggregationStrategy'),
+            fetch('snippets/org.apache.camel.Processor'),
+            fetch('example/demo.camel.yaml'),
             // fetch("example/avro-serialize-action.kamelet.yaml"),
             // fetch("components/blocked-components.properties"),
             // fetch("kamelets/blocked-kamelets.properties")
@@ -78,142 +77,154 @@ export function App() {
             // fetch("example/aws-cloudwatch-sink.kamelet.yaml")
             // fetch("example/aws-s3-cdc-source.kamelet.yaml")
             //fetch("components/supported-components.json"),
-            
-        ]).then(responses =>
-            Promise.all(responses.map(response => response.text()))
-        ).then(data => {
-            const kamelets: string[] = [];
-            data[0].split("\n---\n").map(c => c.trim()).forEach(z => kamelets.push(z));
-            KameletApi.saveKamelets(kamelets, true);
+        ])
+            .then((responses) => Promise.all(responses.map((response) => response.text())))
+            .then((data) => {
+                const kamelets: string[] = [];
+                data[0]
+                    .split('\n---\n')
+                    .map((c) => c.trim())
+                    .forEach((z) => kamelets.push(z));
+                KameletApi.saveKamelets(kamelets, true);
 
-            const jsons: string[] = [];
-            JSON.parse(data[1]).forEach((c: any) => jsons.push(JSON.stringify(c)));
-            ComponentApi.saveComponents(jsons, true);
+                const jsons: string[] = [];
+                JSON.parse(data[1]).forEach((c: any) => jsons.push(JSON.stringify(c)));
+                ComponentApi.saveComponents(jsons, true);
 
-            jsons.length = 0;
-            JSON.parse(data[2]).forEach((c: any) => jsons.push(JSON.stringify(c)));
-            SpiBeanApi.saveSpiBeans(jsons, true);
+                jsons.length = 0;
+                JSON.parse(data[2]).forEach((c: any) => jsons.push(JSON.stringify(c)));
+                SpiBeanApi.saveSpiBeans(jsons, true);
 
-            setLoaded(true);
+                setLoaded(true);
 
-            TemplateApi.saveTemplate("org.apache.camel.AggregationStrategy", data[3]);
-            TemplateApi.saveTemplate("org.apache.camel.Processor", data[4]);
+                TemplateApi.saveTemplate('org.apache.camel.AggregationStrategy', data[3]);
+                TemplateApi.saveTemplate('org.apache.camel.Processor', data[4]);
 
-            if (data[5]) {
-                setYaml(data[5]);
-                // setName("plc4x-ads-source.kamelet.yaml");
-                setName("demo.camel.yaml");
-            }
-            if (data[6]) {
-                ComponentApi.saveBlockedComponentNames(data[6].split('\r\n'));
-            }
-            if (data[8]) {
-                KameletApi.saveBlockedKameletNames(data[8].split('\n'));
-            }
- 	        if (data[9]) {
-                ComponentApi.saveSupportedComponents(data[9]);
-                ComponentApi.setSupportedOnly(true);
-            }
-           
-        }).catch(err => {
-                EventBus.sendAlert("Error", err.text, 'danger')
-            }
-        );
+                if (data[5]) {
+                    setYaml(data[5]);
+                    // setName("plc4x-ads-source.kamelet.yaml");
+                    setName('demo.camel.yaml');
+                }
+                if (data[6]) {
+                    ComponentApi.saveBlockedComponentNames(data[6].split('\r\n'));
+                }
+                if (data[8]) {
+                    KameletApi.saveBlockedKameletNames(data[8].split('\n'));
+                }
+                if (data[9]) {
+                    ComponentApi.saveSupportedComponents(data[9]);
+                    ComponentApi.setSupportedOnly(true);
+                }
+            })
+            .catch((err) => {
+                EventBus.sendAlert('Error', err.text, 'danger');
+            });
     });
 
-    function save(filename: string, yaml: string, propertyOnly: boolean) {
-    }
+    function save(filename: string, yaml: string, propertyOnly: boolean) {}
 
     function getSpinner() {
         return (
-            <Bullseye className="loading-page">
-                <Spinner className="progress-stepper"  diameter="80px" aria-label="Loading..."/>
+            <Bullseye className='loading-page'>
+                <Spinner className='progress-stepper' diameter='80px' aria-label='Loading...' />
             </Bullseye>
-        )
+        );
     }
 
-    function pageNav ()  {
+    function pageNav() {
         const pages: MenuItem[] = [
-            new MenuItem("designer", "Designer", <BlueprintIcon/>),
-            new MenuItem("topology", "Topology", <TopologyIcon/>)
-        ]
-        return (<Flex className="nav-buttons" direction={{default: "column"}} style={{height: "100%"}}
-                      spaceItems={{default: "spaceItemsNone"}}>
-            <FlexItem alignSelf={{default: "alignSelfCenter"}}>
-                <Tooltip className="logo-tooltip" content={"Apache Camel Karavan"}
-                         position={"right"}>
-                    {KaravanIcon()}
-                </Tooltip>
-            </FlexItem>
-            {pages.map(page =>
-                <FlexItem key={page.pageId} className={pageId === page.pageId ? "nav-button-selected" : ""}>
-                    <Tooltip content={page.tooltip} position={"right"}>
-                        <Button id={page.pageId} icon={page.icon} variant={"plain"}
-                                className={pageId === page.pageId ? "nav-button-selected" : ""}
-                                onClick={event => setPageId(page.pageId)}
-                        />
+            new MenuItem('designer', 'Designer', <BlueprintIcon />),
+            new MenuItem('topology', 'Topology', <TopologyIcon />),
+        ];
+        return (
+            <Flex
+                className='nav-buttons'
+                direction={{ default: 'column' }}
+                style={{ height: '100%' }}
+                spaceItems={{ default: 'spaceItemsNone' }}
+            >
+                <FlexItem alignSelf={{ default: 'alignSelfCenter' }}>
+                    <Tooltip className='logo-tooltip' content={'Apache Camel Karavan'} position={'right'}>
+                        {KaravanIcon()}
                     </Tooltip>
                 </FlexItem>
-            )}
-            <FlexItem flex={{default: "flex_2"}} alignSelf={{default: "alignSelfCenter"}}>
-                <Divider/>
-            </FlexItem>
-        </Flex>)
+                {pages.map((page) => (
+                    <FlexItem key={page.pageId} className={pageId === page.pageId ? 'nav-button-selected' : ''}>
+                        <Tooltip content={page.tooltip} position={'right'}>
+                            <Button
+                                id={page.pageId}
+                                icon={page.icon}
+                                variant={'plain'}
+                                className={pageId === page.pageId ? 'nav-button-selected' : ''}
+                                onClick={(event) => setPageId(page.pageId)}
+                            />
+                        </Tooltip>
+                    </FlexItem>
+                ))}
+                <FlexItem flex={{ default: 'flex_2' }} alignSelf={{ default: 'alignSelfCenter' }}>
+                    <Divider />
+                </FlexItem>
+            </Flex>
+        );
     }
 
     function getPage() {
         const dark = document.body.className.includes('vscode-dark');
         switch (pageId) {
-            case "designer":
+            case 'designer':
                 return (
                     <DesignerPage
                         name={name}
                         yaml={yaml}
                         onSave={(filename, yaml1, propertyOnly) => save(filename, yaml1, propertyOnly)}
-                        dark={dark}/>
-                )
-            
-            case "topology":
+                        dark={dark}
+                    />
+                );
+
+            case 'topology':
                 return (
                     <TopologyTab
-                        files={[new IntegrationFile("demo.camel.yaml", yaml)]}
-                        onSetFile={fileName => {}}
+                        files={[new IntegrationFile('demo.camel.yaml', yaml)]}
+                        onSetFile={(fileName) => {}}
                         onClickAddRoute={() => {}}
                         onClickAddREST={() => {}}
                         onClickAddBean={() => {}}
                         onClickAddKamelet={() => {}}
                         hideToolbar={false}
                     />
-                )
+                );
         }
     }
 
-    function getHeader () {
-        return (<Masthead>
-        </Masthead>)
+    function getHeader() {
+        return <Masthead></Masthead>;
     }
 
-    function getSidebar () {
-        return (<PageSidebar isSidebarOpen={true} id="fill-sidebar">
-            <PageSidebarBody>Navigation</PageSidebarBody>
-        </PageSidebar>)
+    function getSidebar() {
+        return (
+            <PageSidebar isSidebarOpen={true} id='fill-sidebar'>
+                <PageSidebarBody>Navigation</PageSidebarBody>
+            </PageSidebar>
+        );
     }
 
     return (
-        <Page className="karavan">
-            <Notification/>
-            <Flex direction={{default: "row"}} style={{width: "100%", height: "100%"}}
-                  alignItems={{default: "alignItemsStretch"}} spaceItems={{default: 'spaceItemsNone'}}>
-                <FlexItem>
-                    {pageNav()}
-                </FlexItem>
-                <FlexItem flex={{default: "flex_2"}} style={{height: "100%"}}>
+        <Page className='karavan'>
+            <Notification />
+            <Flex
+                direction={{ default: 'row' }}
+                style={{ width: '100%', height: '100%' }}
+                alignItems={{ default: 'alignItemsStretch' }}
+                spaceItems={{ default: 'spaceItemsNone' }}
+            >
+                <FlexItem>{pageNav()}</FlexItem>
+                <FlexItem flex={{ default: 'flex_2' }} style={{ height: '100%' }}>
                     {!loaded && getSpinner()}
                     {loaded && getPage()}
                 </FlexItem>
             </Flex>
         </Page>
-    )
+    );
 }
 
 export default App;

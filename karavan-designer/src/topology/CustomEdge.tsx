@@ -18,13 +18,9 @@
 import * as React from 'react';
 
 import './topology.css';
-import {DefaultEdge, observer} from '@patternfly/react-topology';
-
+import { DefaultEdge, observer } from '@patternfly/react-topology';
 
 const CustomEdge: React.FC<any> = observer(({ element, ...rest }) => {
-    return (
-        <DefaultEdge element={element} {...rest}>
-        </DefaultEdge>
-    )
-})
+    return <DefaultEdge element={element} {...rest}></DefaultEdge>;
+});
 export default CustomEdge;

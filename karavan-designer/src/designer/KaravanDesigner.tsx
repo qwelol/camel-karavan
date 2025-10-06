@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Badge,
     Button,
@@ -26,49 +26,60 @@ import {
     TabTitleText,
 } from '@patternfly/react-core';
 import './karavan.css';
-import {RouteDesigner} from "./route/RouteDesigner";
-import {CamelDefinitionYaml} from "karavan-core/lib/api/CamelDefinitionYaml";
-import {Integration, IntegrationFile} from "karavan-core/lib/model/IntegrationDefinition";
-import {CamelUtil} from "karavan-core/lib/api/CamelUtil";
-import {CamelUi} from "./utils/CamelUi";
-import {useDesignerStore, useIntegrationStore} from "./DesignerStore";
-import {shallow} from "zustand/shallow";
-import {getDesignerIcon} from "./icons/KaravanIcons";
-import {InfrastructureAPI} from "./utils/InfrastructureAPI";
-import {EventBus, IntegrationUpdate} from "./utils/EventBus";
-import {CodeEditor} from "./editor/CodeEditor";
+import { RouteDesigner } from './route/RouteDesigner';
+import { CamelDefinitionYaml } from 'karavan-core/lib/api/CamelDefinitionYaml';
+import { Integration, IntegrationFile } from 'karavan-core/lib/model/IntegrationDefinition';
+import { CamelUtil } from 'karavan-core/lib/api/CamelUtil';
+import { CamelUi } from './utils/CamelUi';
+import { useDesignerStore, useIntegrationStore } from './DesignerStore';
+import { shallow } from 'zustand/shallow';
+import { getDesignerIcon } from './icons/KaravanIcons';
+import { InfrastructureAPI } from './utils/InfrastructureAPI';
+import { EventBus, IntegrationUpdate } from './utils/EventBus';
+import { CodeEditor } from './editor/CodeEditor';
 import BellIcon from '@patternfly/react-icons/dist/esm/icons/bell-icon';
-import {BeanFactoryDefinition} from "karavan-core/lib/model/CamelDefinition";
-import {VariableUtil} from "karavan-core/lib/api/VariableUtil";
+import { BeanFactoryDefinition } from 'karavan-core/lib/model/CamelDefinition';
+import { VariableUtil } from 'karavan-core/lib/api/VariableUtil';
 
 interface Props {
-    onSave: (filename: string, yaml: string, propertyOnly: boolean) => void
-    onSaveCustomCode: (name: string, code: string) => void
-    onGetCustomCode: (name: string, javaType: string) => Promise<string | undefined>
-    onSavePropertyPlaceholder: (key: string, value: string) => void
-    onInternalConsumerClick: (uri?: string, name?: string, routeId?: string) => void
-    filename: string
-    yaml: string
-    dark: boolean
-    showCodeTab: boolean
-    tab?: "routes" | "code"
-    propertyPlaceholders: string[]
-    beans: BeanFactoryDefinition[]
-    files: IntegrationFile[]
+    onSave: (filename: string, yaml: string, propertyOnly: boolean) => void;
+    onSaveCustomCode: (name: string, code: string) => void;
+    onGetCustomCode: (name: string, javaType: string) => Promise<string | undefined>;
+    onSavePropertyPlaceholder: (key: string, value: string) => void;
+    onInternalConsumerClick: (uri?: string, name?: string, routeId?: string) => void;
+    filename: string;
+    yaml: string;
+    dark: boolean;
+    showCodeTab: boolean;
+    tab?: 'routes' | 'code';
+    propertyPlaceholders: string[];
+    beans: BeanFactoryDefinition[];
+    files: IntegrationFile[];
 }
 
 export function KaravanDesigner(props: Props) {
-
     const [tab, setTab] = useState<string>('routes');
-    const [setDark, setSelectedStep, reset, badge, message, setPropertyPlaceholders, setBeans] =
-        useDesignerStore((s) =>
-        [s.setDark, s.setSelectedStep, s.reset, s.notificationBadge, s.notificationMessage, s.setPropertyPlaceholders, s.setBeans], shallow)
-    const [integration, setIntegration, resetFiles, setVariables] = useIntegrationStore((s) =>
-        [s.integration, s.setIntegration, s.resetFiles, s.setVariables], shallow)
+    const [setDark, setSelectedStep, reset, badge, message, setPropertyPlaceholders, setBeans] = useDesignerStore(
+        (s) => [
+            s.setDark,
+            s.setSelectedStep,
+            s.reset,
+            s.notificationBadge,
+            s.notificationMessage,
+            s.setPropertyPlaceholders,
+            s.setBeans,
+        ],
+        shallow,
+    );
+    const [integration, setIntegration, resetFiles, setVariables] = useIntegrationStore(
+        (s) => [s.integration, s.setIntegration, s.resetFiles, s.setVariables],
+        shallow,
+    );
 
     useEffect(() => {
         const sub = EventBus.onIntegrationUpdate()?.subscribe((update: IntegrationUpdate) =>
-            save(update.integration, update.propertyOnly));
+            save(update.integration, update.propertyOnly),
+        );
         try {
             InfrastructureAPI.setOnSaveCustomCode(props.onSaveCustomCode);
             InfrastructureAPI.setOnGetCustomCode(props.onGetCustomCode);
@@ -81,13 +92,13 @@ export function KaravanDesigner(props: Props) {
             setIntegration(i, false);
             const allowedTabs = new Set(['routes', 'code']);
             const desired = props.tab && allowedTabs.has(props.tab) ? props.tab : 'routes';
-            setTab(desired)
+            setTab(desired);
             reset();
             setDark(props.dark);
-            setPropertyPlaceholders(props.propertyPlaceholders)
-            setVariables(VariableUtil.findVariables(props.files))
-            setBeans(props.beans)
-            resetFiles(props.files)
+            setPropertyPlaceholders(props.propertyPlaceholders);
+            setVariables(VariableUtil.findVariables(props.files));
+            setBeans(props.beans);
+            resetFiles(props.files);
         } catch (e: any) {
             EventBus.sendAlert(' ' + e?.name, '' + e?.message, 'danger');
         }
@@ -102,13 +113,13 @@ export function KaravanDesigner(props: Props) {
         try {
             const type = CamelDefinitionYaml.yamlIsIntegration(yaml);
             if (yaml && type !== 'none') {
-                const i = CamelDefinitionYaml.yamlToIntegration(props.filename, props.yaml)
+                const i = CamelDefinitionYaml.yamlToIntegration(props.filename, props.yaml);
                 return i;
             } else {
                 return Integration.createNew(filename, 'plain');
             }
         } catch (e) {
-            EventBus.sendAlert("Error parsing YAML", (e as Error).message, 'danger')
+            EventBus.sendAlert('Error parsing YAML', (e as Error).message, 'danger');
             return Integration.createNew(filename, 'plain');
         }
     }
@@ -132,42 +143,57 @@ export function KaravanDesigner(props: Props) {
         const counts = CamelUi.getFlowCounts(integration);
         const count = counts.has(icon) && counts.get(icon) ? counts.get(icon) : undefined;
         const showCount = count && count > 0;
-        const color= showBadge && badge ? "red" : "initial";
+        const color = showBadge && badge ? 'red' : 'initial';
         return (
-            <div className="top-menu-item" style={{color: color}}>
+            <div className='top-menu-item' style={{ color: color }}>
                 <TabTitleIcon>{getDesignerIcon(icon)}</TabTitleIcon>
                 <TabTitleText>{title}</TabTitleText>
-                {showCount && <Badge isRead className="count">{counts.get(icon)}</Badge>}
-                {showBadge && badge &&
-                    <Button variant="link"
-                         icon={<BellIcon color="red"/>}
-                         style={{visibility: (badge ? 'visible' : 'hidden'), padding: '0', margin: '0'}}
-                         onClick={event => EventBus.sendAlert(message[0], message[1], 'danger')}/>
-                }
+                {showCount && (
+                    <Badge isRead className='count'>
+                        {counts.get(icon)}
+                    </Badge>
+                )}
+                {showBadge && badge && (
+                    <Button
+                        variant='link'
+                        icon={<BellIcon color='red' />}
+                        style={{
+                            visibility: badge ? 'visible' : 'hidden',
+                            padding: '0',
+                            margin: '0',
+                        }}
+                        onClick={(event) => EventBus.sendAlert(message[0], message[1], 'danger')}
+                    />
+                )}
             </div>
-        )
+        );
     }
 
     const isKamelet = integration.type === 'kamelet';
 
     return (
-        <PageSection variant={props.dark ? PageSectionVariants.darker : PageSectionVariants.light}
-                     className="page"
-                     isFilled padding={{default: 'noPadding'}}>
-            <div className={"main-tabs-wrapper"}>
-                <Tabs className="main-tabs"
-                      activeKey={tab}
-                      onSelect={(event, tabIndex) => {
-                          setTab(tabIndex.toString());
-                          setSelectedStep(undefined);
-                      }}
-                      style={{width: "100%"}}>
-                    <Tab eventKey='routes' title={getTab("Routes", "Integration flows", "routes")}></Tab>
-                    {props.showCodeTab && <Tab eventKey='code' title={getTab("YAML", "YAML Code", "code", true)}></Tab>}
+        <PageSection
+            variant={props.dark ? PageSectionVariants.darker : PageSectionVariants.light}
+            className='page'
+            isFilled
+            padding={{ default: 'noPadding' }}
+        >
+            <div className={'main-tabs-wrapper'}>
+                <Tabs
+                    className='main-tabs'
+                    activeKey={tab}
+                    onSelect={(event, tabIndex) => {
+                        setTab(tabIndex.toString());
+                        setSelectedStep(undefined);
+                    }}
+                    style={{ width: '100%' }}
+                >
+                    <Tab eventKey='routes' title={getTab('Routes', 'Integration flows', 'routes')}></Tab>
+                    {props.showCodeTab && <Tab eventKey='code' title={getTab('YAML', 'YAML Code', 'code', true)}></Tab>}
                 </Tabs>
             </div>
-            {tab === 'routes' && <RouteDesigner/>}
-            {tab === 'code' && <CodeEditor/>}
+            {tab === 'routes' && <RouteDesigner />}
+            {tab === 'code' && <CodeEditor />}
         </PageSection>
-    )
+    );
 }

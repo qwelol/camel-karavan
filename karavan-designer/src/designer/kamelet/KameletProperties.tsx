@@ -15,32 +15,26 @@
  * limitations under the License.
  */
 import React from 'react';
-import {
-    Form,
-} from '@patternfly/react-core';
+import { Form } from '@patternfly/react-core';
 import '../karavan.css';
-import "@patternfly/patternfly/patternfly.css";
-import {
-    BeanFactoryDefinition,
-} from "karavan-core/lib/model/CamelDefinition";
-import {Integration} from "karavan-core/lib/model/IntegrationDefinition";
-import {IntegrationHeader} from "../utils/IntegrationHeader";
-
+import '@patternfly/patternfly/patternfly.css';
+import { BeanFactoryDefinition } from 'karavan-core/lib/model/CamelDefinition';
+import { Integration } from 'karavan-core/lib/model/IntegrationDefinition';
+import { IntegrationHeader } from '../utils/IntegrationHeader';
 
 interface Props {
-    integration: Integration
-    dark: boolean
-    onChange: (bean: BeanFactoryDefinition) => void
-    onClone: (bean: BeanFactoryDefinition) => void
+    integration: Integration;
+    dark: boolean;
+    onChange: (bean: BeanFactoryDefinition) => void;
+    onClone: (bean: BeanFactoryDefinition) => void;
 }
 
-export function KameletProperties (props: Props) {
-
+export function KameletProperties(props: Props) {
     return (
         <div className='properties' key={'integration'}>
-            <Form autoComplete="off" onSubmit={event => event.preventDefault()}>
-                <IntegrationHeader/>
+            <Form autoComplete='off' onSubmit={(event) => event.preventDefault()}>
+                <IntegrationHeader />
             </Form>
         </div>
-    )
+    );
 }

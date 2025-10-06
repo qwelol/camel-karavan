@@ -15,34 +15,28 @@
  * limitations under the License.
  */
 import React from 'react';
-import {
-    CardHeader, Card, CardTitle, CardBody, CardFooter, Badge, Text
-} from '@patternfly/react-core';
+import { CardHeader, Card, CardTitle, CardBody, CardFooter, Badge, Text } from '@patternfly/react-core';
 import '../../designer/karavan.css';
-import {CamelUi} from "../../designer/utils/CamelUi";
-import {ElementMeta} from "karavan-core/lib/model/CamelMetadata";
-import {useKnowledgebaseStore} from "../KnowledgebaseStore";
-import {shallow} from "zustand/shallow";
+import { CamelUi } from '../../designer/utils/CamelUi';
+import { ElementMeta } from 'karavan-core/lib/model/CamelMetadata';
+import { useKnowledgebaseStore } from '../KnowledgebaseStore';
+import { shallow } from 'zustand/shallow';
 
 interface Props {
-    element: ElementMeta,
+    element: ElementMeta;
 }
 
 export function EipCard(props: Props) {
-
-    const [setElement, setModalOpen] = useKnowledgebaseStore((s) =>
-        [s.setElement, s.setModalOpen], shallow)
+    const [setElement, setModalOpen] = useKnowledgebaseStore((s) => [s.setElement, s.setModalOpen], shallow);
 
     const element = props.element;
 
-    function click (event: React.MouseEvent) {
-        setElement(element)
+    function click(event: React.MouseEvent) {
+        setElement(element);
         setModalOpen(true);
     }
     return (
-        <Card  isCompact key={element.name} className="knowledgebase-card"
-               onClick={event => click(event)}
-        >
+        <Card isCompact key={element.name} className='knowledgebase-card' onClick={(event) => click(event)}>
             <CardHeader>
                 <Badge className='label-eip'>EIP</Badge>
             </CardHeader>
@@ -51,14 +45,17 @@ export function EipCard(props: Props) {
                 <CardTitle>{element.title}</CardTitle>
             </CardHeader>
             <CardBody>
-                <Text className="pf-v5-u-color-200">{element.description}</Text>
+                <Text className='pf-v5-u-color-200'>{element.description}</Text>
             </CardBody>
-            <CardFooter className="footer-labels">
+            <CardFooter className='footer-labels'>
                 <div>
-                    {element.labels.split(',').map((s: string,  i: number) => <Badge key={s + i} isRead
-                                                                                     className="labels">{s}</Badge>)}
+                    {element.labels.split(',').map((s: string, i: number) => (
+                        <Badge key={s + i} isRead className='labels'>
+                            {s}
+                        </Badge>
+                    ))}
                 </div>
             </CardFooter>
         </Card>
-    )
+    );
 }

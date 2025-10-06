@@ -14,16 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, {StrictMode} from 'react';
-import "./index.css";
-import "@patternfly/patternfly/patternfly.css";
-import App from "./App";
-import {createRoot} from "react-dom/client";
+import React, { StrictMode } from 'react';
+import './index.css';
+import '@patternfly/patternfly/patternfly.css';
+import App from './App';
+import { createRoot } from 'react-dom/client';
 
 const container = document.getElementById('root');
 const root = createRoot(container!);
 root.render(
     <StrictMode>
         <App />
-    </StrictMode>
+    </StrictMode>,
 );

@@ -18,18 +18,18 @@ import React from 'react';
 
 export function AutoStartupIcon() {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="icon" width="24px" height="24px">
-            <circle cx="16" cy="16" r="13" fill="white" stroke="black" strokeWidth="1px"/>
-            <path d="M19.88 21.847h2l-5-12h-2l-5 12h2l1.24-3h5.53zm-5.93-5 1.82-4.42h.25l1.86 4.42z"/>
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' className='icon' width='24px' height='24px'>
+            <circle cx='16' cy='16' r='13' fill='white' stroke='black' strokeWidth='1px' />
+            <path d='M19.88 21.847h2l-5-12h-2l-5 12h2l1.24-3h5.53zm-5.93-5 1.82-4.42h.25l1.86 4.42z' />
         </svg>
     );
 }
 
 export function ErrorHandlerIcon() {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="icon" width="24px" height="24px">
-            <circle cx="16" cy="16" r="13" fill="white" stroke="black" strokeWidth="1px"/>
-            <path d="m19.264 14.98-3.998 7-1.736-1 2.287-4h-3.889l3.993-7 1.737 1-2.284 4z"/>
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' className='icon' width='24px' height='24px'>
+            <circle cx='16' cy='16' r='13' fill='white' stroke='black' strokeWidth='1px' />
+            <path d='m19.264 14.98-3.998 7-1.736-1 2.287-4h-3.889l3.993-7 1.737 1-2.284 4z' />
         </svg>
     );
 }

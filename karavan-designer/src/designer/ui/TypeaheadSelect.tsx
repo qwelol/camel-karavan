@@ -26,21 +26,21 @@ import {
     TextInputGroup,
     TextInputGroupMain,
     TextInputGroupUtilities,
-    Button
+    Button,
 } from '@patternfly/react-core';
 import TimesIcon from '@patternfly/react-icons/dist/esm/icons/times-icon';
 
 export interface Value {
-    value: string
-    children: string
+    value: string;
+    children: string;
 }
 
 interface Props {
-    listOfValues: Value[]
-    onSelect: (value: string) => void
+    listOfValues: Value[];
+    onSelect: (value: string) => void;
 }
 
-export function TypeaheadSelect(props: Props)  {
+export function TypeaheadSelect(props: Props) {
     const [isOpen, setIsOpen] = React.useState(false);
     const [selected, setSelected] = React.useState<string>('');
     const [inputValue, setInputValue] = React.useState<string>('');
@@ -56,13 +56,17 @@ export function TypeaheadSelect(props: Props)  {
         // Filter menu items based on the text input value when one exists
         if (filterValue) {
             newSelectOptions = props.listOfValues.filter((menuItem) =>
-                String(menuItem.children).toLowerCase().includes(filterValue.toLowerCase())
+                String(menuItem.children).toLowerCase().includes(filterValue.toLowerCase()),
             );
 
             // When no options are found after filtering, display 'No results found'
             if (!newSelectOptions.length) {
                 newSelectOptions = [
-                    { isDisabled: false, children: `No results found for "${filterValue}"`, value: 'no results' }
+                    {
+                        isDisabled: false,
+                        children: `No results found for "${filterValue}"`,
+                        value: 'no results',
+                    },
                 ];
             }
 
@@ -81,15 +85,18 @@ export function TypeaheadSelect(props: Props)  {
         setIsOpen(!isOpen);
     };
 
-    const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
+    const onSelect = (
+        _event: React.MouseEvent<Element, MouseEvent> | undefined,
+        value: string | number | undefined,
+    ) => {
         if (value) {
-            props.onSelect( value.toString())
+            props.onSelect(value.toString());
         }
 
         if (value && value !== 'no results') {
             setInputValue(value as string);
             setFilterValue('');
-            const text = props.listOfValues.filter(v => v.value === value).at(0)?.children;
+            const text = props.listOfValues.filter((v) => v.value === value).at(0)?.children;
             setSelected(text || value.toString());
             setInputValue(text || value.toString());
         }
@@ -145,7 +152,7 @@ export function TypeaheadSelect(props: Props)  {
                     setInputValue(String(focusedItem.children));
                     setFilterValue('');
                     setSelected(String(focusedItem.children));
-                    props.onSelect(focusedItem.value)
+                    props.onSelect(focusedItem.value);
                 }
 
                 setIsOpen((prevIsOpen) => !prevIsOpen);
@@ -167,34 +174,34 @@ export function TypeaheadSelect(props: Props)  {
     };
 
     const toggle = (toggleRef: React.Ref<MenuToggleElement>) => (
-        <MenuToggle ref={toggleRef} variant="typeahead" onClick={onToggleClick} isExpanded={isOpen} isFullWidth>
+        <MenuToggle ref={toggleRef} variant='typeahead' onClick={onToggleClick} isExpanded={isOpen} isFullWidth>
             <TextInputGroup isPlain>
                 <TextInputGroupMain
                     value={inputValue}
                     onClick={onToggleClick}
                     onChange={onTextInputChange}
                     onKeyDown={onInputKeyDown}
-                    id="typeahead-select-input"
-                    autoComplete="off"
+                    id='typeahead-select-input'
+                    autoComplete='off'
                     innerRef={textInputRef}
-                    placeholder="Select a state"
+                    placeholder='Select a state'
                     {...(activeItem && { 'aria-activedescendant': activeItem })}
-                    role="combobox"
+                    role='combobox'
                     isExpanded={isOpen}
-                    aria-controls="select-typeahead-listbox"
+                    aria-controls='select-typeahead-listbox'
                 />
 
                 <TextInputGroupUtilities>
                     {!!inputValue && (
                         <Button
-                            variant="plain"
+                            variant='plain'
                             onClick={() => {
                                 setSelected('');
                                 setInputValue('');
                                 setFilterValue('');
                                 textInputRef?.current?.focus();
                             }}
-                            aria-label="Clear input value"
+                            aria-label='Clear input value'
                         >
                             <TimesIcon aria-hidden />
                         </Button>
@@ -206,7 +213,7 @@ export function TypeaheadSelect(props: Props)  {
 
     return (
         <Select
-            id="typeahead-select"
+            id='typeahead-select'
             isOpen={isOpen}
             selected={selected}
             onSelect={onSelect}
@@ -215,7 +222,7 @@ export function TypeaheadSelect(props: Props)  {
             }}
             toggle={toggle}
         >
-            <SelectList id="select-typeahead-listbox">
+            <SelectList id='select-typeahead-listbox'>
                 {selectOptions.map((option, index) => (
                     <SelectOption
                         key={option.value || option.children}
@@ -230,4 +237,4 @@ export function TypeaheadSelect(props: Props)  {
             </SelectList>
         </Select>
     );
-};
+}

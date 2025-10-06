@@ -16,56 +16,47 @@
  */
 
 import * as React from 'react';
-import {RegionsIcon} from '@patternfly/react-icons';
+import { RegionsIcon } from '@patternfly/react-icons';
 
-import {DefaultNode, observer} from '@patternfly/react-topology';
-import {getDesignerIcon} from "../designer/icons/KaravanIcons";
-import {CamelUi} from "../designer/utils/CamelUi";
+import { DefaultNode, observer } from '@patternfly/react-topology';
+import { getDesignerIcon } from '../designer/icons/KaravanIcons';
+import { CamelUi } from '../designer/utils/CamelUi';
 import './topology.css';
-import {RouteDefinition} from "karavan-core/lib/model/CamelDefinition";
-import {AutoStartupIcon, ErrorHandlerIcon} from "../designer/icons/OtherIcons";
+import { RouteDefinition } from 'karavan-core/lib/model/CamelDefinition';
+import { AutoStartupIcon, ErrorHandlerIcon } from '../designer/icons/OtherIcons';
 
 function getIcon(data: any) {
     if (['route', 'rest', 'routeConfiguration'].includes(data.icon)) {
-        return (
-            <g transform={`translate(14, 14)`}>
-                {getDesignerIcon(data.icon)}
-            </g>
-        )
+        return <g transform={`translate(14, 14)`}>{getDesignerIcon(data.icon)}</g>;
     } else if (data.icon === 'element') {
-        return (
-            <g transform={`translate(14, 14)`}>
-                {CamelUi.getConnectionIcon(data.step)}
-            </g>
-        )
+        return <g transform={`translate(14, 14)`}>{CamelUi.getConnectionIcon(data.step)}</g>;
     }
-    return <RegionsIcon/>;
+    return <RegionsIcon />;
 }
 
 function getAttachments(data: any) {
     if (data && data?.step?.dslName === 'RouteDefinition') {
         const route: RouteDefinition = data?.step;
-        const autoStartup =  route?.autoStartup !== false;
-        const errorHandler =  route?.errorHandler !== undefined;
+        const autoStartup = route?.autoStartup !== false;
+        const errorHandler = route?.errorHandler !== undefined;
         return (
-            <g className="pf-topology__node__label__badge auto-start" transform="translate(-4, -4)">
-                {errorHandler &&
-                    <g className="" transform="translate(13, -4)">
+            <g className='pf-topology__node__label__badge auto-start' transform='translate(-4, -4)'>
+                {errorHandler && (
+                    <g className='' transform='translate(13, -4)'>
                         {ErrorHandlerIcon()}
                     </g>
-                }
-                {autoStartup &&
-                    <g className="" transform="translate(-4, -4)">
+                )}
+                {autoStartup && (
+                    <g className='' transform='translate(-4, -4)'>
                         {AutoStartupIcon()}
                     </g>
-                }
+                )}
             </g>
-        )
-    } else <></>
+        );
+    } else <></>;
 }
 
-const CustomNode: React.FC<any> = observer(({element, ...rest}) => {
-
+const CustomNode: React.FC<any> = observer(({ element, ...rest }) => {
     const data = element.getData();
     const badge: string = data.badge === 'REST' ? data.badge : data.badge?.substring(0, 1).toUpperCase();
     if (element.getLabel()?.length > 30) {
@@ -76,7 +67,7 @@ const CustomNode: React.FC<any> = observer(({element, ...rest}) => {
         <DefaultNode
             badge={badge}
             showStatusDecorator
-            className="common-node"
+            className='common-node'
             scaleLabel={false}
             element={element}
             attachments={getAttachments(data)}
@@ -84,6 +75,6 @@ const CustomNode: React.FC<any> = observer(({element, ...rest}) => {
         >
             {getIcon(data)}
         </DefaultNode>
-    )
-})
+    );
+});
 export default CustomNode;

@@ -15,42 +15,43 @@
  * limitations under the License.
  */
 import React from 'react';
-import {
-    Gallery,
-    PageSection,
-    PageSectionVariants
-} from '@patternfly/react-core';
+import { Gallery, PageSection, PageSectionVariants } from '@patternfly/react-core';
 import '../../designer/karavan.css';
-import {KameletCard} from "./KameletCard";
-import {KameletModal} from "./KameletModal";
-import {useKnowledgebaseStore} from "../KnowledgebaseStore";
-import {shallow} from "zustand/shallow";
-import {KameletModel} from "karavan-core/lib/model/KameletModels";
+import { KameletCard } from './KameletCard';
+import { KameletModal } from './KameletModal';
+import { useKnowledgebaseStore } from '../KnowledgebaseStore';
+import { shallow } from 'zustand/shallow';
+import { KameletModel } from 'karavan-core/lib/model/KameletModels';
 
 interface Props {
-    dark: boolean,
-    kameletList: KameletModel[],
-    onChange: (name: string, checked: boolean) => void
+    dark: boolean;
+    kameletList: KameletModel[];
+    onChange: (name: string, checked: boolean) => void;
 }
 
 export function KameletsTab(props: Props) {
+    const [isModalOpen] = useKnowledgebaseStore((s) => [s.isModalOpen], shallow);
 
-    const [isModalOpen] = useKnowledgebaseStore((s) => [s.isModalOpen], shallow)
-
-    const {kameletList, dark} = props;
+    const { kameletList, dark } = props;
 
     return (
-        <PageSection variant={dark ? PageSectionVariants.darker : PageSectionVariants.light}
-                     padding={{default: 'noPadding'}} className="kamelet-section">
-            {isModalOpen && <KameletModal/>}
-            <PageSection isFilled className="kamelets-page"
-                         variant={dark ? PageSectionVariants.darker : PageSectionVariants.light}>
+        <PageSection
+            variant={dark ? PageSectionVariants.darker : PageSectionVariants.light}
+            padding={{ default: 'noPadding' }}
+            className='kamelet-section'
+        >
+            {isModalOpen && <KameletModal />}
+            <PageSection
+                isFilled
+                className='kamelets-page'
+                variant={dark ? PageSectionVariants.darker : PageSectionVariants.light}
+            >
                 <Gallery hasGutter>
-                    {kameletList.map(k => (
+                    {kameletList.map((k) => (
                         <KameletCard key={k.metadata.name} kamelet={k} onChange={props.onChange} />
                     ))}
                 </Gallery>
             </PageSection>
         </PageSection>
-    )
+    );
 }

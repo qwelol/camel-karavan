@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 export class InfrastructureAPI {
-
     // code API
     static onGetCustomCode: (name: string, javaType: string) => Promise<string | undefined>;
     static onSaveCustomCode: (name: string, code: string) => void;
@@ -23,24 +22,26 @@ export class InfrastructureAPI {
     static onSavePropertyPlaceholder: (key: string, value: string) => void;
     static onInternalConsumerClick: (uri?: string, name?: string, routeId?: string) => void;
 
-    static setOnGetCustomCode(onGetCustomCode: (name: string, javaType: string) => Promise<string | undefined>){
-        this.onGetCustomCode = onGetCustomCode
+    static setOnGetCustomCode(onGetCustomCode: (name: string, javaType: string) => Promise<string | undefined>) {
+        this.onGetCustomCode = onGetCustomCode;
     }
 
-    static setOnSaveCustomCode(onSaveCustomCode: (name: string, code: string) => void){
-        this.onSaveCustomCode = onSaveCustomCode
+    static setOnSaveCustomCode(onSaveCustomCode: (name: string, code: string) => void) {
+        this.onSaveCustomCode = onSaveCustomCode;
     }
 
-    static setOnSave(onSave:(filename: string, yaml: string, propertyOnly: boolean) => void){
-        this.onSave = onSave
+    static setOnSave(onSave: (filename: string, yaml: string, propertyOnly: boolean) => void) {
+        this.onSave = onSave;
     }
 
-    static setOnSavePropertyPlaceholder(onSavePropertyPlaceholder:(key: string, value: string) => void){
-        this.onSavePropertyPlaceholder = onSavePropertyPlaceholder
+    static setOnSavePropertyPlaceholder(onSavePropertyPlaceholder: (key: string, value: string) => void) {
+        this.onSavePropertyPlaceholder = onSavePropertyPlaceholder;
     }
 
-    static setOnInternalConsumerClick(onInternalConsumerClick:(uri?: string, name?: string, routeId?: string) => void){
-        this.onInternalConsumerClick = onInternalConsumerClick
+    static setOnInternalConsumerClick(
+        onInternalConsumerClick: (uri?: string, name?: string, routeId?: string) => void,
+    ) {
+        this.onInternalConsumerClick = onInternalConsumerClick;
     }
 
     // Kubernetes/Docker API
@@ -49,15 +50,15 @@ export class InfrastructureAPI {
     static secrets: string[] = [];
     static services: string[] = [];
 
-    static setConfigMaps(configMaps: string[]){
-        this.configMaps = configMaps
+    static setConfigMaps(configMaps: string[]) {
+        this.configMaps = configMaps;
     }
 
-    static setSecrets(secrets: string[]){
-        this.secrets = secrets
+    static setSecrets(secrets: string[]) {
+        this.secrets = secrets;
     }
 
-    static setServices(services: string[]){
-        this.services = services
+    static setServices(services: string[]) {
+        this.services = services;
     }
 }

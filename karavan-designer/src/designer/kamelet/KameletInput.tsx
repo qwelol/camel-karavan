@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from 'react';
 import {
     GridItem,
     FormGroup,
@@ -26,15 +26,15 @@ import {
     ToggleGroup,
     ToggleGroupItem,
     capitalize,
-    TextArea
-} from "@patternfly/react-core";
+    TextArea,
+} from '@patternfly/react-core';
 import '../karavan.css';
 import './kamelet.css';
 
 interface Props {
     label: string;
     type: string;
-    span: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
+    span: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
     elementKey: string;
     value: any;
     isRequired: boolean;
@@ -43,11 +43,10 @@ interface Props {
 }
 
 export function KameletInput(props: Props) {
-
     const [inputValue, setInputValue] = useState(props.value);
     const [checkChanges, setCheckChanges] = useState<boolean>(false);
 
-    useEffect(()=> {
+    useEffect(() => {
         if (checkChanges) {
             const interval = setInterval(() => {
                 if (props.value !== inputValue) {
@@ -55,13 +54,13 @@ export function KameletInput(props: Props) {
                 }
             }, 1000);
             return () => {
-                clearInterval(interval)
-            }
+                clearInterval(interval);
+            };
         }
-    }, [checkChanges, inputValue])
+    }, [checkChanges, inputValue]);
 
     function saveValue(value?: string) {
-        setCheckChanges(false)
+        setCheckChanges(false);
         props.setValue(value ? value : inputValue);
     }
 
@@ -69,61 +68,86 @@ export function KameletInput(props: Props) {
         return (
             <InputGroup>
                 <InputGroupItem isFill>
-                    <TextInput className="text-field" type="text" id={props.elementKey} name={props.elementKey}
-                               onChange={(_, value) => {
-                                   setInputValue(value);
-                                   setCheckChanges(true);
-                               }}
-                               onBlur={() => saveValue()}
-                               value={inputValue}/>
+                    <TextInput
+                        className='text-field'
+                        type='text'
+                        id={props.elementKey}
+                        name={props.elementKey}
+                        onChange={(_, value) => {
+                            setInputValue(value);
+                            setCheckChanges(true);
+                        }}
+                        onBlur={() => saveValue()}
+                        value={inputValue}
+                    />
                 </InputGroupItem>
             </InputGroup>
-        )
+        );
     }
 
     function getTextArea() {
-        return (<InputGroup>
-            <InputGroupItem isFill> <TextArea type="text" id={props.elementKey} name={props.elementKey} autoResize
-                                              onChange={(_, value) => {
-                                                  setInputValue(value);
-                                                  setCheckChanges(true);
-                                              }}
-                                              onBlur={() => saveValue()}
-                                              value={inputValue}/></InputGroupItem></InputGroup>)
+        return (
+            <InputGroup>
+                <InputGroupItem isFill>
+                    {' '}
+                    <TextArea
+                        type='text'
+                        id={props.elementKey}
+                        name={props.elementKey}
+                        autoResize
+                        onChange={(_, value) => {
+                            setInputValue(value);
+                            setCheckChanges(true);
+                        }}
+                        onBlur={() => saveValue()}
+                        value={inputValue}
+                    />
+                </InputGroupItem>
+            </InputGroup>
+        );
     }
 
     function getIcon() {
-        return (<InputGroup>
-            <InputGroupText id="username">
-                <svg className="icon">
-                    <image href={props.value} className="icon"/>
-                </svg>
-            </InputGroupText>
-            <InputGroupItem isFill>
-                <TextInput className="text-field" type="text" id={props.elementKey} name={props.elementKey}
-                           onChange={(_, value) => setInputValue(value)}
-                           onBlur={() => saveValue()}
-                           value={inputValue}/>
-            </InputGroupItem>
-        </InputGroup>);
+        return (
+            <InputGroup>
+                <InputGroupText id='username'>
+                    <svg className='icon'>
+                        <image href={props.value} className='icon' />
+                    </svg>
+                </InputGroupText>
+                <InputGroupItem isFill>
+                    <TextInput
+                        className='text-field'
+                        type='text'
+                        id={props.elementKey}
+                        name={props.elementKey}
+                        onChange={(_, value) => setInputValue(value)}
+                        onBlur={() => saveValue()}
+                        value={inputValue}
+                    />
+                </InputGroupItem>
+            </InputGroup>
+        );
     }
 
     function getToggleGroup() {
-        return (<ToggleGroup aria-label={props.elementKey} id={props.elementKey} name={props.elementKey}>
-            {props.options?.map((option: string) =>
-                <ToggleGroupItem
-                    key={option}
-                    text={capitalize(option)}
-                    buttonId="toggle-group-single-1"
-                    isSelected={inputValue === option}
-                    onChange={(_, selected) => {
-                        setInputValue(option);
-                        saveValue(option);
-                        setCheckChanges(false);
-                    }}
-                />
-            )}
-        </ToggleGroup>)
+        return (
+            <ToggleGroup aria-label={props.elementKey} id={props.elementKey} name={props.elementKey}>
+                {props.options?.map((option: string) => (
+                    <ToggleGroupItem
+                        key={option}
+                        text={capitalize(option)}
+                        buttonId='toggle-group-single-1'
+                        isSelected={inputValue === option}
+                        onChange={(_, selected) => {
+                            setInputValue(option);
+                            saveValue(option);
+                            setCheckChanges(false);
+                        }}
+                    />
+                ))}
+            </ToggleGroup>
+        );
     }
 
     return (
@@ -135,5 +159,5 @@ export function KameletInput(props: Props) {
                 {props.type === 'textArea' && getTextArea()}
             </FormGroup>
         </GridItem>
-    )
+    );
 }

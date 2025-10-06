@@ -15,37 +15,37 @@
  * limitations under the License.
  */
 import React from 'react';
-import {
-    Button, Modal,
-} from '@patternfly/react-core';
+import { Button, Modal } from '@patternfly/react-core';
 import '../karavan.css';
-import {useRouteDesignerHook} from "./useRouteDesignerHook";
-import {useDesignerStore} from "../DesignerStore";
-import {shallow} from "zustand/shallow";
+import { useRouteDesignerHook } from './useRouteDesignerHook';
+import { useDesignerStore } from '../DesignerStore';
+import { shallow } from 'zustand/shallow';
 
 export function DeleteConfirmation() {
+    const { deleteElement } = useRouteDesignerHook();
 
-
-    const {deleteElement} = useRouteDesignerHook();
-
-    const [showDeleteConfirmation, deleteMessage , setShowDeleteConfirmation] =
-        useDesignerStore((s) => [s.showDeleteConfirmation, s.deleteMessage, s.setShowDeleteConfirmation], shallow)
+    const [showDeleteConfirmation, deleteMessage, setShowDeleteConfirmation] = useDesignerStore(
+        (s) => [s.showDeleteConfirmation, s.deleteMessage, s.setShowDeleteConfirmation],
+        shallow,
+    );
 
     return (
         <Modal
-            className="modal-delete"
-            title="Confirmation"
+            className='modal-delete'
+            title='Confirmation'
             isOpen={showDeleteConfirmation}
             onClose={() => setShowDeleteConfirmation(false)}
             actions={[
-                <Button key="confirm" variant="primary" onClick={e => deleteElement()}>Delete</Button>,
-                <Button key="cancel" variant="link"
-                        onClick={e => setShowDeleteConfirmation(false)}>Cancel</Button>
+                <Button key='confirm' variant='primary' onClick={(e) => deleteElement()}>
+                    Delete
+                </Button>,
+                <Button key='cancel' variant='link' onClick={(e) => setShowDeleteConfirmation(false)}>
+                    Cancel
+                </Button>,
             ]}
-            onEscapePress={e => setShowDeleteConfirmation(false)}>
-            <div>
-                {deleteMessage}
-            </div>
+            onEscapePress={(e) => setShowDeleteConfirmation(false)}
+        >
+            <div>{deleteMessage}</div>
         </Modal>
-    )
+    );
 }

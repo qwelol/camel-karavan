@@ -16,23 +16,17 @@
  */
 
 import React from 'react';
-import {
-    Card,
-    CardBody,
-    CardTitle,
-    Form, Grid,
-} from '@patternfly/react-core';
+import { Card, CardBody, CardTitle, Form, Grid } from '@patternfly/react-core';
 import '../karavan.css';
 import './kamelet.css';
-import {useIntegrationStore} from "../DesignerStore";
-import {shallow} from "zustand/shallow";
+import { useIntegrationStore } from '../DesignerStore';
+import { shallow } from 'zustand/shallow';
 import { KameletInput } from './KameletInput';
 
 const PREFIX = 'camel.apache.org/';
 
 export function KameletAnnotationsPanel() {
-
-    const [integration, setIntegration] = useIntegrationStore((s) => [s.integration, s.setIntegration], shallow)
+    const [integration, setIntegration] = useIntegrationStore((s) => [s.integration, s.setIntegration], shallow);
 
     function setValue(key: string, value: string) {
         if (key && value && value.length > 0) {
@@ -51,21 +45,55 @@ export function KameletAnnotationsPanel() {
     }
 
     function getElement(key: string, label: string, span: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12) {
-        return (<KameletInput elementKey={key} label={label} span={span} value={getValue(key)} setValue={(value: string) => setValue(key, value)} type='text' isRequired={true}/>);
+        return (
+            <KameletInput
+                elementKey={key}
+                label={label}
+                span={span}
+                value={getValue(key)}
+                setValue={(value: string) => setValue(key, value)}
+                type='text'
+                isRequired={true}
+            />
+        );
     }
 
-    function getElementToggleGroup(key: string, label: string, values: string[], span: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12) {
-        return (<KameletInput elementKey={key} label={label} span={span} value={getValue(key)} setValue={(value: string) => setValue(key, value)} type='toggle' options={values} isRequired={true}/>);
-
+    function getElementToggleGroup(
+        key: string,
+        label: string,
+        values: string[],
+        span: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
+    ) {
+        return (
+            <KameletInput
+                elementKey={key}
+                label={label}
+                span={span}
+                value={getValue(key)}
+                setValue={(value: string) => setValue(key, value)}
+                type='toggle'
+                options={values}
+                isRequired={true}
+            />
+        );
     }
 
     function getElementIcon(key: string, label: string, span: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12) {
-       
-            return (<KameletInput elementKey={key} label={label} span={span} value={getValue(key)} setValue={(value: string) => setValue(key, value)} type='icon' isRequired={true}/>);
+        return (
+            <KameletInput
+                elementKey={key}
+                label={label}
+                span={span}
+                value={getValue(key)}
+                setValue={(value: string) => setValue(key, value)}
+                type='icon'
+                isRequired={true}
+            />
+        );
     }
 
     return (
-        <Card isCompact ouiaId="AnnotationsCard">
+        <Card isCompact ouiaId='AnnotationsCard'>
             <CardTitle>Annotations</CardTitle>
             <CardBody>
                 <Form>
@@ -80,5 +108,5 @@ export function KameletAnnotationsPanel() {
                 </Form>
             </CardBody>
         </Card>
-    )
+    );
 }

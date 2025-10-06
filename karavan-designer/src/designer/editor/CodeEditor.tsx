@@ -14,18 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import '../../designer/karavan.css';
-import Editor from "@monaco-editor/react";
-import {shallow} from "zustand/shallow";
-import {useDesignerStore, useIntegrationStore} from "../DesignerStore";
-import {CamelDefinitionYaml} from "karavan-core/lib/api/CamelDefinitionYaml";
-import {CamelUtil} from "karavan-core/lib/api/CamelUtil";
+import Editor from '@monaco-editor/react';
+import { shallow } from 'zustand/shallow';
+import { useDesignerStore, useIntegrationStore } from '../DesignerStore';
+import { CamelDefinitionYaml } from 'karavan-core/lib/api/CamelDefinitionYaml';
+import { CamelUtil } from 'karavan-core/lib/api/CamelUtil';
 
-export function CodeEditor () {
-
+export function CodeEditor() {
     const [integration, setIntegration] = useIntegrationStore((s) => [s.integration, s.setIntegration], shallow);
-    const [setNotification, badge] = useDesignerStore((s) => [s.setNotification, s.notificationBadge], shallow)
+    const [setNotification, badge] = useDesignerStore((s) => [s.setNotification, s.notificationBadge], shallow);
     const [code, setCode] = useState<string>('');
 
     useEffect(() => {
@@ -39,7 +38,7 @@ export function CodeEditor () {
         }
         return () => {
             setNotification(false, ['', '']);
-        }
+        };
     }, []);
 
     function onChange(value: string | undefined) {
@@ -50,14 +49,14 @@ export function CodeEditor () {
                 setNotification(false, ['', '']);
             } catch (e: any) {
                 const message: string = e?.message ? e.message : e.reason;
-                setNotification(true, ['Error in YAML, Integration can not be saved!' ,message]);
+                setNotification(true, ['Error in YAML, Integration can not be saved!', message]);
             }
         }
     }
 
     return (
         <Editor
-            height="100vh"
+            height='100vh'
             defaultLanguage={'yaml'}
             theme={'light'}
             value={code}
@@ -65,5 +64,5 @@ export function CodeEditor () {
             defaultValue={code}
             onChange={(value, ev) => onChange(value)}
         />
-    )
+    );
 }

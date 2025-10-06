@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
     Dropdown,
     MenuToggleElement,
@@ -28,39 +28,58 @@ import {
     Form,
     Button,
     FlexItem,
-    DropdownGroup, Divider
+    DropdownGroup,
+    Divider,
 } from '@patternfly/react-core';
 import '../../karavan.css';
 import './PropertyPlaceholderDropdown.css';
-import "@patternfly/patternfly/patternfly.css";
-import {ComponentProperty} from "karavan-core/lib/model/ComponentModels";
-import {useDesignerStore} from "../../DesignerStore";
-import {shallow} from "zustand/shallow";
-import EllipsisVIcon from "@patternfly/react-icons/dist/esm/icons/ellipsis-v-icon";
-import AddIcon from "@patternfly/react-icons/dist/js/icons/plus-icon";
-import {InfrastructureAPI} from "../../utils/InfrastructureAPI";
-import {PropertyMeta} from "karavan-core/lib/model/CamelMetadata";
-import {RouteToCreate} from "../../utils/CamelUi";
-import {Property} from "karavan-core/lib/model/KameletModels";
+import '@patternfly/patternfly/patternfly.css';
+import { ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
+import { useDesignerStore } from '../../DesignerStore';
+import { shallow } from 'zustand/shallow';
+import EllipsisVIcon from '@patternfly/react-icons/dist/esm/icons/ellipsis-v-icon';
+import AddIcon from '@patternfly/react-icons/dist/js/icons/plus-icon';
+import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
+import { PropertyMeta } from 'karavan-core/lib/model/CamelMetadata';
+import { RouteToCreate } from '../../utils/CamelUi';
+import { Property } from 'karavan-core/lib/model/KameletModels';
 
 const SYNTAX_EXAMPLES = [
-    {key: 'property:', value: 'group.property', description: 'Application property'},
-    {key: 'env:', value: 'env:ENV_NAME', description: 'OS environment variable'},
-    {key: 'sys:', value: 'sys:JvmPropertyName', description: 'JVM system property'},
-    {key: 'bean:', value: 'bean:beanName.method', description: 'Bean’s method'}
-]
+    {
+        key: 'property:',
+        value: 'group.property',
+        description: 'Application property',
+    },
+    {
+        key: 'env:',
+        value: 'env:ENV_NAME',
+        description: 'OS environment variable',
+    },
+    {
+        key: 'sys:',
+        value: 'sys:JvmPropertyName',
+        description: 'JVM system property',
+    },
+    { key: 'bean:', value: 'bean:beanName.method', description: 'Bean’s method' },
+];
 
 interface Props {
-    property: ComponentProperty | PropertyMeta | Property,
-    value: any,
-    onDslPropertyChange?: (fieldId: string, value: string | number | boolean | any, newRoute?: RouteToCreate) => void,
-    onComponentPropertyChange?: (parameter: string, value: string | number | boolean | any, pathParameter?: boolean, newRoute?: RouteToCreate) => void
+    property: ComponentProperty | PropertyMeta | Property;
+    value: any;
+    onDslPropertyChange?: (fieldId: string, value: string | number | boolean | any, newRoute?: RouteToCreate) => void;
+    onComponentPropertyChange?: (
+        parameter: string,
+        value: string | number | boolean | any,
+        pathParameter?: boolean,
+        newRoute?: RouteToCreate,
+    ) => void;
 }
 
 export function PropertyPlaceholderDropdown(props: Props) {
-
-    const [propertyPlaceholders, setPropertyPlaceholders] = useDesignerStore((s) =>
-        [s.propertyPlaceholders, s.setPropertyPlaceholders], shallow)
+    const [propertyPlaceholders, setPropertyPlaceholders] = useDesignerStore(
+        (s) => [s.propertyPlaceholders, s.setPropertyPlaceholders],
+        shallow,
+    );
     const [isOpenPlaceholdersDropdown, setOpenPlaceholdersDropdown] = useState<boolean>(false);
     const [propValue, setPropValue] = useState<string>('');
     const [isVisible, setIsVisible] = React.useState(false);
@@ -69,16 +88,18 @@ export function PropertyPlaceholderDropdown(props: Props) {
         return val.replace('{{', '').replace('}}', '');
     }
 
-    const {property, value} = props;
+    const { property, value } = props;
     const valueIsPlaceholder: boolean = value && value.toString().startsWith('{{') && value.toString().endsWith('}}');
     const placeholderValue = valueIsPlaceholder ? value.toString().replace('{{', '').replace('}}', '') : undefined;
-    const showAddButton = valueIsPlaceholder
-        && !propertyPlaceholders.includes(placeholderValue)
-        && !SYNTAX_EXAMPLES.map(se=> se.value).includes(removeBrackets(placeholderValue))
-        && SYNTAX_EXAMPLES.findIndex(se=> removeBrackets(placeholderValue).startsWith(se.key)) === -1;
-    const popoverId = "popover-selector-" + property.hasOwnProperty('name') ? (property as any).name : (property as any).id;
+    const showAddButton =
+        valueIsPlaceholder &&
+        !propertyPlaceholders.includes(placeholderValue) &&
+        !SYNTAX_EXAMPLES.map((se) => se.value).includes(removeBrackets(placeholderValue)) &&
+        SYNTAX_EXAMPLES.findIndex((se) => removeBrackets(placeholderValue).startsWith(se.key)) === -1;
+    const popoverId =
+        'popover-selector-' + property.hasOwnProperty('name') ? (property as any).name : (property as any).id;
 
-    const hasPlaceholders = (propertyPlaceholders && propertyPlaceholders.length > 0 );
+    const hasPlaceholders = propertyPlaceholders && propertyPlaceholders.length > 0;
 
     function parametersChanged(value: string | number | boolean | any) {
         if (property instanceof ComponentProperty) {
@@ -92,14 +113,14 @@ export function PropertyPlaceholderDropdown(props: Props) {
 
     function onMenuToggleClick() {
         if (!showAddButton) {
-            setOpenPlaceholdersDropdown(!isOpenPlaceholdersDropdown)
+            setOpenPlaceholdersDropdown(!isOpenPlaceholdersDropdown);
         }
     }
 
     function saveProperty() {
         InfrastructureAPI.onSavePropertyPlaceholder(placeholderValue, propValue);
         setIsVisible(false);
-        const p = [...propertyPlaceholders]
+        const p = [...propertyPlaceholders];
         p.push(placeholderValue);
         setPropertyPlaceholders(p);
     }
@@ -110,53 +131,55 @@ export function PropertyPlaceholderDropdown(props: Props) {
                 isVisible={isVisible}
                 shouldOpen={(_event, _fn) => setIsVisible(true)}
                 shouldClose={(_event, _fn) => setIsVisible(false)}
-                aria-label="Add property"
-                headerContent={"Add property"}
+                aria-label='Add property'
+                headerContent={'Add property'}
                 bodyContent={
-                    <Form isHorizontal className="property-placeholder-toggle-form" autoComplete="off">
-                        <FormGroup isInline label="Property" isRequired fieldId="property">
-                            <TextInput id="property" readOnly value={placeholderValue}/>
+                    <Form isHorizontal className='property-placeholder-toggle-form' autoComplete='off'>
+                        <FormGroup isInline label='Property' isRequired fieldId='property'>
+                            <TextInput id='property' readOnly value={placeholderValue} />
                         </FormGroup>
-                        <FormGroup isInline label="Value" isRequired fieldId="value">
-                            <TextInput id="value" isRequired value={propValue}
-                                       onChange={(_, value) => setPropValue(value)}/>
+                        <FormGroup isInline label='Value' isRequired fieldId='value'>
+                            <TextInput
+                                id='value'
+                                isRequired
+                                value={propValue}
+                                onChange={(_, value) => setPropValue(value)}
+                            />
                         </FormGroup>
                     </Form>
                 }
                 footerContent={
                     <Flex>
-                        <FlexItem align={{default: "alignRight"}}>
-                            <Button
-                                onClick={() => saveProperty()}>
-                                Save
-                            </Button>
+                        <FlexItem align={{ default: 'alignRight' }}>
+                            <Button onClick={() => saveProperty()}>Save</Button>
                         </FlexItem>
                     </Flex>
                 }
                 triggerRef={() => document.getElementById(popoverId) as HTMLButtonElement}
             />
-        )
+        );
     }
 
     function getToggle(toggleRef: React.Ref<MenuToggleElement>) {
         return (
-            <MenuToggle className="property-placeholder-toggle"
-                        id={popoverId}
-                        ref={toggleRef}
-                        aria-label="placeholder menu"
-                        variant="default"
-                        onClick={() => onMenuToggleClick()}
-                        isExpanded={isOpenPlaceholdersDropdown}
+            <MenuToggle
+                className='property-placeholder-toggle'
+                id={popoverId}
+                ref={toggleRef}
+                aria-label='placeholder menu'
+                variant='default'
+                onClick={() => onMenuToggleClick()}
+                isExpanded={isOpenPlaceholdersDropdown}
             >
-                {showAddButton ? <AddIcon/> : <EllipsisVIcon/>}
+                {showAddButton ? <AddIcon /> : <EllipsisVIcon />}
                 {showAddButton && getPopover()}
             </MenuToggle>
-        )
+        );
     }
 
     return (
         <Dropdown
-            popperProps={{position: "end"}}
+            popperProps={{ position: 'end' }}
             isOpen={isOpenPlaceholdersDropdown}
             onSelect={(_, value) => {
                 parametersChanged(value);
@@ -167,20 +190,24 @@ export function PropertyPlaceholderDropdown(props: Props) {
             shouldFocusToggleOnSelect
         >
             <DropdownList>
-                {hasPlaceholders && <DropdownGroup label="Application Properties">
-                    {propertyPlaceholders.map((pp, index) =>
-                        <DropdownItem value={pp} key={index}>{pp}</DropdownItem>
-                    )}
-                </DropdownGroup>}
-                {hasPlaceholders && <Divider component="li"/>}
-                <DropdownGroup label="Syntax examples">
-                    {SYNTAX_EXAMPLES.map(se =>
+                {hasPlaceholders && (
+                    <DropdownGroup label='Application Properties'>
+                        {propertyPlaceholders.map((pp, index) => (
+                            <DropdownItem value={pp} key={index}>
+                                {pp}
+                            </DropdownItem>
+                        ))}
+                    </DropdownGroup>
+                )}
+                {hasPlaceholders && <Divider component='li' />}
+                <DropdownGroup label='Syntax examples'>
+                    {SYNTAX_EXAMPLES.map((se) => (
                         <DropdownItem value={se.value} key={se.key} description={se.description}>
                             {se.value}
-                        </DropdownItem>)
-                    }
+                        </DropdownItem>
+                    ))}
                 </DropdownGroup>
             </DropdownList>
         </Dropdown>
-    )
+    );
 }

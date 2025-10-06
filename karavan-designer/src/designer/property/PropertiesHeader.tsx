@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Text,
     Title,
@@ -24,33 +24,37 @@ import {
     MenuToggleElement,
     MenuToggle,
     DropdownList,
-    DropdownItem, Flex, Popover, FlexItem, Badge, ClipboardCopy,
+    DropdownItem,
+    Flex,
+    Popover,
+    FlexItem,
+    Badge,
+    ClipboardCopy,
     Switch,
 } from '@patternfly/react-core';
 import '../karavan.css';
 import './DslProperties.css';
-import "@patternfly/patternfly/patternfly.css";
-import {CamelUi} from "../utils/CamelUi";
-import {useDesignerStore, useSelectorStore} from "../DesignerStore";
-import {shallow} from "zustand/shallow";
-import {usePropertiesHook} from "./usePropertiesHook";
-import {CamelDisplayUtil} from "karavan-core/lib/api/CamelDisplayUtil";
+import '@patternfly/patternfly/patternfly.css';
+import { CamelUi } from '../utils/CamelUi';
+import { useDesignerStore, useSelectorStore } from '../DesignerStore';
+import { shallow } from 'zustand/shallow';
+import { usePropertiesHook } from './usePropertiesHook';
+import { CamelDisplayUtil } from 'karavan-core/lib/api/CamelDisplayUtil';
 import EllipsisVIcon from '@patternfly/react-icons/dist/esm/icons/ellipsis-v-icon';
-import {ComponentApi} from "karavan-core/lib/api/ComponentApi";
-import HelpIcon from "@patternfly/react-icons/dist/js/icons/help-icon";
-import {CamelMetadataApi} from "karavan-core/lib/model/CamelMetadata";
-import {useRouteDesignerHook} from "../route/useRouteDesignerHook";
+import { ComponentApi } from 'karavan-core/lib/api/ComponentApi';
+import HelpIcon from '@patternfly/react-icons/dist/js/icons/help-icon';
+import { CamelMetadataApi } from 'karavan-core/lib/model/CamelMetadata';
+import { useRouteDesignerHook } from '../route/useRouteDesignerHook';
 
 interface Props {
-    designerType: 'routes' | 'rest' | 'beans'
+    designerType: 'routes' | 'rest' | 'beans';
 }
 
 export function PropertiesHeader(props: Props) {
+    const { saveAsRoute, convertStep } = usePropertiesHook(props.designerType);
+    const { openSelectorToReplaceFrom } = useRouteDesignerHook();
 
-    const {saveAsRoute, convertStep} = usePropertiesHook(props.designerType);
-    const {openSelectorToReplaceFrom} = useRouteDesignerHook();
-
-    const [selectedStep, dark] = useDesignerStore((s) => [s.selectedStep, s.dark], shallow)
+    const [selectedStep, dark] = useDesignerStore((s) => [s.selectedStep, s.dark], shallow);
 
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState<boolean>(false);
     const [isHeadersExpanded, setIsHeadersExpanded] = useState<boolean>(false);
@@ -59,190 +63,244 @@ export function PropertiesHeader(props: Props) {
     const [isStepTypeOpen, setIsStepTypeOpen] = React.useState(false);
 
     useEffect(() => {
-        setMenuOpen(false)
-    }, [selectedStep])
+        setMenuOpen(false);
+    }, [selectedStep]);
 
     function getHeaderMenu(): React.JSX.Element {
         const hasSteps = selectedStep?.hasSteps();
         const targetDsl = CamelUi.getConvertTargetDsl(selectedStep?.dslName);
-        const targetDslTitle = targetDsl?.replace("Definition", "");
+        const targetDslTitle = targetDsl?.replace('Definition', '');
         const showMenu = hasSteps || targetDsl !== undefined;
-        return showMenu ?
+        return showMenu ? (
             <Dropdown
-                popperProps={{position: "end"}}
+                popperProps={{ position: 'end' }}
                 isOpen={isMenuOpen}
-                onSelect={() => {
-                }}
+                onSelect={() => {}}
                 onOpenChange={(isOpen: boolean) => setMenuOpen(isOpen)}
                 toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                     <MenuToggle
-                        className="header-menu-toggle"
+                        className='header-menu-toggle'
                         ref={toggleRef}
-                        aria-label="menu"
-                        variant="plain"
+                        aria-label='menu'
+                        variant='plain'
                         onClick={() => setMenuOpen(!isMenuOpen)}
                         isExpanded={isMenuOpen}
                     >
-                        <EllipsisVIcon/>
+                        <EllipsisVIcon />
                     </MenuToggle>
                 )}
             >
                 <DropdownList>
-                    {isFrom &&
-                        <DropdownItem key="changeFrom" onClick={(ev) => {
-                            ev.preventDefault()
-                            openSelectorToReplaceFrom((selectedStep as any).id)
-                            setMenuOpen(false);
-                        }}>
+                    {isFrom && (
+                        <DropdownItem
+                            key='changeFrom'
+                            onClick={(ev) => {
+                                ev.preventDefault();
+                                openSelectorToReplaceFrom((selectedStep as any).id);
+                                setMenuOpen(false);
+                            }}
+                        >
                             Change From...
-                        </DropdownItem>}
-                    {hasSteps &&
-                        <DropdownItem key="saveStepsRoute" onClick={(ev) => {
-                            ev.preventDefault()
-                            if (selectedStep) {
-                                saveAsRoute(selectedStep, true);
-                                setMenuOpen(false);
-                            }
-                        }}>
+                        </DropdownItem>
+                    )}
+                    {hasSteps && (
+                        <DropdownItem
+                            key='saveStepsRoute'
+                            onClick={(ev) => {
+                                ev.preventDefault();
+                                if (selectedStep) {
+                                    saveAsRoute(selectedStep, true);
+                                    setMenuOpen(false);
+                                }
+                            }}
+                        >
                             Save Steps to Route
-                        </DropdownItem>}
-                    {hasSteps && !isFrom &&
-                        <DropdownItem key="saveElementRoute" onClick={(ev) => {
-                            ev.preventDefault()
-                            if (selectedStep) {
-                                saveAsRoute(selectedStep, false);
-                                setMenuOpen(false);
-                            }
-                        }}>
+                        </DropdownItem>
+                    )}
+                    {hasSteps && !isFrom && (
+                        <DropdownItem
+                            key='saveElementRoute'
+                            onClick={(ev) => {
+                                ev.preventDefault();
+                                if (selectedStep) {
+                                    saveAsRoute(selectedStep, false);
+                                    setMenuOpen(false);
+                                }
+                            }}
+                        >
                             Save Element to Route
-                        </DropdownItem>}
-                    {targetDsl &&
-                        <DropdownItem key="convert"
-                                      onClick={(ev) => {
-                                          ev.preventDefault()
-                                          if (selectedStep) {
-                                              convertStep(selectedStep, targetDsl);
-                                              setMenuOpen(false);
-                                          }
-                                      }}>
+                        </DropdownItem>
+                    )}
+                    {targetDsl && (
+                        <DropdownItem
+                            key='convert'
+                            onClick={(ev) => {
+                                ev.preventDefault();
+                                if (selectedStep) {
+                                    convertStep(selectedStep, targetDsl);
+                                    setMenuOpen(false);
+                                }
+                            }}
+                        >
                             Convert to {targetDslTitle}
-                        </DropdownItem>}
+                        </DropdownItem>
+                    )}
                 </DropdownList>
-            </Dropdown> : <></>;
+            </Dropdown>
+        ) : (
+            <></>
+        );
     }
 
     function getExchangePropertiesSection(): React.JSX.Element {
         return (
-            <ExpandableSection toggleText='Exchange Properties'
-                               onToggle={(_event, isExpanded) => setIsExchangePropertiesExpanded(!isExchangePropertiesExpanded)}
-                               isExpanded={isExchangePropertiesExpanded}>
-                <Flex className='component-headers' direction={{default: "column"}}>
-                    {exchangeProperties.map((header, index, array) =>
-                            <Flex key={index}>
-                                <ClipboardCopy key={index} hoverTip="Copy" clickTip="Copied" variant="inline-compact"
-                                               isCode>
-                                    {header.name}
-                                </ClipboardCopy>
-                                <FlexItem align={{default: 'alignRight'}}>
-                                    <Popover
-                                        position={"left"}
-                                        headerContent={header.name}
-                                        bodyContent={header.description}
-                                        footerContent={
-                                            <Flex>
-                                                <Text component={TextVariants.p}>{header.javaType}</Text>
-                                                <FlexItem align={{default: 'alignRight'}}>
-                                                    <Badge isRead>{header.label}</Badge>
-                                                </FlexItem>
-                                            </Flex>
-                                        }
-                                    >
-                                        <button type="button" aria-label="More info" onClick={e => {
+            <ExpandableSection
+                toggleText='Exchange Properties'
+                onToggle={(_event, isExpanded) => setIsExchangePropertiesExpanded(!isExchangePropertiesExpanded)}
+                isExpanded={isExchangePropertiesExpanded}
+            >
+                <Flex className='component-headers' direction={{ default: 'column' }}>
+                    {exchangeProperties.map((header, index, array) => (
+                        <Flex key={index}>
+                            <ClipboardCopy
+                                key={index}
+                                hoverTip='Copy'
+                                clickTip='Copied'
+                                variant='inline-compact'
+                                isCode
+                            >
+                                {header.name}
+                            </ClipboardCopy>
+                            <FlexItem align={{ default: 'alignRight' }}>
+                                <Popover
+                                    position={'left'}
+                                    headerContent={header.name}
+                                    bodyContent={header.description}
+                                    footerContent={
+                                        <Flex>
+                                            <Text component={TextVariants.p}>{header.javaType}</Text>
+                                            <FlexItem align={{ default: 'alignRight' }}>
+                                                <Badge isRead>{header.label}</Badge>
+                                            </FlexItem>
+                                        </Flex>
+                                    }
+                                >
+                                    <button
+                                        type='button'
+                                        aria-label='More info'
+                                        onClick={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
-                                        }} className="pf-v5-c-form__group-label-help">
-                                            <HelpIcon/>
-                                        </button>
-                                    </Popover>
-                                </FlexItem>
-                            </Flex>
-                        )}
+                                        }}
+                                        className='pf-v5-c-form__group-label-help'
+                                    >
+                                        <HelpIcon />
+                                    </button>
+                                </Popover>
+                            </FlexItem>
+                        </Flex>
+                    ))}
                 </Flex>
             </ExpandableSection>
-        )
+        );
     }
 
     function getComponentHeadersSection(): React.JSX.Element {
         return (
-            <ExpandableSection toggleText='Headers'
-                               onToggle={(_event, isExpanded) => setIsHeadersExpanded(!isHeadersExpanded)}
-                               isExpanded={isHeadersExpanded}>
-                <Flex className='component-headers' direction={{default: "column"}}>
-                    {headers.filter((header) => groups.includes(header.group))
-                        .map((header, index, array) =>
+            <ExpandableSection
+                toggleText='Headers'
+                onToggle={(_event, isExpanded) => setIsHeadersExpanded(!isHeadersExpanded)}
+                isExpanded={isHeadersExpanded}
+            >
+                <Flex className='component-headers' direction={{ default: 'column' }}>
+                    {headers
+                        .filter((header) => groups.includes(header.group))
+                        .map((header, index, array) => (
                             <Flex key={index}>
-                                <ClipboardCopy key={index} hoverTip="Copy" clickTip="Copied" variant="inline-compact"
-                                               isCode>
+                                <ClipboardCopy
+                                    key={index}
+                                    hoverTip='Copy'
+                                    clickTip='Copied'
+                                    variant='inline-compact'
+                                    isCode
+                                >
                                     {header.name}
                                 </ClipboardCopy>
-                                <FlexItem align={{default: 'alignRight'}}>
+                                <FlexItem align={{ default: 'alignRight' }}>
                                     <Popover
-                                        position={"left"}
+                                        position={'left'}
                                         headerContent={header.name}
                                         bodyContent={header.description}
                                         footerContent={
                                             <Flex>
                                                 <Text component={TextVariants.p}>{header.javaType}</Text>
-                                                <FlexItem align={{default: 'alignRight'}}>
+                                                <FlexItem align={{ default: 'alignRight' }}>
                                                     <Badge isRead>{header.group}</Badge>
                                                 </FlexItem>
                                             </Flex>
                                         }
                                     >
-                                        <button type="button" aria-label="More info" onClick={e => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                        }} className="pf-v5-c-form__group-label-help">
-                                            <HelpIcon/>
+                                        <button
+                                            type='button'
+                                            aria-label='More info'
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                            }}
+                                            className='pf-v5-c-form__group-label-help'
+                                        >
+                                            <HelpIcon />
                                         </button>
                                     </Popover>
                                 </FlexItem>
                             </Flex>
-                        )}
+                        ))}
                 </Flex>
             </ExpandableSection>
-        )
+        );
     }
 
     function getDescriptionSection(): React.JSX.Element {
         return (
-            <ExpandableSection toggleText={isDescriptionExpanded ? 'Show less' : 'Show more'}
-                               onToggle={(_event, isExpanded) => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                               isExpanded={isDescriptionExpanded}>
-                {descriptionLines.filter((value, index) => index > 0)
-                    .map((desc, index, array) => <Text key={index} component={TextVariants.p}>{desc}</Text>)}
+            <ExpandableSection
+                toggleText={isDescriptionExpanded ? 'Show less' : 'Show more'}
+                onToggle={(_event, isExpanded) => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                isExpanded={isDescriptionExpanded}
+            >
+                {descriptionLines
+                    .filter((value, index) => index > 0)
+                    .map((desc, index, array) => (
+                        <Text key={index} component={TextVariants.p}>
+                            {desc}
+                        </Text>
+                    ))}
             </ExpandableSection>
-        )
+        );
     }
 
-    const title = selectedStep && CamelDisplayUtil.getTitle(selectedStep)
+    const title = selectedStep && CamelDisplayUtil.getTitle(selectedStep);
     const description = selectedStep && CamelDisplayUtil.getDescription(selectedStep);
-    const descriptionLines: string [] = description ? description?.split("\n") : [""];
-    const headers = ComponentApi.getComponentHeadersList(selectedStep)
+    const descriptionLines: string[] = description ? description?.split('\n') : [''];
+    const headers = ComponentApi.getComponentHeadersList(selectedStep);
     const exchangeProperties = selectedStep ? CamelMetadataApi.getExchangeProperties(selectedStep.dslName) : [];
     const isFrom = selectedStep?.dslName === 'FromDefinition';
     const isPoll = selectedStep?.dslName === 'PollDefinition';
     const component = ComponentApi.findStepComponent(selectedStep);
-    const groups = (isFrom || isPoll) ? ['consumer', 'common'] : ['producer', 'common'];
+    const groups = isFrom || isPoll ? ['consumer', 'common'] : ['producer', 'common'];
     const isKamelet = CamelUi.isKamelet(selectedStep);
-    const isStepComponent = !isFrom && selectedStep !== undefined && !isKamelet && ['ToDefinition', 'PollDefinition'].includes(selectedStep?.dslName);
+    const isStepComponent =
+        !isFrom &&
+        selectedStep !== undefined &&
+        !isKamelet &&
+        ['ToDefinition', 'PollDefinition'].includes(selectedStep?.dslName);
 
     function getComponentStepTypeSwitch() {
-        return (component?.component.producerOnly
-            ? <></>
-            : <Switch
-                id="step-type-switch"
-                label="Poll"
+        return component?.component.producerOnly ? (
+            <></>
+        ) : (
+            <Switch
+                id='step-type-switch'
+                label='Poll'
                 isChecked={isStepTypeOpen}
                 onChange={(event, checked) => {
                     if (selectedStep) {
@@ -250,16 +308,18 @@ export function PropertiesHeader(props: Props) {
                         setIsStepTypeOpen(checked);
                     }
                 }}
-                ouiaId="step-type-switch"
+                ouiaId='step-type-switch'
                 isReversed
             />
-        )
+        );
     }
 
     return (
-        <div className="headers">
-            <div className="top">
-                <Title headingLevel="h1" size="md">{title}</Title>
+        <div className='headers'>
+            <div className='top'>
+                <Title headingLevel='h1' size='md'>
+                    {title}
+                </Title>
                 {getHeaderMenu()}
                 {isStepComponent && getComponentStepTypeSwitch()}
             </div>
@@ -268,5 +328,5 @@ export function PropertiesHeader(props: Props) {
             {headers.length > 0 && getComponentHeadersSection()}
             {exchangeProperties.length > 0 && getExchangePropertiesSection()}
         </div>
-    )
+    );
 }

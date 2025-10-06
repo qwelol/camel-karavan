@@ -15,41 +15,42 @@
  * limitations under the License.
  */
 import React from 'react';
-import {
-    Gallery,
-    PageSection, PageSectionVariants
-} from '@patternfly/react-core';
+import { Gallery, PageSection, PageSectionVariants } from '@patternfly/react-core';
 import '../../designer/karavan.css';
-import {EipCard} from "./EipCard";
-import {EipModal} from "./EipModal";
-import {useKnowledgebaseStore} from "../KnowledgebaseStore";
-import {shallow} from "zustand/shallow";
-import {ElementMeta} from "karavan-core/lib/model/CamelMetadata";
+import { EipCard } from './EipCard';
+import { EipModal } from './EipModal';
+import { useKnowledgebaseStore } from '../KnowledgebaseStore';
+import { shallow } from 'zustand/shallow';
+import { ElementMeta } from 'karavan-core/lib/model/CamelMetadata';
 
 interface Props {
-    dark: boolean,
-    elements: ElementMeta[],
+    dark: boolean;
+    elements: ElementMeta[];
 }
 
 export function EipTab(props: Props) {
-
-    const [isModalOpen] = useKnowledgebaseStore((s) => [s.isModalOpen], shallow)
+    const [isModalOpen] = useKnowledgebaseStore((s) => [s.isModalOpen], shallow);
 
     const { elements } = props;
 
     return (
-        <PageSection variant={props.dark ? PageSectionVariants.darker : PageSectionVariants.light}
-            padding={{ default: 'noPadding' }} className="kamelet-section knowledbase-eip-section">
-
-            {isModalOpen && <EipModal/>}
-            <PageSection isFilled className="kamelets-page"
-                         variant={props.dark ? PageSectionVariants.darker : PageSectionVariants.light}>
+        <PageSection
+            variant={props.dark ? PageSectionVariants.darker : PageSectionVariants.light}
+            padding={{ default: 'noPadding' }}
+            className='kamelet-section knowledbase-eip-section'
+        >
+            {isModalOpen && <EipModal />}
+            <PageSection
+                isFilled
+                className='kamelets-page'
+                variant={props.dark ? PageSectionVariants.darker : PageSectionVariants.light}
+            >
                 <Gallery hasGutter>
-                    {elements.map(c => (
-                        <EipCard key={c.name} element={c}/>
+                    {elements.map((c) => (
+                        <EipCard key={c.name} element={c} />
                     ))}
                 </Gallery>
             </PageSection>
         </PageSection>
-    )
+    );
 }

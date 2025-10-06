@@ -14,22 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {PropertyMeta} from "karavan-core/lib/model/CamelMetadata";
-import {ComponentProperty} from "karavan-core/lib/model/ComponentModels";
-import {Property} from "karavan-core/lib/model/KameletModels";
+import { PropertyMeta } from 'karavan-core/lib/model/CamelMetadata';
+import { ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
+import { Property } from 'karavan-core/lib/model/KameletModels';
 
 export class PropertyUtil {
-
     static hasDslPropertyValueChanged(property: PropertyMeta, value: any): boolean {
         const isSet = value !== undefined && !['id', 'uri', 'nodePrefixId'].includes(property.name);
-        const defaultValue = property.type === 'boolean' ? property.defaultValue?.toString() || 'false' : property.defaultValue;
+        const defaultValue =
+            property.type === 'boolean' ? property.defaultValue?.toString() || 'false' : property.defaultValue;
         const isDefault = defaultValue !== undefined && value?.toString() === defaultValue?.toString();
         return isSet && !isDefault;
     }
 
     static hasComponentPropertyValueChanged(property: ComponentProperty, value: any): boolean {
         const isSet = value !== undefined;
-        const defaultValue = property.type === 'boolean' ? property.defaultValue?.toString() || 'false' : property.defaultValue;
+        const defaultValue =
+            property.type === 'boolean' ? property.defaultValue?.toString() || 'false' : property.defaultValue;
         const isDefault = defaultValue !== undefined && value?.toString() === defaultValue?.toString();
         return isSet && !isDefault;
     }

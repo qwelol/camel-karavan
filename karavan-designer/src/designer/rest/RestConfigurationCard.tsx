@@ -15,22 +15,21 @@
  * limitations under the License.
  */
 import React from 'react';
-import {Button} from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core';
 import './rest.css';
 import '../karavan.css';
-import {CamelElement} from "karavan-core/lib/model/IntegrationDefinition";
-import {RestConfigurationDefinition} from "karavan-core/lib/model/CamelDefinition";
-import {DeleteElementIcon} from "../utils/ElementIcons";
+import { CamelElement } from 'karavan-core/lib/model/IntegrationDefinition';
+import { RestConfigurationDefinition } from 'karavan-core/lib/model/CamelDefinition';
+import { DeleteElementIcon } from '../utils/ElementIcons';
 
 interface Props {
-    restConfig: RestConfigurationDefinition
-    selectedRestConfig?: CamelElement
-    selectElement: (element: CamelElement) => void
-    deleteElement: (element: CamelElement) => void
+    restConfig: RestConfigurationDefinition;
+    selectedRestConfig?: CamelElement;
+    selectElement: (element: CamelElement) => void;
+    deleteElement: (element: CamelElement) => void;
 }
 
-export function RestConfigurationCard (props: Props) {
-
+export function RestConfigurationCard(props: Props) {
     function selectElement(evt: React.MouseEvent) {
         evt.stopPropagation();
         props.selectElement(props.restConfig);
@@ -42,19 +41,25 @@ export function RestConfigurationCard (props: Props) {
     }
 
     const restConfig = props.restConfig;
-    const desc = restConfig.host && restConfig.port
-        ? restConfig.host + ":" + restConfig.port
-        : (restConfig.host ? restConfig.host : "") + (restConfig.port ? restConfig.port : "");
+    const desc =
+        restConfig.host && restConfig.port
+            ? restConfig.host + ':' + restConfig.port
+            : (restConfig.host ? restConfig.host : '') + (restConfig.port ? restConfig.port : '');
     return (
-        <div className={props.selectedRestConfig?.uuid === restConfig.uuid ? "rest-config-card rest-config-card-selected" : "rest-config-card rest-config-card-unselected"} 
-             onClick={e => selectElement(e)}>
-            <div className="title">Configuration</div>
-            <div className="title">{restConfig.contextPath}</div>
-            <div className="description">{desc}</div>
-            <Button variant="link" className="delete-button"
-                    onClick={e => onDelete(e)}>
+        <div
+            className={
+                props.selectedRestConfig?.uuid === restConfig.uuid
+                    ? 'rest-config-card rest-config-card-selected'
+                    : 'rest-config-card rest-config-card-unselected'
+            }
+            onClick={(e) => selectElement(e)}
+        >
+            <div className='title'>Configuration</div>
+            <div className='title'>{restConfig.contextPath}</div>
+            <div className='description'>{desc}</div>
+            <Button variant='link' className='delete-button' onClick={(e) => onDelete(e)}>
                 {DeleteElementIcon()}
             </Button>
         </div>
-    )
+    );
 }

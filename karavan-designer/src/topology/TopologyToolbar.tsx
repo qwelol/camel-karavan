@@ -16,90 +16,92 @@
  */
 
 import * as React from 'react';
-import {
-    Button, Switch,
-    ToolbarItem, Tooltip
-} from '@patternfly/react-core';
-import PlusIcon from "@patternfly/react-icons/dist/esm/icons/plus-icon";
-import {useTopologyStore} from "./TopologyStore";
-import {shallow} from "zustand/shallow";
-
+import { Button, Switch, ToolbarItem, Tooltip } from '@patternfly/react-core';
+import PlusIcon from '@patternfly/react-icons/dist/esm/icons/plus-icon';
+import { useTopologyStore } from './TopologyStore';
+import { shallow } from 'zustand/shallow';
 
 interface Props {
-    onClickAddRoute: () => void
-    onClickAddREST: () => void
-    onClickAddKamelet: () => void
-    onClickAddBean: () => void
-    isDev?: boolean
+    onClickAddRoute: () => void;
+    onClickAddREST: () => void;
+    onClickAddKamelet: () => void;
+    onClickAddBean: () => void;
+    isDev?: boolean;
 }
 
-export function TopologyToolbar (props: Props) {
-
-    const [showGroups, setShowGroups] = useTopologyStore((s) =>
-        [s.showGroups, s.setShowGroups], shallow);
-    const isDev = props.isDev
+export function TopologyToolbar(props: Props) {
+    const [showGroups, setShowGroups] = useTopologyStore((s) => [s.showGroups, s.setShowGroups], shallow);
+    const isDev = props.isDev;
 
     return (
         <div className='topology-toolbar'>
-            <ToolbarItem className="group-switch">
-                <Tooltip content={"Show Consumer and Producer Groups"} position={"bottom-start"}>
+            <ToolbarItem className='group-switch'>
+                <Tooltip content={'Show Consumer and Producer Groups'} position={'bottom-start'}>
                     <Switch
-                        id="reversed-switch"
-                        label="Groups"
+                        id='reversed-switch'
+                        label='Groups'
                         isChecked={showGroups}
                         onChange={(_, checked) => setShowGroups(checked)}
                         isReversed
                     />
                 </Tooltip>
             </ToolbarItem>
-            <ToolbarItem align={{default:"alignRight"}}>
-                <Tooltip content={"Add Integration Route"} position={"bottom"}>
-                    <Button className="dev-action-button" size="sm"
-                            isDisabled={!isDev}
-                            variant={"primary"}
-                            icon={<PlusIcon/>}
-                            onClick={e => props.onClickAddRoute()}
+            <ToolbarItem align={{ default: 'alignRight' }}>
+                <Tooltip content={'Add Integration Route'} position={'bottom'}>
+                    <Button
+                        className='dev-action-button'
+                        size='sm'
+                        isDisabled={!isDev}
+                        variant={'primary'}
+                        icon={<PlusIcon />}
+                        onClick={(e) => props.onClickAddRoute()}
                     >
                         Route
                     </Button>
                 </Tooltip>
             </ToolbarItem>
-            <ToolbarItem align={{default:"alignRight"}}>
-                <Tooltip content={"Add REST API"} position={"bottom"}>
-                    <Button className="dev-action-button" size="sm"
-                            isDisabled={!isDev}
-                            variant={"secondary"}
-                            icon={<PlusIcon/>}
-                            onClick={e => props.onClickAddREST()}
+            <ToolbarItem align={{ default: 'alignRight' }}>
+                <Tooltip content={'Add REST API'} position={'bottom'}>
+                    <Button
+                        className='dev-action-button'
+                        size='sm'
+                        isDisabled={!isDev}
+                        variant={'secondary'}
+                        icon={<PlusIcon />}
+                        onClick={(e) => props.onClickAddREST()}
                     >
                         REST
                     </Button>
                 </Tooltip>
             </ToolbarItem>
-            <ToolbarItem align={{default:"alignRight"}}>
-                <Tooltip content={"Add Kamelet"} position={"bottom"}>
-                    <Button className="dev-action-button" size="sm"
-                            isDisabled={!isDev}
-                            variant={"secondary"}
-                            icon={<PlusIcon/>}
-                            onClick={e => props.onClickAddKamelet()}
+            <ToolbarItem align={{ default: 'alignRight' }}>
+                <Tooltip content={'Add Kamelet'} position={'bottom'}>
+                    <Button
+                        className='dev-action-button'
+                        size='sm'
+                        isDisabled={!isDev}
+                        variant={'secondary'}
+                        icon={<PlusIcon />}
+                        onClick={(e) => props.onClickAddKamelet()}
                     >
                         Kamelet
                     </Button>
                 </Tooltip>
             </ToolbarItem>
-            <ToolbarItem align={{default:"alignRight"}}>
-                <Tooltip content={"Add Bean"} position={"bottom"}>
-                    <Button className="dev-action-button" size="sm"
-                            isDisabled={!isDev}
-                            variant={"secondary"}
-                            icon={<PlusIcon/>}
-                            onClick={e => props.onClickAddBean()}
+            <ToolbarItem align={{ default: 'alignRight' }}>
+                <Tooltip content={'Add Bean'} position={'bottom'}>
+                    <Button
+                        className='dev-action-button'
+                        size='sm'
+                        isDisabled={!isDev}
+                        variant={'secondary'}
+                        icon={<PlusIcon />}
+                        onClick={(e) => props.onClickAddBean()}
                     >
                         Bean
                     </Button>
                 </Tooltip>
             </ToolbarItem>
         </div>
-    )
+    );
 }

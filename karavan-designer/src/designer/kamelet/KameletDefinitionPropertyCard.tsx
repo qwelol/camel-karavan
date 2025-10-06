@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
     Button,
     Card,
@@ -34,22 +34,21 @@ import {
 } from '@patternfly/react-core';
 import '../karavan.css';
 import './kamelet.css';
-import {useIntegrationStore} from "../DesignerStore";
-import {shallow} from "zustand/shallow";
-import {DefinitionProperty} from "karavan-core/lib/model/IntegrationDefinition";
-import {CamelUtil} from "karavan-core/lib/api/CamelUtil";
-import AddIcon from "@patternfly/react-icons/dist/js/icons/plus-circle-icon";
+import { useIntegrationStore } from '../DesignerStore';
+import { shallow } from 'zustand/shallow';
+import { DefinitionProperty } from 'karavan-core/lib/model/IntegrationDefinition';
+import { CamelUtil } from 'karavan-core/lib/api/CamelUtil';
+import AddIcon from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import { KameletInput } from './KameletInput';
 
 interface Props {
-    index: number
-    propKey: string
-    property: DefinitionProperty
+    index: number;
+    propKey: string;
+    property: DefinitionProperty;
 }
 
 export function KameletDefinitionPropertyCard(props: Props) {
-
-    const [integration, setIntegration] = useIntegrationStore((s) => [s.integration, s.setIntegration], shallow)
+    const [integration, setIntegration] = useIntegrationStore((s) => [s.integration, s.setIntegration], shallow);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<boolean>(false);
 
     const key = props.propKey;
@@ -70,38 +69,63 @@ export function KameletDefinitionPropertyCard(props: Props) {
         return undefined;
     }
 
-
-    function getPropertyField(field: string, label: string, isRequired: boolean, span: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12) {
-       return (<KameletInput elementKey={key + field} label={label} span={span} value={getPropertyValue(field)} setValue={(value: string) => setPropertyValue(field, value)} type='text' isRequired={isRequired}/>);
+    function getPropertyField(
+        field: string,
+        label: string,
+        isRequired: boolean,
+        span: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
+    ) {
+        return (
+            <KameletInput
+                elementKey={key + field}
+                label={label}
+                span={span}
+                value={getPropertyValue(field)}
+                setValue={(value: string) => setPropertyValue(field, value)}
+                type='text'
+                isRequired={isRequired}
+            />
+        );
     }
 
-    function getPropertyTypeField(field: string, label: string, isRequired: boolean, span: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12) {
+    function getPropertyTypeField(
+        field: string,
+        label: string,
+        isRequired: boolean,
+        span: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
+    ) {
         return (
             <GridItem span={span}>
                 <FormGroup label={label} fieldId={key + field} isRequired={isRequired}>
                     <FormSelect
                         value={getPropertyValue(field)}
                         onChange={(_, value) => setPropertyValue(field, value)}
-                        aria-label="FormSelect Input"
-                        ouiaId="BasicFormSelect"
+                        aria-label='FormSelect Input'
+                        ouiaId='BasicFormSelect'
                     >
                         {['string', 'number', 'integer', 'boolean'].map((option, index) => (
-                            <FormSelectOption key={option} isDisabled={false} id={key + field} name={key + field}
-                                              value={option} label={option}/>
+                            <FormSelectOption
+                                key={option}
+                                isDisabled={false}
+                                id={key + field}
+                                name={key + field}
+                                value={option}
+                                label={option}
+                            />
                         ))}
                     </FormSelect>
                 </FormGroup>
             </GridItem>
-        )
+        );
     }
 
     function sortEnum(source: string, dest: string) {
         const i = CamelUtil.cloneIntegration(integration);
         if (i.spec.definition && integration.spec.definition?.properties[key]) {
-            const enums: string [] = i.spec.definition.properties[key].enum;
+            const enums: string[] = i.spec.definition.properties[key].enum;
             if (enums && Array.isArray(enums)) {
-                const from = enums.findIndex(e => source);
-                const to = enums.findIndex(e => dest);
+                const from = enums.findIndex((e) => source);
+                const to = enums.findIndex((e) => dest);
                 if (from > -1 && to > -1) {
                     [enums[from], enums[to]] = [enums[to], enums[from]];
                     i.spec.definition.properties[key].enum = enums;
@@ -114,9 +138,9 @@ export function KameletDefinitionPropertyCard(props: Props) {
     function addEnum() {
         const i = CamelUtil.cloneIntegration(integration);
         if (i.spec.definition && integration.spec.definition?.properties[key]) {
-            let enums: string [] = i.spec.definition.properties[key].enum;
+            let enums: string[] = i.spec.definition.properties[key].enum;
             if (enums && Array.isArray(enums)) {
-                enums.push("enum")
+                enums.push('enum');
             } else {
                 enums = ['enum'];
             }
@@ -130,7 +154,10 @@ export function KameletDefinitionPropertyCard(props: Props) {
         const i = CamelUtil.cloneIntegration(integration);
         if (enumVal && Array.isArray(enumVal) && i.spec.definition) {
             const enums: string[] = [...enumVal];
-            setPropertyValue('enum', enums.filter(e => e !== val));
+            setPropertyValue(
+                'enum',
+                enums.filter((e) => e !== val),
+            );
         }
     }
 
@@ -144,7 +171,12 @@ export function KameletDefinitionPropertyCard(props: Props) {
         }
     }
 
-    function getPropertyEnumField(field: string, label: string, isRequired: boolean, span: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12) {
+    function getPropertyEnumField(
+        field: string,
+        label: string,
+        isRequired: boolean,
+        span: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
+    ) {
         const enumVal = getPropertyValue(field);
         return (
             <GridItem span={span}>
@@ -154,38 +186,42 @@ export function KameletDefinitionPropertyCard(props: Props) {
                         numLabels={enumVal?.length || 0}
                         isEditable
                         addLabelControl={
-                            <Button variant="link" icon={<AddIcon/>} onClick={event => addEnum()}>
+                            <Button variant='link' icon={<AddIcon />} onClick={(event) => addEnum()}>
                                 Add
                             </Button>
                         }
                     >
-                        {enumVal && enumVal.map((val: string, index: number) => (
-                            <Label
-                                key={val}
-                                id={val}
-                                color="grey"
-                                isEditable
-                                onClose={() => deleteEnum(val)}
-                                onEditCancel={(_event, prevText) => {}}
-                                onEditComplete={(event, newText) => {
-                                    if (event.type === 'mousedown') {
-                                        renameEnum(index, val)
-                                    } else if (event.type === 'keydown' && (event as KeyboardEvent).key === 'Tab') {
-                                        renameEnum(index, newText)
-                                    } else if (event.type === 'keydown' && (event as KeyboardEvent).key === 'Enter') {
-                                        renameEnum(index, newText)
-                                    } else {
-                                        renameEnum(index, val)
-                                    }
-                                }}
-                            >
-                                {val}
-                            </Label>
-                        ))}
+                        {enumVal &&
+                            enumVal.map((val: string, index: number) => (
+                                <Label
+                                    key={val}
+                                    id={val}
+                                    color='grey'
+                                    isEditable
+                                    onClose={() => deleteEnum(val)}
+                                    onEditCancel={(_event, prevText) => {}}
+                                    onEditComplete={(event, newText) => {
+                                        if (event.type === 'mousedown') {
+                                            renameEnum(index, val);
+                                        } else if (event.type === 'keydown' && (event as KeyboardEvent).key === 'Tab') {
+                                            renameEnum(index, newText);
+                                        } else if (
+                                            event.type === 'keydown' &&
+                                            (event as KeyboardEvent).key === 'Enter'
+                                        ) {
+                                            renameEnum(index, newText);
+                                        } else {
+                                            renameEnum(index, val);
+                                        }
+                                    }}
+                                >
+                                    {val}
+                                </Label>
+                            ))}
                     </LabelGroup>
                 </FormGroup>
             </GridItem>
-        )
+        );
     }
 
     function renameProperty(newKey: string) {
@@ -193,15 +229,15 @@ export function KameletDefinitionPropertyCard(props: Props) {
         newKey = newKey.replace(/[\W_]+/g, '');
         if (oldKey !== newKey) {
             if (integration.spec.definition?.properties) {
-                const o = (integration.spec.definition?.properties as any)
+                const o = integration.spec.definition?.properties as any;
                 const newObject: any = {};
-                Object.keys(o).forEach(k => {
+                Object.keys(o).forEach((k) => {
                     if (k !== oldKey) {
                         newObject[k] = o[k];
                     } else {
                         newObject[newKey] = o[k];
                     }
-                })
+                });
                 integration.spec.definition.properties = newObject;
                 setIntegration(integration, true);
             }
@@ -216,21 +252,25 @@ export function KameletDefinitionPropertyCard(props: Props) {
     }
 
     function getDeleteConfirmation() {
-        return (<Modal
-            className="modal-delete"
-            title="Confirmation"
-            isOpen={showDeleteConfirmation}
-            onClose={() => setShowDeleteConfirmation(false)}
-            actions={[
-                <Button key="confirm" variant="primary" onClick={e => deleteProperty()}>Delete</Button>,
-                <Button key="cancel" variant="link"
-                        onClick={e => setShowDeleteConfirmation(false)}>Cancel</Button>
-            ]}
-            onEscapePress={e => setShowDeleteConfirmation(false)}>
-            <div>
-                Delete {key} property?
-            </div>
-        </Modal>)
+        return (
+            <Modal
+                className='modal-delete'
+                title='Confirmation'
+                isOpen={showDeleteConfirmation}
+                onClose={() => setShowDeleteConfirmation(false)}
+                actions={[
+                    <Button key='confirm' variant='primary' onClick={(e) => deleteProperty()}>
+                        Delete
+                    </Button>,
+                    <Button key='cancel' variant='link' onClick={(e) => setShowDeleteConfirmation(false)}>
+                        Cancel
+                    </Button>,
+                ]}
+                onEscapePress={(e) => setShowDeleteConfirmation(false)}
+            >
+                <div>Delete {key} property?</div>
+            </Modal>
+        );
     }
 
     function setRequired(checked: boolean) {
@@ -238,12 +278,12 @@ export function KameletDefinitionPropertyCard(props: Props) {
         if (checked && !newRequired.includes(key)) {
             newRequired.push(key);
         } else if (!checked && newRequired.includes(key)) {
-            const index = newRequired.findIndex(r => r === key);
+            const index = newRequired.findIndex((r) => r === key);
             newRequired.splice(index, 1);
         }
         if (integration.spec.definition?.required) {
             integration.spec.definition.required.length = 0;
-            integration.spec.definition.required.push(...newRequired)
+            integration.spec.definition.required.push(...newRequired);
         }
         setIntegration(integration, true);
     }
@@ -253,64 +293,60 @@ export function KameletDefinitionPropertyCard(props: Props) {
             <Flex>
                 <FlexItem>
                     <Label
-                        color="blue"
+                        color='blue'
                         onClose={() => {
                             setShowDeleteConfirmation(true);
                         }}
-                        closeBtnAriaLabel="Delete Property"
-                        onEditCancel={(_, previousText) => {
-                        }}
+                        closeBtnAriaLabel='Delete Property'
+                        onEditCancel={(_, previousText) => {}}
                         onEditComplete={(event, newText) => {
                             if (event.type === 'mousedown') {
-                                renameProperty(newText)
+                                renameProperty(newText);
                             } else if (event.type === 'keydown' && (event as KeyboardEvent).key === 'Tab') {
-                                renameProperty(newText)
+                                renameProperty(newText);
                             } else if (event.type === 'keydown' && (event as KeyboardEvent).key === 'Enter') {
-                                renameProperty(newText)
+                                renameProperty(newText);
                             } else {
-                                renameProperty(key)
+                                renameProperty(key);
                             }
                         }}
                         isEditable
                         editableProps={{
                             'aria-label': `Editable property with text ${key}`,
-                            id: 'editable-property'
+                            id: 'editable-property',
                         }}
                     >
                         {key}
                     </Label>
                 </FlexItem>
-                <FlexItem align={{default: "alignRight"}}>
+                <FlexItem align={{ default: 'alignRight' }}>
                     <Switch
-                        label={"Required"}
+                        label={'Required'}
                         isChecked={required.includes(key)}
                         onChange={(_, checked) => setRequired(checked)}
                         isReversed
                     />
                 </FlexItem>
             </Flex>
-        )
+        );
     }
 
-
     return (
-        <Card isClickable isCompact isFlat ouiaId="PropertyCard" className="property-card">
-            <CardTitle>
-                {getTitle()}
-            </CardTitle>
+        <Card isClickable isCompact isFlat ouiaId='PropertyCard' className='property-card'>
+            <CardTitle>{getTitle()}</CardTitle>
             <CardBody>
                 <Grid hasGutter>
-                    {getPropertyField("title", "Title", true, 3)}
-                    {getPropertyField("description", "Description", true, 6)}
-                    {getPropertyTypeField("type", "Type", true, 3)}
-                    {getPropertyField("format", "Format", false, 3)}
-                    {getPropertyField("example", "Example", false, 6)}
-                    {getPropertyField("default", "Default", false, 3)}
-                    {getPropertyValue('type') === 'string' && getPropertyEnumField("enum", "Enum", true, 12)}
+                    {getPropertyField('title', 'Title', true, 3)}
+                    {getPropertyField('description', 'Description', true, 6)}
+                    {getPropertyTypeField('type', 'Type', true, 3)}
+                    {getPropertyField('format', 'Format', false, 3)}
+                    {getPropertyField('example', 'Example', false, 6)}
+                    {getPropertyField('default', 'Default', false, 3)}
+                    {getPropertyValue('type') === 'string' && getPropertyEnumField('enum', 'Enum', true, 12)}
                     {/*{getPropertyField("x-descriptors", "Descriptors", false, 12)}*/}
                 </Grid>
             </CardBody>
             {getDeleteConfirmation()}
         </Card>
-    )
+    );
 }

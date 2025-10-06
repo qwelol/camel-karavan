@@ -1481,5 +1481,5 @@ export const MediaTypes: string[] = [
     'application/yin+xml',
     'application/zip',
     'application/zlib',
-    'application/zstd'
+    'application/zstd',
 ];
