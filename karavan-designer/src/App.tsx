@@ -31,7 +31,6 @@ import {
 import {KameletApi} from "karavan-core/lib/api/KameletApi";
 import {ComponentApi} from "karavan-core/lib/api/ComponentApi";
 import {BlueprintIcon} from "@patternfly/react-icons";
-import KnowledgebaseIcon from "@patternfly/react-icons/dist/js/icons/book-open-icon";
 import TopologyIcon from "@patternfly/react-icons/dist/js/icons/topology-icon";
 import {KaravanIcon} from "./designer/icons/KaravanIcons";
 import './designer/karavan.css';
@@ -42,7 +41,6 @@ import {EventBus} from "./designer/utils/EventBus";
 import {TopologyTab} from "./topology/TopologyTab";
 import {useEffect, useState} from "react";
 import {IntegrationFile} from "karavan-core/lib/model/IntegrationDefinition";
-import {KnowledgebaseHome} from "./KnowledgebaseHome";
 import {SpiBeanApi} from "karavan-core/lib/api/SpiBeanApi";
 
 class MenuItem {
@@ -137,8 +135,7 @@ export function App() {
     function pageNav ()  {
         const pages: MenuItem[] = [
             new MenuItem("designer", "Designer", <BlueprintIcon/>),
-            new MenuItem("topology", "Topology", <TopologyIcon/>),
-            new MenuItem("knowledgebase", "Knowledgebase", <KnowledgebaseIcon/>),
+            new MenuItem("topology", "Topology", <TopologyIcon/>)
         ]
         return (<Flex className="nav-buttons" direction={{default: "column"}} style={{height: "100%"}}
                       spaceItems={{default: "spaceItemsNone"}}>
@@ -175,10 +172,7 @@ export function App() {
                         onSave={(filename, yaml1, propertyOnly) => save(filename, yaml1, propertyOnly)}
                         dark={dark}/>
                 )
-            case "knowledgebase":
-                return (
-                    <KnowledgebaseHome dark={dark}/>
-                )
+            
             case "topology":
                 return (
                     <TopologyTab

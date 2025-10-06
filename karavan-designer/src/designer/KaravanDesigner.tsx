@@ -36,11 +36,8 @@ import {shallow} from "zustand/shallow";
 import {getDesignerIcon} from "./icons/KaravanIcons";
 import {InfrastructureAPI} from "./utils/InfrastructureAPI";
 import {EventBus, IntegrationUpdate} from "./utils/EventBus";
-import {RestDesigner} from "./rest/RestDesigner";
-import {BeansDesigner} from "./beans/BeansDesigner";
 import {CodeEditor} from "./editor/CodeEditor";
 import BellIcon from '@patternfly/react-icons/dist/esm/icons/bell-icon';
-import {KameletDesigner} from "./kamelet/KameletDesigner";
 import {BeanFactoryDefinition} from "karavan-core/lib/model/CamelDefinition";
 import {VariableUtil} from "karavan-core/lib/api/VariableUtil";
 
@@ -54,7 +51,7 @@ interface Props {
     yaml: string
     dark: boolean
     showCodeTab: boolean
-    tab?: "routes" | "rest" | "beans" | "kamelet"
+    tab?: "routes" | "code"
     propertyPlaceholders: string[]
     beans: BeanFactoryDefinition[]
     files: IntegrationFile[]
@@ -82,14 +79,9 @@ export function KaravanDesigner(props: Props) {
             setSelectedStep(undefined);
             const i = makeIntegration(props.yaml, props.filename);
             setIntegration(i, false);
-            let designerTab = i.kind === 'Kamelet' ? 'kamelet' : props.tab;
-            if (designerTab === undefined) {
-                const counts = CamelUi.getFlowCounts(i);
-                designerTab = (counts.get('routes') || 0) > 0 ? 'routes' : designerTab;
-                designerTab = (counts.get('rest') || 0) > 0 ? 'rest' : designerTab;
-                designerTab = (counts.get('beans') || 0) > 0 ? 'beans' : designerTab;
-            }
-            setTab(designerTab || 'routes')
+            const allowedTabs = new Set(['routes', 'code']);
+            const desired = props.tab && allowedTabs.has(props.tab) ? props.tab : 'routes';
+            setTab(desired)
             reset();
             setDark(props.dark);
             setPropertyPlaceholders(props.propertyPlaceholders)
@@ -170,17 +162,11 @@ export function KaravanDesigner(props: Props) {
                           setSelectedStep(undefined);
                       }}
                       style={{width: "100%"}}>
-                    {isKamelet && <Tab eventKey='kamelet' title={getTab("Definitions", "Kamelet Definitions", "kamelet")}></Tab>}
                     <Tab eventKey='routes' title={getTab("Routes", "Integration flows", "routes")}></Tab>
-                    {!isKamelet && <Tab eventKey='rest' title={getTab("REST", "REST services", "rest")}></Tab>}
-                    <Tab eventKey='beans' title={getTab("Beans", "Beans Configuration", "beans")}></Tab>
                     {props.showCodeTab && <Tab eventKey='code' title={getTab("YAML", "YAML Code", "code", true)}></Tab>}
                 </Tabs>
             </div>
-            {tab === 'kamelet' && <KameletDesigner/>}
             {tab === 'routes' && <RouteDesigner/>}
-            {tab === 'rest' && <RestDesigner/>}
-            {tab === 'beans' && <BeansDesigner/>}
             {tab === 'code' && <CodeEditor/>}
         </PageSection>
     )
