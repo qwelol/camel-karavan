@@ -118,14 +118,12 @@ export function App() {
             }
            
         }).catch(err => {
-                console.log(err);
                 EventBus.sendAlert("Error", err.text, 'danger')
             }
         );
     });
 
     function save(filename: string, yaml: string, propertyOnly: boolean) {
-        // console.log(yaml);
     }
 
     function getSpinner() {

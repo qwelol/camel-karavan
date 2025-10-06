@@ -102,7 +102,6 @@ export function ComponentPropertyField(props: Props) {
     }, [checkChanges, textValue])
 
     function parametersChanged(parameter: string, value: string | number | boolean | any, pathParameter?: boolean, newRoute?: RouteToCreate) {
-        console.log("parametersChange", parameter, value);
         setCheckChanges(false);
         onParametersChange(parameter, value, pathParameter, newRoute);
         setSelectStatus(new Map<string, boolean>([[parameter, false]]))

@@ -97,7 +97,6 @@ export function KaravanDesigner(props: Props) {
             setBeans(props.beans)
             resetFiles(props.files)
         } catch (e: any) {
-            console.log(e)
             EventBus.sendAlert(' ' + e?.name, '' + e?.message, 'danger');
         }
         return () => {

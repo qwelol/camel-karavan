@@ -480,7 +480,7 @@ export function DslPropertyField(props: Props) {
                 setCustomCode(value);
                 setShowEditor(true);
             }
-        }).catch((reason: any) => console.log(reason))
+        }).catch((reason: any) => {})
     }
 
     function getJavaTypeGeneratedInput(property: PropertyMeta, value: any) {
@@ -506,42 +506,6 @@ export function DslPropertyField(props: Props) {
                 value={value?.toString()}
                 onChange={(name, value) => propertyChanged(property.name, value)}
             />
-            // <InputGroup>
-            //     <InputGroupItem isFill>
-            //         <TextInput
-            //             ref={ref}
-            //             className="text-field" isRequired
-            //             type="text"
-            //             id={property.name} name={property.name}
-            //             value={value?.toString()}
-            //             onChange={(_, value) => {
-            //                 propertyChanged(property.name, CamelUtil.capitalizeName(value?.replace(/\s/g, '')))
-            //             }}
-            //             readOnlyVariant={isUriReadOnly(property) ? "default" : undefined}/>
-            //     </InputGroupItem>
-            //     <InputGroupItem>
-            //         <Tooltip position="bottom-end" content={"Create Java Class"}>
-            //             <Button isDisabled={value?.length === 0} variant="control"
-            //                     onClick={e => showCode(value, property.javaType)}>
-            //                 <PlusIcon/>
-            //             </Button>
-            //         </Tooltip>
-            //     </InputGroupItem>
-            //     {showEditor && <InputGroupItem>
-            //         <ExpressionModalEditor name={property.name}
-            //                                customCode={customCode}
-            //                                showEditor={showEditor}
-            //                                dark={dark}
-            //                                dslLanguage={dslLanguage}
-            //                                title="Java Class"
-            //                                onClose={() => setShowEditor(false)}
-            //                                onSave={(fieldId, value1) => {
-            //                                    propertyChanged(fieldId, value);
-            //                                    InfrastructureAPI.onSaveCustomCode?.(value, value1);
-            //                                    setShowEditor(false)
-            //                                }}/>
-            //     </InputGroupItem>}
-            // </InputGroup>
         )
     }
 

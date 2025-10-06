@@ -109,9 +109,6 @@ export function SelectField(props: Props) {
     };
 
     const selectOption = (value: string | number, content: string | number) => {
-        // eslint-disable-next-line no-console
-        console.log('selected', content);
-
         setInputValue(String(content));
         setFilterValue('');
         setSelected(String(value));
@@ -121,7 +118,6 @@ export function SelectField(props: Props) {
 
     const onSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
         let initialSelectOptions = props.selectOptions;
-        console.log("onselect", value)
         if (value) {
             if (value === CREATE_NEW) {
                 if (!initialSelectOptions.some((item) => item.children === filterValue)) {

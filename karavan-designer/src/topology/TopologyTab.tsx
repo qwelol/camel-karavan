@@ -87,9 +87,6 @@ export function TopologyTab(props: Props) {
         newController.registerComponentFactory(customComponentFactory);
 
         newController.addEventListener(SELECTION_EVENT, args => setTopologySelected(model, args));
-        // newController.addEventListener(SELECTION_EVENT, args => {
-        //     console.log(args)
-        // });
         newController.addEventListener(GRAPH_LAYOUT_END_EVENT, () => {
             newController.getGraph().fit(80);
         });
@@ -105,21 +102,6 @@ export function TopologyTab(props: Props) {
     }, [ranker, controller, setSelectedIds, props.files, showGroups]);
 
     const controlButtons = React.useMemo(() => {
-        // const customButtons = [
-        //     {
-        //         id: "change-ranker",
-        //         icon: <RankerIcon />,
-        //         tooltip: 'Change Ranker ' + ranker,
-        //         ariaLabel: '',
-        //         callback: (id: any) => {
-        //             if (ranker === 'network-simplex') {
-        //                 setRanker('tight-tree')
-        //             } else {
-        //                 setRanker('network-simplex')
-        //             }
-        //         }
-        //     }
-        // ];
         return createTopologyControlButtons({
             ...defaultControlButtonsOptions,
             zoomInCallback: action(() => {
@@ -136,7 +118,6 @@ export function TopologyTab(props: Props) {
                 controller.getGraph().layout();
             }),
             legend: false,
-            // customButtons,
         });
     }, [ranker, controller, setRanker]);
 

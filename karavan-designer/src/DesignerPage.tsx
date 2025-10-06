@@ -69,18 +69,14 @@ export const DesignerPage = (props: Props) => {
                 onGetCustomCode={name => {
                     return new Promise<string | undefined>(resolve => resolve(undefined))
                 }}
-                onSaveCustomCode={(name1, code) => {
-                    console.log(name1, code)
-                }}
+                onSaveCustomCode={(name1, code) => {}}
                 propertyPlaceholders={[
                     // "timer.delay",
                     // "sql.query"
                 ]}
-                onSavePropertyPlaceholder={(key, value) => console.log("onSavePropertyPlaceholder", key, value)}
+                onSavePropertyPlaceholder={(key, value) => {}}
                 beans={[]}
-                onInternalConsumerClick={(uri, name, routeId) => {
-                    console.log("onInternalConsumerClick", uri, name, routeId)
-                }}
+                onInternalConsumerClick={(uri, name, routeId) => {}}
                 files={[new IntegrationFile("demo.camel.yaml", yaml)]}
             />
         )

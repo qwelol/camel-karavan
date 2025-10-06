@@ -137,12 +137,7 @@ export function DslConnections() {
         }
     }
 
-    // function getToDirectSteps(name: string) {
-    //     return Array.from(steps.values())
-    //         .filter(s => s.step.dslName === 'ToDefinition')
-    //         .filter(s =>  NAV_COMPONENTS.includes((s.step as any)?.uri))
-    //         .filter(s =>  (s.step as any)?.parameters?.name === name)
-    // }
+    
 
     function getIncomingIcons(data: [string, number, 'internal' | 'remote' | 'nav' | 'poll']) {
         const pos = steps.get(data[0]);
@@ -421,9 +416,6 @@ export function DslConnections() {
             !['MulticastDefinition', 'LoadBalanceDefinition'].includes(pos.parent?.dslName))) {
             const next = steps.get(pos.nextstep.uuid);
             if (next && !isSpecial(next) && next.inSteps) {
-                // console.log(pos)
-                // const to = steps.get(parent.nextstep.uuid);
-                // list.push(...addArrowToList(list, pos, to, true, true))
             }
         }
 
