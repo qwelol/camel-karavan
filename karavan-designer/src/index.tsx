@@ -19,11 +19,14 @@ import './index.css';
 import '@patternfly/patternfly/patternfly.css';
 import App from './App';
 import { createRoot } from 'react-dom/client';
+import NiceModal from '@ebay/nice-modal-react';
 
 const container = document.getElementById('root');
 const root = createRoot(container!);
 root.render(
     <StrictMode>
-        <App />
+        <NiceModal.Provider>
+            <App />
+        </NiceModal.Provider>
     </StrictMode>,
 );

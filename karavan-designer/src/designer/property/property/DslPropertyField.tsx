@@ -58,13 +58,13 @@ import { CamelDefinitionApi } from 'karavan-core/lib/api/CamelDefinitionApi';
 import AddIcon from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import { MediaTypes } from '../../utils/MediaTypes';
 import { ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
-import { InfrastructureSelector } from './InfrastructureSelector';
 import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
 import EditorIcon from '@patternfly/react-icons/dist/js/icons/code-icon';
-import { ExpressionModalEditor } from '../../../expression/ExpressionModalEditor';
 import DockerIcon from '@patternfly/react-icons/dist/js/icons/docker-icon';
 import { useDesignerStore, useIntegrationStore } from '../../DesignerStore';
 import { shallow } from 'zustand/shallow';
+import NiceModal from '@ebay/nice-modal-react';
+import { InfrastructureModal, ExpressionModal } from '../../utils/modals';
 import {
     DataFormatDefinition,
     ExpressionDefinition,
@@ -106,7 +106,7 @@ export function DslPropertyField(props: Props) {
         (s) => [s.integration, s.setIntegration, s.addVariable, s.files],
         shallow,
     );
-    const [dark, setSelectedStep, beans] = useDesignerStore((s) => [s.dark, s.setSelectedStep, s.beans], shallow);
+    const [setSelectedStep, beans] = useDesignerStore((s) => [s.setSelectedStep, s.beans], shallow);
     const [propertyFilter, changedOnly, requiredOnly] = usePropertiesStore(
         (s) => [s.propertyFilter, s.changedOnly, s.requiredOnly],
         shallow,
@@ -115,9 +115,6 @@ export function DslPropertyField(props: Props) {
     const [isShowAdvanced, setIsShowAdvanced] = useState<string[]>([]);
     const [arrayValues, setArrayValues] = useState<Map<string, string>>(new Map<string, string>());
     const [selectStatus, setSelectStatus] = useState<Map<string, boolean>>(new Map<string, boolean>());
-    const [showEditor, setShowEditor] = useState<boolean>(false);
-    const [infrastructureSelector, setInfrastructureSelector] = useState<boolean>(false);
-    const [infrastructureSelectorProperty, setInfrastructureSelectorProperty] = useState<string | undefined>(undefined);
     const ref = useRef<any>(null);
     const [variableType, setVariableType] = useState<'global:' | 'route:' | ''>('');
 
@@ -252,7 +249,7 @@ export function DslPropertyField(props: Props) {
         );
     }
 
-    function selectInfrastructure(value: string) {
+    function selectInfrastructure(propertyName: string, value: string) {
         // check if there is a selection
         const textVal = ref.current;
         if (textVal != null) {
@@ -263,34 +260,9 @@ export function DslPropertyField(props: Props) {
                 const selectedText = prevValue.substring(cursorStart, cursorEnd);
                 value = prevValue.replace(selectedText, value);
             }
-            const propertyName = infrastructureSelectorProperty;
-            if (propertyName) {
-                if (value.startsWith('config') || value.startsWith('secret')) value = '{{' + value + '}}';
-                propertyChanged(propertyName, value);
-                setInfrastructureSelector(false);
-                setInfrastructureSelectorProperty(undefined);
-            }
         }
-    }
-
-    function openInfrastructureSelector(propertyName: string) {
-        setInfrastructureSelector(true);
-        setInfrastructureSelectorProperty(propertyName);
-    }
-
-    function closeInfrastructureSelector() {
-        setInfrastructureSelector(false);
-    }
-
-    function getInfrastructureSelectorModal() {
-        return (
-            <InfrastructureSelector
-                dark={false}
-                isOpen={infrastructureSelector}
-                onClose={() => closeInfrastructureSelector()}
-                onSelect={selectInfrastructure}
-            />
-        );
+        if (value.startsWith('config') || value.startsWith('secret')) value = '{{' + value + '}}';
+        propertyChanged(propertyName, value);
     }
 
     function getVariableInput(property: PropertyMeta) {
@@ -418,67 +390,66 @@ export function DslPropertyField(props: Props) {
             !uriReadOnly && !isNumber && !property.secret && !['id', 'description'].includes(property.name);
         return (
             <InputGroup>
-                {inInfrastructure && !showEditor && !noInfraSelectorButton && (
+                {inInfrastructure && !noInfraSelectorButton && (
                     <InputGroupItem>
                         <Tooltip
                             position='bottom-end'
                             content={'Select from ' + capitalize(InfrastructureAPI.infrastructure)}
                         >
-                            <Button variant='control' onClick={(_e) => openInfrastructureSelector(property.name)}>
+                            <Button
+                                variant='control'
+                                onClick={async () => {
+                                    const value = await NiceModal.show(InfrastructureModal, {});
+                                    if (typeof value === 'string') {
+                                        selectInfrastructure(property.name, value);
+                                    }
+                                }}
+                            >
                                 {icon}
                             </Button>
                         </Tooltip>
                     </InputGroupItem>
                 )}
-                {(!showEditor || property.secret) && (
-                    <DebouncedTextInput
-                        ref={ref}
-                        className='text-field'
-                        isRequired
-                        type={property.secret ? 'password' : 'text'}
-                        autoComplete='off'
-                        id={property.name}
-                        name={property.name}
-                        value={value}
-                        customIcon={
-                            property.type !== 'string' ? (
-                                <Text component={TextVariants.p}>{property.type}</Text>
-                            ) : undefined
+                <DebouncedTextInput
+                    ref={ref}
+                    className='text-field'
+                    isRequired
+                    type={property.secret ? 'password' : 'text'}
+                    autoComplete='off'
+                    id={property.name}
+                    name={property.name}
+                    value={value}
+                    customIcon={
+                        property.type !== 'string' ? <Text component={TextVariants.p}>{property.type}</Text> : undefined
+                    }
+                    onChange={(_, v) => {
+                        if (isNumber && isNumeric(v)) {
+                            propertyChanged(property.name, Number(v));
+                        } else if (!isNumber) {
+                            propertyChanged(property.name, v);
                         }
-                        onChange={(_, v) => {
-                            if (isNumber && isNumeric(v)) {
-                                propertyChanged(property.name, Number(v));
-                            } else if (!isNumber) {
-                                propertyChanged(property.name, v);
-                            }
-                        }}
-                        readOnlyVariant={uriReadOnly ? 'default' : undefined}
-                    />
-                )}
+                    }}
+                    readOnlyVariant={uriReadOnly ? 'default' : undefined}
+                />
                 {showEditorButton && (
                     <InputGroupItem>
                         <Tooltip position='bottom-end' content={'Show Editor'}>
-                            <Button variant='control' onClick={(_e) => setShowEditor(!showEditor)}>
+                            <Button
+                                variant='control'
+                                onClick={async () => {
+                                    const result = await NiceModal.show(ExpressionModal, {
+                                        name: property.name,
+                                        value: value,
+                                        title: property.displayName,
+                                    });
+                                    if (result && typeof result === 'object' && 'value' in result) {
+                                        propertyChanged(property.name, (result as any).value);
+                                    }
+                                }}
+                            >
                                 <EditorIcon />
                             </Button>
                         </Tooltip>
-                    </InputGroupItem>
-                )}
-                {showEditor && (
-                    <InputGroupItem>
-                        <ExpressionModalEditor
-                            name={property.name}
-                            customCode={value}
-                            showEditor={showEditor}
-                            dark={dark}
-                            dslLanguage={undefined}
-                            title={property.displayName}
-                            onClose={() => setShowEditor(false)}
-                            onSave={(fieldId, value1) => {
-                                propertyChanged(property.name, value1);
-                                setShowEditor(false);
-                            }}
-                        />
                     </InputGroupItem>
                 )}
                 <InputGroupItem>
@@ -544,28 +515,24 @@ export function DslPropertyField(props: Props) {
                 </InputGroupItem>
                 <InputGroupItem>
                     <Tooltip position='bottom-end' content={'Show Editor'}>
-                        <Button variant='control' onClick={(_e) => setShowEditor(!showEditor)}>
+                        <Button
+                            variant='control'
+                            onClick={async () => {
+                                const result = await NiceModal.show(ExpressionModal, {
+                                    name: property.name,
+                                    value: value,
+                                    title: `Expression (${dslLanguage?.[0]})`,
+                                    dslLanguage: dslLanguage,
+                                });
+                                if (result && typeof result === 'object' && 'value' in result) {
+                                    propertyChanged(property.name, (result as any).value);
+                                }
+                            }}
+                        >
                             <EditorIcon />
                         </Button>
                     </Tooltip>
                 </InputGroupItem>
-                {showEditor && (
-                    <InputGroupItem>
-                        <ExpressionModalEditor
-                            name={property.name}
-                            customCode={value}
-                            showEditor={showEditor}
-                            dark={dark}
-                            dslLanguage={dslLanguage}
-                            title={`Expression (${dslLanguage?.[0]})`}
-                            onClose={() => setShowEditor(false)}
-                            onSave={(fieldId, value1) => {
-                                propertyChanged(fieldId, value1);
-                                setShowEditor(false);
-                            }}
-                        />
-                    </InputGroupItem>
-                )}
             </InputGroup>
         );
     }
@@ -1230,7 +1197,6 @@ export function DslPropertyField(props: Props) {
                 {beanConstructors && getBeanProperties('constructors')}
                 {beanProperties && getBeanProperties('properties')}
             </FormGroup>
-            {getInfrastructureSelectorModal()}
         </div>
     );
 }

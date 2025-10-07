@@ -31,7 +31,6 @@ import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
 import HelpIcon from '@patternfly/react-icons/dist/js/icons/help-icon';
 import { Property } from 'karavan-core/lib/model/KameletModels';
-import { InfrastructureSelector } from './InfrastructureSelector';
 import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
 import ShowIcon from '@patternfly/react-icons/dist/js/icons/eye-icon';
 import HideIcon from '@patternfly/react-icons/dist/js/icons/eye-slash-icon';
@@ -41,10 +40,9 @@ import { Select, SelectDirection, SelectOption, SelectVariant } from '@patternfl
 import { KubernetesIcon } from '../../icons/ComponentIcons';
 import { PropertyPlaceholderDropdown } from './PropertyPlaceholderDropdown';
 import EditorIcon from '@patternfly/react-icons/dist/js/icons/code-icon';
-import { ExpressionModalEditor } from '../../../expression/ExpressionModalEditor';
-import { useDesignerStore } from '../../DesignerStore';
-import { shallow } from 'zustand/shallow';
 import { DebouncedTextInput } from '../../utils/components';
+import NiceModal from '@ebay/nice-modal-react';
+import { InfrastructureModal, ExpressionModal } from '../../utils/modals';
 
 interface Props {
     property: Property;
@@ -55,11 +53,7 @@ interface Props {
 export function KameletPropertyField(props: Props) {
     const { onParametersChange } = usePropertiesHook();
 
-    const [dark] = useDesignerStore((s) => [s.dark], shallow);
-    const [showEditor, setShowEditor] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [infrastructureSelector, setInfrastructureSelector] = useState<boolean>(false);
-    const [infrastructureSelectorProperty, setInfrastructureSelectorProperty] = useState<string | undefined>(undefined);
     const [selectStatus, setSelectStatus] = useState<Map<string, boolean>>(new Map<string, boolean>());
     const ref = useRef<any>(null);
 
@@ -76,39 +70,20 @@ export function KameletPropertyField(props: Props) {
         return selectStatus.has(propertyName) && selectStatus.get(propertyName) === true;
     }
 
-    function selectInfrastructure(value: string) {
+    function selectInfrastructure(propertyId: string, value: string) {
         // check if there is a selection
         const textVal = ref.current;
-        const cursorStart = textVal.selectionStart;
-        const cursorEnd = textVal.selectionEnd;
-        if (cursorStart !== cursorEnd) {
-            const prevValue = props.value;
-            const selectedText = prevValue.substring(cursorStart, cursorEnd);
-            value = prevValue.replace(selectedText, value);
+        if (textVal != null) {
+            const cursorStart = textVal.selectionStart;
+            const cursorEnd = textVal.selectionEnd;
+            if (cursorStart !== cursorEnd) {
+                const prevValue = props.value;
+                const selectedText = prevValue.substring(cursorStart, cursorEnd);
+                value = prevValue.replace(selectedText, value);
+            }
         }
-        const propertyId = infrastructureSelectorProperty;
-        if (propertyId) {
-            if (value.startsWith('config') || value.startsWith('secret')) value = '{{' + value + '}}';
-            parametersChanged(propertyId, value);
-            setInfrastructureSelector(false);
-            setInfrastructureSelectorProperty(undefined);
-        }
-    }
-
-    function openInfrastructureSelector(propertyName: string) {
-        setInfrastructureSelector(true);
-        setInfrastructureSelectorProperty(propertyName);
-    }
-
-    function getInfrastructureSelectorModal() {
-        return (
-            <InfrastructureSelector
-                dark={false}
-                isOpen={infrastructureSelector}
-                onClose={() => setInfrastructureSelector(false)}
-                onSelect={selectInfrastructure}
-            />
-        );
+        if (value.startsWith('config') || value.startsWith('secret')) value = '{{' + value + '}}';
+        parametersChanged(propertyId, value);
     }
 
     function getSpecialStringInput() {
@@ -119,7 +94,7 @@ export function KameletPropertyField(props: Props) {
         const noInfraSelectorButton = ['uri', 'id', 'description', 'group'].includes(property.id);
         const icon =
             InfrastructureAPI.infrastructure === 'kubernetes' ? KubernetesIcon('infra-button') : <DockerIcon />;
-        const showInfraSelectorButton = inInfrastructure && !showEditor && !noInfraSelectorButton;
+        const showInfraSelectorButton = inInfrastructure && !noInfraSelectorButton;
         const showEditorButton = property.type === 'string' && property.format !== 'password';
         const selectFromList: boolean = property.enum !== undefined && property?.enum?.length > 0;
         const selectOptions: JSX.Element[] = [];
@@ -137,7 +112,15 @@ export function KameletPropertyField(props: Props) {
                         position='bottom-end'
                         content={'Select from ' + capitalize(InfrastructureAPI.infrastructure)}
                     >
-                        <Button variant='control' onClick={(_e) => openInfrastructureSelector(property.id)}>
+                        <Button
+                            variant='control'
+                            onClick={async () => {
+                                const value = await NiceModal.show(InfrastructureModal, {});
+                                if (typeof value === 'string') {
+                                    selectInfrastructure(property.id, value);
+                                }
+                            }}
+                        >
                             {icon}
                         </Button>
                     </Tooltip>
@@ -166,7 +149,7 @@ export function KameletPropertyField(props: Props) {
                         {selectOptions}
                     </Select>
                 )}
-                {((!selectFromList && !showEditor) || property.format === 'password') && (
+                {(!selectFromList || property.format === 'password') && (
                     <DebouncedTextInput
                         ref={ref}
                         className='text-field'
@@ -194,27 +177,22 @@ export function KameletPropertyField(props: Props) {
                 {showEditorButton && (
                     <InputGroupItem>
                         <Tooltip position='bottom-end' content={'Show Editor'}>
-                            <Button variant='control' onClick={(_e) => setShowEditor(!showEditor)}>
+                            <Button
+                                variant='control'
+                                onClick={async () => {
+                                    const result = await NiceModal.show(ExpressionModal, {
+                                        name: property.id,
+                                        value: value,
+                                        title: property.title,
+                                    });
+                                    if (result && typeof result === 'object' && 'value' in result) {
+                                        parametersChanged(property.id, (result as any).value);
+                                    }
+                                }}
+                            >
                                 <EditorIcon />
                             </Button>
                         </Tooltip>
-                    </InputGroupItem>
-                )}
-                {showEditor && (
-                    <InputGroupItem>
-                        <ExpressionModalEditor
-                            name={property.id}
-                            customCode={value}
-                            showEditor={showEditor}
-                            dark={dark}
-                            dslLanguage={undefined}
-                            title={property.title}
-                            onClose={() => setShowEditor(false)}
-                            onSave={(fieldId, value1) => {
-                                parametersChanged(property.id, value1);
-                                setShowEditor(false);
-                            }}
-                        />
                     </InputGroupItem>
                 )}
                 <InputGroupItem>
@@ -309,7 +287,6 @@ export function KameletPropertyField(props: Props) {
                     />
                 )}
             </FormGroup>
-            {getInfrastructureSelectorModal()}
         </div>
     );
 }

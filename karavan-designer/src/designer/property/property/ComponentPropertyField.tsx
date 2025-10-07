@@ -36,7 +36,6 @@ import { ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
 import { CamelUi, RouteToCreate } from '../../utils/CamelUi';
 import { CamelElement } from 'karavan-core/lib/model/IntegrationDefinition';
 import { ToDefinition } from 'karavan-core/lib/model/CamelDefinition';
-import { InfrastructureSelector } from './InfrastructureSelector';
 import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
 import DockerIcon from '@patternfly/react-icons/dist/js/icons/docker-icon';
 import ShowIcon from '@patternfly/react-icons/dist/js/icons/eye-icon';
@@ -47,11 +46,12 @@ import { useDesignerStore, useIntegrationStore } from '../../DesignerStore';
 import { shallow } from 'zustand/shallow';
 import { KubernetesIcon } from '../../icons/ComponentIcons';
 import EditorIcon from '@patternfly/react-icons/dist/js/icons/code-icon';
-import { ExpressionModalEditor } from '../../../expression/ExpressionModalEditor';
 import { PropertyPlaceholderDropdown } from './PropertyPlaceholderDropdown';
 import { INTERNAL_COMPONENTS } from 'karavan-core/lib/api/ComponentApi';
 import { PropertyUtil } from './PropertyUtil';
 import { DebouncedTextInput } from '../../utils/components';
+import NiceModal from '@ebay/nice-modal-react';
+import { InfrastructureModal, ExpressionModal } from '../../utils/modals';
 
 const prefix = 'parameters';
 const beanPrefix = '#bean:';
@@ -72,13 +72,10 @@ export function ComponentPropertyField(props: Props) {
     const { onParametersChange, getInternalComponentName } = usePropertiesHook();
 
     const [integration, files] = useIntegrationStore((state) => [state.integration, state.files], shallow);
-    const [dark, beans] = useDesignerStore((s) => [s.dark, s.beans], shallow);
+    const [beans] = useDesignerStore((s) => [s.beans], shallow);
 
     const [selectStatus, setSelectStatus] = useState<Map<string, boolean>>(new Map<string, boolean>());
-    const [showEditor, setShowEditor] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [infrastructureSelector, setInfrastructureSelector] = useState<boolean>(false);
-    const [infrastructureSelectorProperty, setInfrastructureSelectorProperty] = useState<string | undefined>(undefined);
     const [id] = useState<string>(prefix + '-' + props.property.name);
     const ref = useRef<any>(null);
 
@@ -119,7 +116,7 @@ export function ComponentPropertyField(props: Props) {
                 onToggle={(_event, isExpanded) => {
                     openSelect(property.name, isExpanded);
                 }}
-                onSelect={(e, value, isPlaceholder) =>
+                onSelect={(_e, value, isPlaceholder) =>
                     parametersChanged(property.name, !isPlaceholder ? value : undefined)
                 }
                 selections={value}
@@ -229,39 +226,20 @@ export function ComponentPropertyField(props: Props) {
         );
     }
 
-    function selectInfrastructure(value: string) {
+    function selectInfrastructure(propertyName: string, value: string) {
         // check if there is a selection
         const textVal = ref.current;
-        const cursorStart = textVal.selectionStart;
-        const cursorEnd = textVal.selectionEnd;
-        if (cursorStart !== cursorEnd) {
-            const prevValue = props.value;
-            const selectedText = prevValue.substring(cursorStart, cursorEnd);
-            value = prevValue.replace(selectedText, value);
+        if (textVal != null) {
+            const cursorStart = textVal.selectionStart;
+            const cursorEnd = textVal.selectionEnd;
+            if (cursorStart !== cursorEnd) {
+                const prevValue = props.value;
+                const selectedText = prevValue.substring(cursorStart, cursorEnd);
+                value = prevValue.replace(selectedText, value);
+            }
         }
-        const propertyName = infrastructureSelectorProperty;
-        if (propertyName) {
-            if (value.startsWith('config') || value.startsWith('secret')) value = '{{' + value + '}}';
-            parametersChanged(propertyName, value);
-            setInfrastructureSelector(false);
-            setInfrastructureSelectorProperty(undefined);
-        }
-    }
-
-    function openInfrastructureSelector(propertyName: string) {
-        setInfrastructureSelector(true);
-        setInfrastructureSelectorProperty(propertyName);
-    }
-
-    function getInfrastructureSelectorModal() {
-        return (
-            <InfrastructureSelector
-                dark={false}
-                isOpen={infrastructureSelector}
-                onClose={() => setInfrastructureSelector(false)}
-                onSelect={selectInfrastructure}
-            />
-        );
+        if (value.startsWith('config') || value.startsWith('secret')) value = '{{' + value + '}}';
+        parametersChanged(propertyName, value);
     }
 
     function getStringInput(property: ComponentProperty) {
@@ -271,17 +249,25 @@ export function ComponentPropertyField(props: Props) {
             InfrastructureAPI.infrastructure === 'kubernetes' ? KubernetesIcon('infra-button') : <DockerIcon />;
         return (
             <InputGroup>
-                {inInfrastructure && !showEditor && !noInfraSelectorButton && (
+                {inInfrastructure && !noInfraSelectorButton && (
                     <Tooltip
                         position='bottom-end'
                         content={'Select from ' + capitalize(InfrastructureAPI.infrastructure)}
                     >
-                        <Button variant='control' onClick={(_e) => openInfrastructureSelector(property.name)}>
+                        <Button
+                            variant='control'
+                            onClick={async () => {
+                                const value = await NiceModal.show(InfrastructureModal, {});
+                                if (typeof value === 'string') {
+                                    selectInfrastructure(property.name, value);
+                                }
+                            }}
+                        >
                             {icon}
                         </Button>
                     </Tooltip>
                 )}
-                {(!showEditor || property.secret) && (
+                {property.secret && (
                     <DebouncedTextInput
                         className='text-field'
                         isRequired
@@ -299,28 +285,23 @@ export function ComponentPropertyField(props: Props) {
                 )}
                 <InputGroupItem>
                     <Tooltip position='bottom-end' content={'Show Editor'}>
-                        <Button variant='control' onClick={(_e) => setShowEditor(!showEditor)}>
+                        <Button
+                            variant='control'
+                            onClick={async () => {
+                                const result = await NiceModal.show(ExpressionModal, {
+                                    name: property.name,
+                                    value: value,
+                                    title: property.displayName,
+                                });
+                                if (result && typeof result === 'object' && 'value' in result) {
+                                    parametersChanged(property.name, (result as any).value, property.kind === 'path');
+                                }
+                            }}
+                        >
                             <EditorIcon />
                         </Button>
                     </Tooltip>
                 </InputGroupItem>
-                {showEditor && (
-                    <InputGroupItem>
-                        <ExpressionModalEditor
-                            name={property.name}
-                            customCode={value}
-                            showEditor={showEditor}
-                            dark={dark}
-                            dslLanguage={undefined}
-                            title={property.displayName}
-                            onClose={() => setShowEditor(false)}
-                            onSave={(fieldId, value1) => {
-                                parametersChanged(property.name, value1, property.kind === 'path');
-                                setShowEditor(false);
-                            }}
-                        />
-                    </InputGroupItem>
-                )}
                 {property.secret && (
                     <Tooltip position='bottom-end' content={showPassword ? 'Hide' : 'Show'}>
                         <Button variant='control' onClick={(_e) => setShowPassword(!showPassword)}>
@@ -510,7 +491,6 @@ export function ComponentPropertyField(props: Props) {
             {['object'].includes(property.type) && !property.enum && getSelectBean(property, value)}
             {['string', 'object', 'integer'].includes(property.type) && property.enum && getSelect(property, value)}
             {property.type === 'boolean' && getSwitch(property, value)}
-            {getInfrastructureSelectorModal()}
         </FormGroup>
     );
 }
