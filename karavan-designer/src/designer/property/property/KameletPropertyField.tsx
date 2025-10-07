@@ -14,10 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     FormGroup,
-    TextInput,
     Popover,
     Switch,
     InputGroup,
@@ -45,6 +44,7 @@ import EditorIcon from '@patternfly/react-icons/dist/js/icons/code-icon';
 import { ExpressionModalEditor } from '../../../expression/ExpressionModalEditor';
 import { useDesignerStore } from '../../DesignerStore';
 import { shallow } from 'zustand/shallow';
+import { DebouncedTextInput } from '../../utils/components';
 
 interface Props {
     property: Property;
@@ -62,26 +62,8 @@ export function KameletPropertyField(props: Props) {
     const [infrastructureSelectorProperty, setInfrastructureSelectorProperty] = useState<string | undefined>(undefined);
     const [selectStatus, setSelectStatus] = useState<Map<string, boolean>>(new Map<string, boolean>());
     const ref = useRef<any>(null);
-    const [textValue, setTextValue] = useState<any>();
-    const [checkChanges, setCheckChanges] = useState<boolean>(false);
-
-    useEffect(() => setTextValue(value), []);
-
-    useEffect(() => {
-        if (checkChanges) {
-            const interval = setInterval(() => {
-                if (props.value !== textValue) {
-                    onParametersChange(property.id, textValue);
-                }
-            }, 700);
-            return () => {
-                clearInterval(interval);
-            };
-        }
-    }, [checkChanges, textValue]);
 
     function parametersChanged(parameter: string, value: string | number | boolean | any, pathParameter?: boolean) {
-        setCheckChanges(false);
         onParametersChange(parameter, value, pathParameter);
         setSelectStatus(new Map<string, boolean>([[parameter, false]]));
     }
@@ -107,7 +89,6 @@ export function KameletPropertyField(props: Props) {
         const propertyId = infrastructureSelectorProperty;
         if (propertyId) {
             if (value.startsWith('config') || value.startsWith('secret')) value = '{{' + value + '}}';
-            setTextValue(value);
             parametersChanged(propertyId, value);
             setInfrastructureSelector(false);
             setInfrastructureSelectorProperty(undefined);
@@ -173,7 +154,6 @@ export function KameletPropertyField(props: Props) {
                         }}
                         onSelect={(_e, value, _isPlaceholder) => {
                             parametersChanged(property.id, value);
-                            setCheckChanges(false);
                         }}
                         selections={value}
                         isOpen={isSelectOpen(property.id)}
@@ -187,7 +167,7 @@ export function KameletPropertyField(props: Props) {
                     </Select>
                 )}
                 {((!selectFromList && !showEditor) || property.format === 'password') && (
-                    <TextInput
+                    <DebouncedTextInput
                         ref={ref}
                         className='text-field'
                         isRequired
@@ -195,23 +175,20 @@ export function KameletPropertyField(props: Props) {
                         autoComplete='off'
                         id={id}
                         name={id}
-                        value={textValue}
-                        onBlur={(_) => {
-                            if (isNumeric(textValue)) {
-                                parametersChanged(property.id, Number(textValue));
+                        value={value}
+                        onChange={(_: React.FormEvent<HTMLInputElement>, v: string) => {
+                            if (isNumeric(v)) {
+                                parametersChanged(property.id, Number(v));
                             } else {
-                                parametersChanged(property.id, textValue);
+                                parametersChanged(property.id, v);
                             }
-                        }}
-                        onChange={(_, v) => {
-                            setTextValue(v);
-                            setCheckChanges(true);
                         }}
                         customIcon={
                             property.type !== 'string' ? (
                                 <Text component={TextVariants.p}>{property.type}</Text>
                             ) : undefined
                         }
+                        debounceDelay={700}
                     />
                 )}
                 {showEditorButton && (
@@ -235,7 +212,6 @@ export function KameletPropertyField(props: Props) {
                             onClose={() => setShowEditor(false)}
                             onSave={(fieldId, value1) => {
                                 parametersChanged(property.id, value1);
-                                setTextValue(value1);
                                 setShowEditor(false);
                             }}
                         />
@@ -246,9 +222,7 @@ export function KameletPropertyField(props: Props) {
                         property={property}
                         value={value}
                         onDslPropertyChange={(_, v, _newRoute) => {
-                            setTextValue(v);
                             parametersChanged(property.id, v);
-                            setCheckChanges(true);
                         }}
                     />
                 </InputGroupItem>
@@ -323,7 +297,6 @@ export function KameletPropertyField(props: Props) {
                     </Popover>
                 }
             >
-                {/*{property.type === 'string' && getStringInput()}*/}
                 {['string', 'integer', 'int', 'number'].includes(property.type) && getSpecialStringInput()}
                 {property.type === 'boolean' && (
                     <Switch

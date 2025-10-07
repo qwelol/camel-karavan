@@ -17,11 +17,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
     FormGroup,
-    TextInput,
     Popover,
     Switch,
     ExpandableSection,
-    TextArea,
     Chip,
     TextInputGroup,
     TextInputGroupMain,
@@ -39,6 +37,7 @@ import {
     ToggleGroup,
     ToggleGroupItem,
 } from '@patternfly/react-core';
+import { DebouncedTextInput, DebouncedTextArea } from '../../utils/components';
 import { Select, SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
 import '../../karavan.css';
 import './DslPropertyField.css';
@@ -120,45 +119,21 @@ export function DslPropertyField(props: Props) {
     const [infrastructureSelector, setInfrastructureSelector] = useState<boolean>(false);
     const [infrastructureSelectorProperty, setInfrastructureSelectorProperty] = useState<string | undefined>(undefined);
     const ref = useRef<any>(null);
-    const [textValue, setTextValue] = useState<any>();
     const [variableType, setVariableType] = useState<'global:' | 'route:' | ''>('');
-    const [checkChanges, setCheckChanges] = useState<boolean>(false);
 
     useEffect(() => {
         setTextVariable(value);
     }, []);
 
-    useEffect(() => {
-        if (checkChanges) {
-            const interval = setInterval(() => {
-                if (props.value !== textValue) {
-                    if (isVariable && textValue !== undefined) {
-                        propertyChanged(property.name, variableType.concat(textValue));
-                    } else {
-                        propertyChanged(property.name, textValue);
-                    }
-                }
-            }, 700);
-            return () => {
-                clearInterval(interval);
-            };
-        }
-    }, [checkChanges, textValue]);
-
     function setTextVariable(val: any) {
         if (isVariable) {
             if (val?.toString().startsWith(GLOBAL)) {
-                setTextValue(val.toString().replace(GLOBAL, ''));
                 setVariableType(GLOBAL);
             } else if (val?.toString().startsWith(ROUTE)) {
-                setTextValue(val.toString().replace(ROUTE, ''));
                 setVariableType(ROUTE);
             } else {
                 setVariableType('');
-                setTextValue(val?.toString());
             }
-        } else {
-            setTextValue(val);
         }
     }
 
@@ -175,7 +150,6 @@ export function DslPropertyField(props: Props) {
     }
 
     function propertyChanged(fieldId: string, value: string | number | boolean | any, newRoute?: RouteToCreate) {
-        setCheckChanges(false);
         props.onPropertyChange?.(fieldId, value, newRoute);
         clearSelection(fieldId);
         if (isVariable) {
@@ -292,7 +266,6 @@ export function DslPropertyField(props: Props) {
             const propertyName = infrastructureSelectorProperty;
             if (propertyName) {
                 if (value.startsWith('config') || value.startsWith('secret')) value = '{{' + value + '}}';
-                setTextValue(value);
                 propertyChanged(propertyName, value);
                 setInfrastructureSelector(false);
                 setInfrastructureSelectorProperty(undefined);
@@ -321,6 +294,7 @@ export function DslPropertyField(props: Props) {
     }
 
     function getVariableInput(property: PropertyMeta) {
+        const variableValue = value?.toString().replace(GLOBAL, '').replace(ROUTE, '') || '';
         return (
             <InputGroup>
                 <InputGroupItem>
@@ -333,10 +307,10 @@ export function DslPropertyField(props: Props) {
                             onChange={(_, selected) => {
                                 if (selected) {
                                     setVariableType(GLOBAL);
-                                    propertyChanged(property.name, GLOBAL.concat(textValue));
+                                    propertyChanged(property.name, GLOBAL.concat(variableValue));
                                 } else {
                                     setVariableType('');
-                                    propertyChanged(property.name, textValue);
+                                    propertyChanged(property.name, variableValue);
                                 }
                             }}
                         />
@@ -349,38 +323,31 @@ export function DslPropertyField(props: Props) {
                             onChange={(_, selected) => {
                                 if (selected) {
                                     setVariableType(ROUTE);
-                                    propertyChanged(property.name, ROUTE.concat(textValue));
+                                    propertyChanged(property.name, ROUTE.concat(variableValue));
                                 } else {
                                     setVariableType('');
-                                    propertyChanged(property.name, textValue);
+                                    propertyChanged(property.name, variableValue);
                                 }
                             }}
                         />
                     </ToggleGroup>
                 </InputGroupItem>
                 <InputGroupItem isFill>
-                    <TextInput
+                    <DebouncedTextInput
                         ref={ref}
                         className='text-field route-variable'
                         isRequired
                         type='text'
                         id={property.name}
                         name={property.name}
-                        value={textValue?.toString()}
+                        value={variableValue}
                         customIcon={
                             property.type !== 'string' ? (
                                 <Text component={TextVariants.p}>{property.type}</Text>
                             ) : undefined
                         }
-                        onBlur={(_) => {
-                            if (textValue !== undefined) {
-                                propertyChanged(property.name, variableType.concat(textValue));
-                            }
-                        }}
-                        onFocus={(_) => setCheckChanges(true)}
                         onChange={(_, v) => {
-                            setTextValue(v);
-                            setCheckChanges(true);
+                            propertyChanged(property.name, variableType.concat(v));
                         }}
                     />
                 </InputGroupItem>
@@ -404,7 +371,7 @@ export function DslPropertyField(props: Props) {
         return (
             <InputGroup>
                 <InputGroupItem isFill>
-                    <TextInput
+                    <DebouncedTextInput
                         ref={ref}
                         className='text-field'
                         isRequired
@@ -412,23 +379,18 @@ export function DslPropertyField(props: Props) {
                         autoComplete='off'
                         id={property.name}
                         name={property.name}
-                        value={textValue?.toString()}
+                        value={value}
                         customIcon={
                             property.type !== 'string' ? (
                                 <Text component={TextVariants.p}>{property.type}</Text>
                             ) : undefined
                         }
-                        onBlur={(_) => {
-                            if (isNumeric(textValue)) {
-                                propertyChanged(property.name, Number(textValue));
-                            } else {
-                                propertyChanged(property.name, textValue);
-                            }
-                        }}
-                        onFocus={(_) => setCheckChanges(true)}
                         onChange={(_, v) => {
-                            setTextValue(v);
-                            setCheckChanges(true);
+                            if (isNumeric(v)) {
+                                propertyChanged(property.name, Number(v));
+                            } else {
+                                propertyChanged(property.name, v);
+                            }
                         }}
                     />
                 </InputGroupItem>
@@ -437,9 +399,7 @@ export function DslPropertyField(props: Props) {
                         property={property}
                         value={value}
                         onDslPropertyChange={(_, v, _newRoute) => {
-                            setTextValue(v);
                             propertyChanged(property.name, v);
-                            setCheckChanges(true);
                         }}
                     />
                 </InputGroupItem>
@@ -471,7 +431,7 @@ export function DslPropertyField(props: Props) {
                     </InputGroupItem>
                 )}
                 {(!showEditor || property.secret) && (
-                    <TextInput
+                    <DebouncedTextInput
                         ref={ref}
                         className='text-field'
                         isRequired
@@ -479,27 +439,17 @@ export function DslPropertyField(props: Props) {
                         autoComplete='off'
                         id={property.name}
                         name={property.name}
-                        value={textValue?.toString()}
+                        value={value}
                         customIcon={
                             property.type !== 'string' ? (
                                 <Text component={TextVariants.p}>{property.type}</Text>
                             ) : undefined
                         }
-                        onBlur={(_) => {
-                            if (isNumber && isNumeric(textValue)) {
-                                propertyChanged(property.name, Number(textValue));
-                            } else if (!isNumber) {
-                                propertyChanged(property.name, textValue);
-                            }
-                        }}
-                        onFocus={(_) => setCheckChanges(true)}
                         onChange={(_, v) => {
                             if (isNumber && isNumeric(v)) {
-                                setTextValue(v);
-                                setCheckChanges(true);
+                                propertyChanged(property.name, Number(v));
                             } else if (!isNumber) {
-                                setTextValue(v);
-                                setCheckChanges(true);
+                                propertyChanged(property.name, v);
                             }
                         }}
                         readOnlyVariant={uriReadOnly ? 'default' : undefined}
@@ -526,7 +476,6 @@ export function DslPropertyField(props: Props) {
                             onClose={() => setShowEditor(false)}
                             onSave={(fieldId, value1) => {
                                 propertyChanged(property.name, value1);
-                                setTextValue(value1);
                                 setShowEditor(false);
                             }}
                         />
@@ -537,9 +486,7 @@ export function DslPropertyField(props: Props) {
                         property={property}
                         value={value}
                         onDslPropertyChange={(_, v, _newRoute) => {
-                            setTextValue(v);
                             propertyChanged(property.name, v);
-                            setCheckChanges(true);
                         }}
                     />
                 </InputGroupItem>
@@ -582,18 +529,16 @@ export function DslPropertyField(props: Props) {
         return (
             <InputGroup>
                 <InputGroupItem isFill>
-                    <TextArea
+                    <DebouncedTextArea
                         className='text-field'
                         isRequired
                         type={'text'}
                         id={property.name}
                         name={property.name}
                         height={'100px'}
-                        value={textValue?.toString()}
-                        onBlur={(_) => propertyChanged(property.name, textValue)}
+                        value={value}
                         onChange={(_, v) => {
-                            setTextValue(v);
-                            setCheckChanges(true);
+                            propertyChanged(property.name, v);
                         }}
                     />
                 </InputGroupItem>
@@ -616,7 +561,6 @@ export function DslPropertyField(props: Props) {
                             onClose={() => setShowEditor(false)}
                             onSave={(fieldId, value1) => {
                                 propertyChanged(fieldId, value1);
-                                setTextValue(value1);
                                 setShowEditor(false);
                             }}
                         />
@@ -642,16 +586,13 @@ export function DslPropertyField(props: Props) {
         );
     }
 
-    function getBooleanInput(property: PropertyMeta) {
-        const isValueBoolean = textValue?.toString() === 'true' || textValue?.toString() === 'false';
-        const isDisabled = textValue?.toString().includes('{') || textValue?.toString().includes('}');
+    function getBooleanInput(property: PropertyMeta, value: any) {
+        const isValueBoolean = value?.toString() === 'true' || value?.toString() === 'false';
+        const isDisabled = value?.toString().includes('{') || value?.toString().includes('}');
         let isChecked = false;
-        if (textValue !== undefined && isValueBoolean) {
-            isChecked = Boolean(textValue);
-        } else if (
-            (textValue === undefined || textValue.toString().length > 0) &&
-            property.defaultValue !== undefined
-        ) {
+        if (value !== undefined && isValueBoolean) {
+            isChecked = Boolean(value);
+        } else if ((value === undefined || value.toString().length > 0) && property.defaultValue !== undefined) {
             isChecked = property.defaultValue === 'true';
         }
         return (
@@ -662,27 +603,23 @@ export function DslPropertyField(props: Props) {
                         id={property.name + '-switch'}
                         name={property.name + '-switch'}
                         className='switch-placeholder'
-                        value={textValue?.toString()}
+                        value={value?.toString()}
                         aria-label={property.name}
                         isChecked={isChecked}
                         onChange={(_, v) => {
-                            setTextValue(v);
                             propertyChanged(property.name, v);
-                            setCheckChanges(false);
                         }}
                     />
                 </InputGroupItem>
                 <InputGroupItem isFill>
-                    <TextInput
+                    <DebouncedTextInput
                         id={property.name + '-placeholder'}
                         name={property.name + '-placeholder'}
                         type='text'
                         aria-label='placeholder'
-                        value={!isValueBoolean ? textValue?.toString() : undefined}
-                        onBlur={(_) => propertyChanged(property.name, textValue)}
+                        value={!isValueBoolean ? value?.toString() : undefined}
                         onChange={(_, v) => {
-                            setTextValue(v);
-                            setCheckChanges(true);
+                            propertyChanged(property.name, v);
                         }}
                     />
                 </InputGroupItem>
@@ -691,9 +628,7 @@ export function DslPropertyField(props: Props) {
                         property={property}
                         value={value}
                         onDslPropertyChange={(_, v, newRoute) => {
-                            setTextValue(v);
                             propertyChanged(property.name, v, newRoute);
-                            setCheckChanges(false);
                         }}
                     />
                 </InputGroupItem>
@@ -1288,7 +1223,7 @@ export function DslPropertyField(props: Props) {
                     !property.enumVals &&
                     getSelectBean(property, value)}
                 {isMultiValueField(property) && getMultiValueField(property, value)}
-                {property.type === 'boolean' && getBooleanInput(property)}
+                {property.type === 'boolean' && getBooleanInput(property, value)}
                 {property.enumVals && getSelect(property, value)}
                 {isKamelet && property.name === 'parameters' && getKameletParameters()}
                 {!isKamelet && property.name === 'parameters' && getComponentParameters(property)}

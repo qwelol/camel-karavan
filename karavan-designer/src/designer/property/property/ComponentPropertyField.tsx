@@ -14,10 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     FormGroup,
-    TextInput,
     Popover,
     Switch,
     InputGroup,
@@ -52,6 +51,7 @@ import { ExpressionModalEditor } from '../../../expression/ExpressionModalEditor
 import { PropertyPlaceholderDropdown } from './PropertyPlaceholderDropdown';
 import { INTERNAL_COMPONENTS } from 'karavan-core/lib/api/ComponentApi';
 import { PropertyUtil } from './PropertyUtil';
+import { DebouncedTextInput } from '../../utils/components';
 
 const prefix = 'parameters';
 const beanPrefix = '#bean:';
@@ -80,24 +80,7 @@ export function ComponentPropertyField(props: Props) {
     const [infrastructureSelector, setInfrastructureSelector] = useState<boolean>(false);
     const [infrastructureSelectorProperty, setInfrastructureSelectorProperty] = useState<string | undefined>(undefined);
     const [id] = useState<string>(prefix + '-' + props.property.name);
-    const [textValue, setTextValue] = useState<any>();
     const ref = useRef<any>(null);
-    const [checkChanges, setCheckChanges] = useState<boolean>(false);
-
-    useEffect(() => setTextValue(value), []);
-
-    useEffect(() => {
-        if (checkChanges) {
-            const interval = setInterval(() => {
-                if (props.value !== textValue) {
-                    parametersChanged(property.name, textValue);
-                }
-            }, 700);
-            return () => {
-                clearInterval(interval);
-            };
-        }
-    }, [checkChanges, textValue]);
 
     function parametersChanged(
         parameter: string,
@@ -105,7 +88,6 @@ export function ComponentPropertyField(props: Props) {
         pathParameter?: boolean,
         newRoute?: RouteToCreate,
     ) {
-        setCheckChanges(false);
         onParametersChange(parameter, value, pathParameter, newRoute);
         setSelectStatus(new Map<string, boolean>([[parameter, false]]));
     }
@@ -260,7 +242,6 @@ export function ComponentPropertyField(props: Props) {
         const propertyName = infrastructureSelectorProperty;
         if (propertyName) {
             if (value.startsWith('config') || value.startsWith('secret')) value = '{{' + value + '}}';
-            setTextValue(value);
             parametersChanged(propertyName, value);
             setInfrastructureSelector(false);
             setInfrastructureSelectorProperty(undefined);
@@ -301,7 +282,7 @@ export function ComponentPropertyField(props: Props) {
                     </Tooltip>
                 )}
                 {(!showEditor || property.secret) && (
-                    <TextInput
+                    <DebouncedTextInput
                         className='text-field'
                         isRequired
                         ref={ref}
@@ -309,12 +290,11 @@ export function ComponentPropertyField(props: Props) {
                         autoComplete='off'
                         id={id}
                         name={id}
-                        value={textValue !== undefined ? textValue : property.defaultValue}
-                        onBlur={(_) => parametersChanged(property.name, textValue, property.kind === 'path')}
+                        value={value !== undefined ? value : property.defaultValue}
                         onChange={(_, v) => {
-                            setTextValue(v);
-                            setCheckChanges(true);
+                            parametersChanged(property.name, v, property.kind === 'path');
                         }}
+                        debounceDelay={700}
                     />
                 )}
                 <InputGroupItem>
@@ -335,10 +315,8 @@ export function ComponentPropertyField(props: Props) {
                             title={property.displayName}
                             onClose={() => setShowEditor(false)}
                             onSave={(fieldId, value1) => {
-                                setTextValue(value1);
                                 parametersChanged(property.name, value1, property.kind === 'path');
                                 setShowEditor(false);
-                                setCheckChanges(false);
                             }}
                         />
                     </InputGroupItem>
@@ -355,9 +333,7 @@ export function ComponentPropertyField(props: Props) {
                         property={property}
                         value={value}
                         onComponentPropertyChange={(parameter, v) => {
-                            onParametersChange(parameter, v);
-                            setTextValue(v);
-                            setCheckChanges(false);
+                            parametersChanged(parameter, v);
                         }}
                     />
                 </InputGroupItem>
@@ -369,30 +345,27 @@ export function ComponentPropertyField(props: Props) {
         return (
             <InputGroup>
                 <InputGroupItem isFill>
-                    <TextInput
+                    <DebouncedTextInput
                         className='text-field'
                         isRequired
                         type={property.secret ? 'password' : 'text'}
                         autoComplete='off'
                         id={id}
                         name={id}
-                        value={textValue !== undefined ? textValue : property.defaultValue}
-                        onBlur={(_) => parametersChanged(property.name, textValue, property.kind === 'path')}
+                        value={value !== undefined ? value : property.defaultValue}
                         onChange={(_, v) => {
-                            setTextValue(v);
-                            setCheckChanges(true);
+                            parametersChanged(property.name, v, property.kind === 'path');
                         }}
                         customIcon={<Text component={TextVariants.p}>{property.type}</Text>}
+                        debounceDelay={700}
                     />
                 </InputGroupItem>
                 <InputGroupItem>
                     <PropertyPlaceholderDropdown
                         property={property}
-                        value={textValue}
+                        value={value}
                         onComponentPropertyChange={(_, v) => {
-                            setTextValue(v);
-                            onParametersChange(property.name, v);
-                            setCheckChanges(true);
+                            parametersChanged(property.name, v);
                         }}
                     />
                 </InputGroupItem>
@@ -428,12 +401,12 @@ export function ComponentPropertyField(props: Props) {
         );
     }
 
-    function getSwitch(property: ComponentProperty) {
-        const isValueBoolean = textValue?.toString() === 'true' || textValue?.toString() === 'false';
-        const isDisabled = textValue?.toString().includes('{') || textValue?.toString().includes('}');
+    function getSwitch(property: ComponentProperty, value: any) {
+        const isValueBoolean = value?.toString() === 'true' || value?.toString() === 'false';
+        const isDisabled = value?.toString().includes('{') || value?.toString().includes('}');
         const isChecked =
-            textValue !== undefined
-                ? Boolean(textValue)
+            value !== undefined
+                ? Boolean(value)
                 : property.defaultValue !== undefined && ['true', true].includes(property.defaultValue);
         return (
             <TextInputGroup className='input-group'>
@@ -445,26 +418,23 @@ export function ComponentPropertyField(props: Props) {
                         className='switch-placeholder'
                         aria-label={id}
                         isChecked={isChecked}
-                        value={textValue?.toString()}
+                        value={value?.toString()}
                         onChange={(_, v) => {
-                            setTextValue(v);
                             parametersChanged(property.name, v);
-                            setCheckChanges(true);
                         }}
                     />
                 </InputGroupItem>
                 <InputGroupItem isFill>
-                    <TextInput
+                    <DebouncedTextInput
                         id={property.name + '-placeholder'}
                         name={property.name + '-placeholder'}
                         type='text'
                         aria-label='placeholder'
-                        value={!isValueBoolean ? textValue?.toString() : undefined}
-                        onBlur={(_) => onParametersChange(property.name, textValue)}
+                        value={!isValueBoolean ? value?.toString() : undefined}
                         onChange={(_, v) => {
-                            setTextValue(v);
-                            setCheckChanges(true);
+                            parametersChanged(property.name, v);
                         }}
+                        debounceDelay={700}
                     />
                 </InputGroupItem>
                 <InputGroupItem>
@@ -472,9 +442,7 @@ export function ComponentPropertyField(props: Props) {
                         property={property}
                         value={value}
                         onDslPropertyChange={(_, v) => {
-                            setTextValue(v);
-                            onParametersChange(property.name, v);
-                            setCheckChanges(false);
+                            parametersChanged(property.name, v);
                         }}
                     />
                 </InputGroupItem>
@@ -541,7 +509,7 @@ export function ComponentPropertyField(props: Props) {
                 getSpecialStringInput(property)}
             {['object'].includes(property.type) && !property.enum && getSelectBean(property, value)}
             {['string', 'object', 'integer'].includes(property.type) && property.enum && getSelect(property, value)}
-            {property.type === 'boolean' && getSwitch(property)}
+            {property.type === 'boolean' && getSwitch(property, value)}
             {getInfrastructureSelectorModal()}
         </FormGroup>
     );
