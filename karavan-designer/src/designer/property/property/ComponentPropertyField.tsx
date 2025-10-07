@@ -72,14 +72,14 @@ export function ComponentPropertyField(props: Props) {
     const { onParametersChange, getInternalComponentName } = usePropertiesHook();
 
     const [integration, files] = useIntegrationStore((state) => [state.integration, state.files], shallow);
-    const [dark, setSelectedStep, beans] = useDesignerStore((s) => [s.dark, s.setSelectedStep, s.beans], shallow);
+    const [dark, beans] = useDesignerStore((s) => [s.dark, s.beans], shallow);
 
     const [selectStatus, setSelectStatus] = useState<Map<string, boolean>>(new Map<string, boolean>());
     const [showEditor, setShowEditor] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [infrastructureSelector, setInfrastructureSelector] = useState<boolean>(false);
     const [infrastructureSelectorProperty, setInfrastructureSelectorProperty] = useState<string | undefined>(undefined);
-    const [id, setId] = useState<string>(prefix + '-' + props.property.name);
+    const [id] = useState<string>(prefix + '-' + props.property.name);
     const [textValue, setTextValue] = useState<any>();
     const ref = useRef<any>(null);
     const [checkChanges, setCheckChanges] = useState<boolean>(false);
@@ -230,7 +230,7 @@ export function ComponentPropertyField(props: Props) {
                         <Button
                             isDisabled={value === undefined}
                             variant='control'
-                            onClick={(e) => {
+                            onClick={(_e) => {
                                 if (value) {
                                     const newRoute = !internalUris.includes(value.toString())
                                         ? CamelUi.createNewInternalRoute(componentName.concat(...':', value.toString()))
@@ -295,7 +295,7 @@ export function ComponentPropertyField(props: Props) {
                         position='bottom-end'
                         content={'Select from ' + capitalize(InfrastructureAPI.infrastructure)}
                     >
-                        <Button variant='control' onClick={(e) => openInfrastructureSelector(property.name)}>
+                        <Button variant='control' onClick={(_e) => openInfrastructureSelector(property.name)}>
                             {icon}
                         </Button>
                     </Tooltip>
@@ -319,7 +319,7 @@ export function ComponentPropertyField(props: Props) {
                 )}
                 <InputGroupItem>
                     <Tooltip position='bottom-end' content={'Show Editor'}>
-                        <Button variant='control' onClick={(e) => setShowEditor(!showEditor)}>
+                        <Button variant='control' onClick={(_e) => setShowEditor(!showEditor)}>
                             <EditorIcon />
                         </Button>
                     </Tooltip>
@@ -345,7 +345,7 @@ export function ComponentPropertyField(props: Props) {
                 )}
                 {property.secret && (
                     <Tooltip position='bottom-end' content={showPassword ? 'Hide' : 'Show'}>
-                        <Button variant='control' onClick={(e) => setShowPassword(!showPassword)}>
+                        <Button variant='control' onClick={(_e) => setShowPassword(!showPassword)}>
                             {showPassword ? <ShowIcon /> : <HideIcon />}
                         </Button>
                     </Tooltip>

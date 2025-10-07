@@ -156,7 +156,7 @@ export function KameletPropertyField(props: Props) {
                         position='bottom-end'
                         content={'Select from ' + capitalize(InfrastructureAPI.infrastructure)}
                     >
-                        <Button variant='control' onClick={(e) => openInfrastructureSelector(property.id)}>
+                        <Button variant='control' onClick={(_e) => openInfrastructureSelector(property.id)}>
                             {icon}
                         </Button>
                     </Tooltip>
@@ -171,7 +171,7 @@ export function KameletPropertyField(props: Props) {
                         onToggle={(_event, isExpanded) => {
                             openSelect(property.id, isExpanded);
                         }}
-                        onSelect={(e, value, isPlaceholder) => {
+                        onSelect={(_e, value, _isPlaceholder) => {
                             parametersChanged(property.id, value);
                             setCheckChanges(false);
                         }}
@@ -217,7 +217,7 @@ export function KameletPropertyField(props: Props) {
                 {showEditorButton && (
                     <InputGroupItem>
                         <Tooltip position='bottom-end' content={'Show Editor'}>
-                            <Button variant='control' onClick={(e) => setShowEditor(!showEditor)}>
+                            <Button variant='control' onClick={(_e) => setShowEditor(!showEditor)}>
                                 <EditorIcon />
                             </Button>
                         </Tooltip>
@@ -245,7 +245,7 @@ export function KameletPropertyField(props: Props) {
                     <PropertyPlaceholderDropdown
                         property={property}
                         value={value}
-                        onDslPropertyChange={(_, v, newRoute) => {
+                        onDslPropertyChange={(_, v, _newRoute) => {
                             setTextValue(v);
                             parametersChanged(property.id, v);
                             setCheckChanges(true);
@@ -254,7 +254,7 @@ export function KameletPropertyField(props: Props) {
                 </InputGroupItem>
                 {property.format === 'password' && (
                     <Tooltip position='bottom-end' content={showPassword ? 'Hide' : 'Show'}>
-                        <Button variant='control' onClick={(e) => setShowPassword(!showPassword)}>
+                        <Button variant='control' onClick={(_e) => setShowPassword(!showPassword)}>
                             {showPassword ? <ShowIcon /> : <HideIcon />}
                         </Button>
                     </Tooltip>
@@ -332,7 +332,7 @@ export function KameletPropertyField(props: Props) {
                         value={value?.toString()}
                         aria-label={id}
                         isChecked={Boolean(value) === true}
-                        onChange={(e) => parametersChanged(property.id, !value)}
+                        onChange={(_e) => parametersChanged(property.id, !value)}
                     />
                 )}
             </FormGroup>

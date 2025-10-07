@@ -39,33 +39,14 @@ export function RouteDesigner() {
         onCommand,
         unselectElement,
         onDslSelect,
-        isSourceKamelet,
         isActionKamelet,
         isKamelet,
         isSinkKamelet,
     } = useRouteDesignerHook();
 
     const [integration] = useIntegrationStore((state) => [state.integration], shallow);
-    const [
-        showDeleteConfirmation,
-        setPosition,
-        width,
-        height,
-        top,
-        left,
-        showMoveConfirmation,
-        setShowMoveConfirmation,
-    ] = useDesignerStore(
-        (s) => [
-            s.showDeleteConfirmation,
-            s.setPosition,
-            s.width,
-            s.height,
-            s.top,
-            s.left,
-            s.showMoveConfirmation,
-            s.setShowMoveConfirmation,
-        ],
+    const [showDeleteConfirmation, setPosition, width, height, top, left, showMoveConfirmation] = useDesignerStore(
+        (s) => [s.showDeleteConfirmation, s.setPosition, s.width, s.height, s.top, s.left, s.showMoveConfirmation],
         shallow,
     );
 
@@ -73,7 +54,7 @@ export function RouteDesigner() {
 
     const [clearSteps] = useConnectionsStore((s) => [s.clearSteps], shallow);
 
-    const onChangeGraphSize = useCallback((target: HTMLDivElement) => {
+    const onChangeGraphSize = useCallback((_target: HTMLDivElement) => {
         changeGraphSize();
     }, []);
 
@@ -148,7 +129,7 @@ export function RouteDesigner() {
                     </Button>
                 )}
                 {showNewRouteConfiguration && (
-                    <Button variant='secondary' icon={<PlusIcon />} onClick={(e) => createRouteConfiguration()}>
+                    <Button variant='secondary' icon={<PlusIcon />} onClick={(_e) => createRouteConfiguration()}>
                         Create configuration
                     </Button>
                 )}

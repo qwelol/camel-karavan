@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-export class ExpressionContext {
+class ExpressionContext {
     name: string = '';
     information: Context[] = [];
 

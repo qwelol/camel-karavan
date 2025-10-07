@@ -138,8 +138,7 @@ export function useRouteDesignerHook() {
     const onShowDeleteConfirmation = (id: string) => {
         let message: string;
         const uuidsToDelete: string[] = [id];
-        let ce: CamelElement;
-        ce = CamelDefinitionApiExt.findElementInIntegration(integration, id)!;
+        const ce: CamelElement = CamelDefinitionApiExt.findElementInIntegration(integration, id)!;
         if (ce.dslName === 'FromDefinition') {
             // Get the RouteDefinition for this.routeDesigner.  Use its uuid.
             const flows = integration.spec.flows!;
@@ -332,28 +331,32 @@ export function useRouteDesignerHook() {
                     addStep(route, parentId, position);
                 }
                 break;
-            case 'ToDefinition':
+            case 'ToDefinition': {
                 if (dsl.uri === undefined && isKamelet()) {
                     dsl.uri = 'kamelet:sink';
                 }
                 const to = CamelDefinitionApi.createStep(dsl.dsl, { uri: dsl.uri });
                 addStep(to, parentId, position);
                 break;
-            case 'ToDynamicDefinition':
+            }
+            case 'ToDynamicDefinition': {
                 const toD = CamelDefinitionApi.createStep(dsl.dsl, { uri: dsl.uri });
                 addStep(toD, parentId, position);
                 break;
-            case 'KameletDefinition':
+            }
+            case 'KameletDefinition': {
                 const kamelet = CamelDefinitionApi.createStep(dsl.dsl, {
                     name: dsl.name,
                 });
                 addStep(kamelet, parentId, position);
                 break;
-            default:
+            }
+            default: {
                 const step = CamelDefinitionApi.createStep(dsl.dsl, undefined);
                 const augmentedStep = setDslDefaults(step);
                 addStep(augmentedStep, parentId, position);
                 break;
+            }
         }
     }
 
@@ -451,7 +454,7 @@ export function useRouteDesignerHook() {
                 height: height,
                 width: width,
                 backgroundColor: dark ? 'black' : 'white',
-            }).then((v) => {
+            }).then((_v) => {
                 toPng(ref, {
                     style: { overflow: 'hidden' },
                     cacheBust: true,

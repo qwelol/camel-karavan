@@ -143,7 +143,7 @@ export function TopologyPropertiesPanel(props: Props) {
                 </FlexItem>
                 <FlexItem align={{ default: 'alignRight' }}>
                     <Tooltip content={'Close'} position={TooltipPosition.top}>
-                        <Button variant='link' icon={<CloseIcon />} onClick={(event) => setSelectedIds([])} />
+                        <Button variant='link' icon={<CloseIcon />} onClick={(_event) => setSelectedIds([])} />
                     </Tooltip>
                 </FlexItem>
             </Flex>

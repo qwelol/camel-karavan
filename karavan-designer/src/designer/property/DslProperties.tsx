@@ -88,7 +88,7 @@ export function DslProperties(props: Props) {
                         <Button variant='link' onClick={() => cloneElement()} icon={<CloneIcon />} />
                     </Tooltip>
                 </div>
-                {descriptionLines.map((desc, index, array) => (
+                {descriptionLines.map((desc, index, _array) => (
                     <Text key={index} component={TextVariants.p}>
                         {desc}
                     </Text>
@@ -240,7 +240,7 @@ export function DslProperties(props: Props) {
                 {selectedStep && propertiesAdvanced.length > 0 && (
                     <ExpandableSection
                         toggleText={'EIP advanced properties'}
-                        onToggle={(_event, isExpanded) => setShowAdvanced(!showAdvanced)}
+                        onToggle={(_event, _isExpanded) => setShowAdvanced(!showAdvanced)}
                         isExpanded={getShowExpanded()}
                     >
                         <div className='parameters'>{getPropertyFields(propertiesAdvanced)}</div>

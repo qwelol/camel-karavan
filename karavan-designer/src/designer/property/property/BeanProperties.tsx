@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import React, { useEffect, useState } from 'react';
-import { TextInput, Button, Tooltip, Popover, InputGroup, InputGroupItem, capitalize } from '@patternfly/react-core';
+import { TextInput, Button, Tooltip, InputGroup, InputGroupItem, capitalize } from '@patternfly/react-core';
 import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
 import { BeanFactoryDefinition } from 'karavan-core/lib/model/CamelDefinition';
@@ -24,7 +24,6 @@ import { SensitiveKeys } from 'karavan-core/lib/model/CamelMetadata';
 import { v4 as uuidv4 } from 'uuid';
 import DeleteIcon from '@patternfly/react-icons/dist/js/icons/times-icon';
 import AddIcon from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
-import HelpIcon from '@patternfly/react-icons/dist/js/icons/help-icon';
 import { InfrastructureSelector } from './InfrastructureSelector';
 import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
 import ShowIcon from '@patternfly/react-icons/dist/js/icons/eye-icon';
@@ -60,7 +59,7 @@ export function BeanProperties(props: Props) {
     function preparePropertiesMap(properties: any): Map<string, [string, string, boolean]> {
         const result = new Map<string, [string, string, boolean]>();
         if (properties) {
-            Object.keys(properties).forEach((k, i, a) => result.set(uuidv4(), [k, properties[k], false]));
+            Object.keys(properties).forEach((k, _i, _a) => result.set(uuidv4(), [k, properties[k], false]));
         }
         return result;
     }
@@ -68,7 +67,9 @@ export function BeanProperties(props: Props) {
     function prepareConstructorsMap(constructors: any): Map<string, [number, string, boolean]> {
         const result = new Map<string, [number, string, boolean]>();
         if (constructors) {
-            Object.keys(constructors).forEach((k, i, a) => result.set(uuidv4(), [parseInt(k), constructors[k], false]));
+            Object.keys(constructors).forEach((k, _i, _a) =>
+                result.set(uuidv4(), [parseInt(k), constructors[k], false]),
+            );
         }
         return result;
     }
@@ -89,14 +90,6 @@ export function BeanProperties(props: Props) {
             const beanConstructors: any = {};
             constructors.forEach((p: any) => (beanConstructors[p[0]] = p[1]));
             bean.constructors = beanConstructors;
-            props.onChange(bean);
-        }
-    }
-
-    function beanFieldChanged(fieldId: string, value: string) {
-        if (selectedStep) {
-            const bean = CamelUtil.cloneBean(selectedStep as BeanFactoryDefinition);
-            (bean as any)[fieldId] = value;
             props.onChange(bean);
         }
     }
@@ -165,45 +158,10 @@ export function BeanProperties(props: Props) {
         );
     }
 
-    function cloneBean() {
-        if (selectedStep) {
-            const bean = CamelUtil.cloneBean(selectedStep as BeanFactoryDefinition);
-            bean.uuid = uuidv4();
-            props.onClone(bean);
-        }
-    }
-
-    function getLabelIcon(displayName: string, description: string) {
-        return (
-            <Popover
-                position={'left'}
-                headerContent={displayName}
-                bodyContent={description}
-                footerContent={
-                    <div>
-                        <b>Required</b>
-                    </div>
-                }
-            >
-                <button
-                    type='button'
-                    aria-label='More info'
-                    onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }}
-                    className='pf-v5-c-form__group-label-help'
-                >
-                    <HelpIcon />
-                </button>
-            </Popover>
-        );
-    }
-
     function getBeanConstructors() {
         return (
             <>
-                {Array.from(constructors.entries()).map((v, index, array) => {
+                {Array.from(constructors.entries()).map((v, _index, _array) => {
                     const i = v[0];
                     const key = v[1][0];
                     const value = v[1][1];
@@ -243,14 +201,14 @@ export function BeanProperties(props: Props) {
                                     <Tooltip position='bottom-end' content={showPassword ? 'Hide' : 'Show'}>
                                         <Button
                                             variant='control'
-                                            onClick={(e) => constructorChanged(i, key, value, !showPassword)}
+                                            onClick={(_e) => constructorChanged(i, key, value, !showPassword)}
                                         >
                                             {showPassword ? <ShowIcon /> : <HideIcon />}
                                         </Button>
                                     </Tooltip>
                                 )}
                             </InputGroup>
-                            <Button variant='link' className='delete-button' onClick={(e) => constructorDeleted(i)}>
+                            <Button variant='link' className='delete-button' onClick={(_e) => constructorDeleted(i)}>
                                 <DeleteIcon />
                             </Button>
                         </div>
@@ -259,7 +217,7 @@ export function BeanProperties(props: Props) {
                 <Button
                     variant='link'
                     className='add-button'
-                    onClick={(e) => constructorChanged(uuidv4(), constructors.size, '', false)}
+                    onClick={(_e) => constructorChanged(uuidv4(), constructors.size, '', false)}
                 >
                     <AddIcon />
                     Add argument
@@ -271,7 +229,7 @@ export function BeanProperties(props: Props) {
     function getBeanProperties() {
         return (
             <>
-                {Array.from(properties.entries()).map((v, index, array) => {
+                {Array.from(properties.entries()).map((v, _index, _array) => {
                     const i = v[0];
                     const key = v[1][0];
                     const value = v[1][1];
@@ -304,7 +262,7 @@ export function BeanProperties(props: Props) {
                                         position='bottom-end'
                                         content={'Select from ' + capitalize(InfrastructureAPI.infrastructure)}
                                     >
-                                        <Button variant='control' onClick={(e) => openInfrastructureSelector(i, key)}>
+                                        <Button variant='control' onClick={(_e) => openInfrastructureSelector(i, key)}>
                                             {icon}
                                         </Button>
                                     </Tooltip>
@@ -328,20 +286,24 @@ export function BeanProperties(props: Props) {
                                     <Tooltip position='bottom-end' content={showPassword ? 'Hide' : 'Show'}>
                                         <Button
                                             variant='control'
-                                            onClick={(e) => propertyChanged(i, key, value, !showPassword)}
+                                            onClick={(_e) => propertyChanged(i, key, value, !showPassword)}
                                         >
                                             {showPassword ? <ShowIcon /> : <HideIcon />}
                                         </Button>
                                     </Tooltip>
                                 )}
                             </InputGroup>
-                            <Button variant='link' className='delete-button' onClick={(e) => propertyDeleted(i)}>
+                            <Button variant='link' className='delete-button' onClick={(_e) => propertyDeleted(i)}>
                                 <DeleteIcon />
                             </Button>
                         </div>
                     );
                 })}
-                <Button variant='link' className='add-button' onClick={(e) => propertyChanged(uuidv4(), '', '', false)}>
+                <Button
+                    variant='link'
+                    className='add-button'
+                    onClick={(_e) => propertyChanged(uuidv4(), '', '', false)}
+                >
                     <AddIcon />
                     Add property
                 </Button>

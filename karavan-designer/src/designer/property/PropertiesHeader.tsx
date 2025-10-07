@@ -36,7 +36,7 @@ import '../karavan.css';
 import './DslProperties.css';
 import '@patternfly/patternfly/patternfly.css';
 import { CamelUi } from '../utils/CamelUi';
-import { useDesignerStore, useSelectorStore } from '../DesignerStore';
+import { useDesignerStore } from '../DesignerStore';
 import { shallow } from 'zustand/shallow';
 import { usePropertiesHook } from './usePropertiesHook';
 import { CamelDisplayUtil } from 'karavan-core/lib/api/CamelDisplayUtil';
@@ -54,7 +54,7 @@ export function PropertiesHeader(props: Props) {
     const { saveAsRoute, convertStep } = usePropertiesHook(props.designerType);
     const { openSelectorToReplaceFrom } = useRouteDesignerHook();
 
-    const [selectedStep, dark] = useDesignerStore((s) => [s.selectedStep, s.dark], shallow);
+    const [selectedStep] = useDesignerStore((s) => [s.selectedStep], shallow);
 
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState<boolean>(false);
     const [isHeadersExpanded, setIsHeadersExpanded] = useState<boolean>(false);
@@ -156,11 +156,11 @@ export function PropertiesHeader(props: Props) {
         return (
             <ExpandableSection
                 toggleText='Exchange Properties'
-                onToggle={(_event, isExpanded) => setIsExchangePropertiesExpanded(!isExchangePropertiesExpanded)}
+                onToggle={(_event, _isExpanded) => setIsExchangePropertiesExpanded(!isExchangePropertiesExpanded)}
                 isExpanded={isExchangePropertiesExpanded}
             >
                 <Flex className='component-headers' direction={{ default: 'column' }}>
-                    {exchangeProperties.map((header, index, array) => (
+                    {exchangeProperties.map((header, index, _array) => (
                         <Flex key={index}>
                             <ClipboardCopy
                                 key={index}
@@ -209,13 +209,13 @@ export function PropertiesHeader(props: Props) {
         return (
             <ExpandableSection
                 toggleText='Headers'
-                onToggle={(_event, isExpanded) => setIsHeadersExpanded(!isHeadersExpanded)}
+                onToggle={(_event, _isExpanded) => setIsHeadersExpanded(!isHeadersExpanded)}
                 isExpanded={isHeadersExpanded}
             >
                 <Flex className='component-headers' direction={{ default: 'column' }}>
                     {headers
                         .filter((header) => groups.includes(header.group))
-                        .map((header, index, array) => (
+                        .map((header, index, _array) => (
                             <Flex key={index}>
                                 <ClipboardCopy
                                     key={index}
@@ -264,12 +264,12 @@ export function PropertiesHeader(props: Props) {
         return (
             <ExpandableSection
                 toggleText={isDescriptionExpanded ? 'Show less' : 'Show more'}
-                onToggle={(_event, isExpanded) => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                onToggle={(_event, _isExpanded) => setIsDescriptionExpanded(!isDescriptionExpanded)}
                 isExpanded={isDescriptionExpanded}
             >
                 {descriptionLines
-                    .filter((value, index) => index > 0)
-                    .map((desc, index, array) => (
+                    .filter((_value, index) => index > 0)
+                    .map((desc, index, _array) => (
                         <Text key={index} component={TextVariants.p}>
                             {desc}
                         </Text>

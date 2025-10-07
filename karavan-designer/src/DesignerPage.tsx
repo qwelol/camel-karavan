@@ -71,19 +71,19 @@ export const DesignerPage = (props: Props) => {
                 showCodeTab={true}
                 yaml={yaml}
                 onSave={(filename, yaml, propertyOnly) => save(filename, yaml, propertyOnly)}
-                onGetCustomCode={(name) => {
+                onGetCustomCode={() => {
                     return new Promise<string | undefined>((resolve) => resolve(undefined));
                 }}
-                onSaveCustomCode={(name1, code) => {}}
+                onSaveCustomCode={() => {}}
                 propertyPlaceholders={
                     [
                         // "timer.delay",
                         // "sql.query"
                     ]
                 }
-                onSavePropertyPlaceholder={(key, value) => {}}
+                onSavePropertyPlaceholder={() => {}}
                 beans={[]}
-                onInternalConsumerClick={(uri, name, routeId) => {}}
+                onInternalConsumerClick={() => {}}
                 files={[new IntegrationFile('demo.camel.yaml', yaml)]}
             />
         );
@@ -108,7 +108,7 @@ export const DesignerPage = (props: Props) => {
                             <ToolbarContent>
                                 <ToolbarItem>
                                     <Tooltip content='Download YAML' position={'bottom'}>
-                                        <Button variant='primary' icon={<DownloadIcon />} onClick={(e) => download()}>
+                                        <Button variant='primary' icon={<DownloadIcon />} onClick={() => download()}>
                                             YAML
                                         </Button>
                                     </Tooltip>
@@ -118,7 +118,7 @@ export const DesignerPage = (props: Props) => {
                                         <Button
                                             variant='secondary'
                                             icon={<DownloadImageIcon />}
-                                            onClick={(e) => downloadImage()}
+                                            onClick={() => downloadImage()}
                                         >
                                             Image
                                         </Button>

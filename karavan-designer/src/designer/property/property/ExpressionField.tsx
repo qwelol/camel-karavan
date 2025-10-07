@@ -162,7 +162,7 @@ export function ExpressionField(props: Props) {
                 onToggle={(_event, isExpanded) => {
                     openSelect(isExpanded);
                 }}
-                onSelect={(e, lang, isPlaceholder) => {
+                onSelect={(_e, lang, _isPlaceholder) => {
                     expressionChanged(lang.toString(), value);
                 }}
                 selections={dslLanguage}
@@ -205,9 +205,9 @@ export function ExpressionField(props: Props) {
                         property={exp}
                         value={value ? (value as any)[exp.name] : undefined}
                         dslLanguage={dslLanguage}
-                        onExpressionChange={(exp) => {}}
-                        onParameterChange={(parameter) => {}}
-                        onDataFormatChange={(dataFormat) => {}}
+                        onExpressionChange={(_exp) => {}}
+                        onParameterChange={(_parameter) => {}}
+                        onDataFormatChange={(_dataFormat) => {}}
                         onPropertyChange={propertyChanged}
                     />
                 )}
@@ -223,9 +223,9 @@ export function ExpressionField(props: Props) {
                                 property={property}
                                 value={value ? (value as any)[property.name] : undefined}
                                 dslLanguage={dslLanguage}
-                                onExpressionChange={(exp) => {}}
-                                onParameterChange={(parameter) => {}}
-                                onDataFormatChange={(dataFormat) => {}}
+                                onExpressionChange={(_exp) => {}}
+                                onParameterChange={(_parameter) => {}}
+                                onDataFormatChange={(_dataFormat) => {}}
                                 onPropertyChange={propertyChanged}
                             />
                         ))}

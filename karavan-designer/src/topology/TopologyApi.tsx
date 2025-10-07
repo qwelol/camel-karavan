@@ -54,7 +54,7 @@ export function getIntegrations(files: IntegrationFile[]): Integration[] {
         });
 }
 
-export function getIncomingNodes(tins: TopologyIncomingNode[]): NodeModel[] {
+function getIncomingNodes(tins: TopologyIncomingNode[]): NodeModel[] {
     return tins
         .filter((tin) => tin.type === 'external')
         .map((tin) => {
@@ -78,7 +78,7 @@ export function getIncomingNodes(tins: TopologyIncomingNode[]): NodeModel[] {
         });
 }
 
-export function getRoutes(tins: TopologyRouteNode[]): NodeModel[] {
+function getRoutes(tins: TopologyRouteNode[]): NodeModel[] {
     return tins.map((tin) => {
         const node: NodeModel = {
             id: tin.id,
@@ -100,7 +100,7 @@ export function getRoutes(tins: TopologyRouteNode[]): NodeModel[] {
         return node;
     });
 }
-export function getRouteConfigurations(trcs: TopologyRouteConfigurationNode[]): NodeModel[] {
+function getRouteConfigurations(trcs: TopologyRouteConfigurationNode[]): NodeModel[] {
     return trcs.map((tin) => {
         const node: NodeModel = {
             id: tin.id,
@@ -123,7 +123,7 @@ export function getRouteConfigurations(trcs: TopologyRouteConfigurationNode[]): 
     });
 }
 
-export function getOutgoingNodes(tons: TopologyOutgoingNode[]): NodeModel[] {
+function getOutgoingNodes(tons: TopologyOutgoingNode[]): NodeModel[] {
     return tons
         .filter((tin) => tin.type === 'external')
         .map((tin) => {
@@ -148,7 +148,7 @@ export function getOutgoingNodes(tons: TopologyOutgoingNode[]): NodeModel[] {
         });
 }
 
-export function getIncomingEdges(tins: TopologyIncomingNode[]): EdgeModel[] {
+function getIncomingEdges(tins: TopologyIncomingNode[]): EdgeModel[] {
     return tins
         .filter((tin) => tin.type === 'external')
         .map((tin) => {
@@ -164,7 +164,7 @@ export function getIncomingEdges(tins: TopologyIncomingNode[]): EdgeModel[] {
         });
 }
 
-export function getOutgoingEdges(tons: TopologyOutgoingNode[]): EdgeModel[] {
+function getOutgoingEdges(tons: TopologyOutgoingNode[]): EdgeModel[] {
     return tons
         .filter((tin) => tin.type === 'external')
         .map((tin) => {
@@ -180,9 +180,9 @@ export function getOutgoingEdges(tons: TopologyOutgoingNode[]): EdgeModel[] {
         });
 }
 
-export function getExternalEdges(tons: TopologyOutgoingNode[], tins: TopologyIncomingNode[]): EdgeModel[] {
+function getExternalEdges(tons: TopologyOutgoingNode[], tins: TopologyIncomingNode[]): EdgeModel[] {
     const result: EdgeModel[] = [];
-    tons.filter((ton) => ton.type === 'external').forEach((ton, index) => {
+    tons.filter((ton) => ton.type === 'external').forEach((ton, _index) => {
         const uniqueUri = ton.uniqueUri;
         if (uniqueUri) {
             TopologyUtils.getNodeIdByUniqueUri(tins, uniqueUri).forEach((target) => {
@@ -202,7 +202,7 @@ export function getExternalEdges(tons: TopologyOutgoingNode[], tins: TopologyInc
     return result;
 }
 
-export function getRestNodes(tins: TopologyRestNode[]): NodeModel[] {
+function getRestNodes(tins: TopologyRestNode[]): NodeModel[] {
     return tins.map((tin) => {
         return {
             id: tin.id,
@@ -225,7 +225,7 @@ export function getRestNodes(tins: TopologyRestNode[]): NodeModel[] {
     });
 }
 
-export function getRestEdges(rest: TopologyRestNode[], tins: TopologyIncomingNode[]): EdgeModel[] {
+function getRestEdges(rest: TopologyRestNode[], tins: TopologyIncomingNode[]): EdgeModel[] {
     const result: EdgeModel[] = [];
     rest.forEach((tin) => {
         tin.uris.forEach((uri, index) => {
@@ -244,7 +244,7 @@ export function getRestEdges(rest: TopologyRestNode[], tins: TopologyIncomingNod
     return result;
 }
 
-export function getInternalEdges(tons: TopologyOutgoingNode[], tins: TopologyIncomingNode[]): EdgeModel[] {
+function getInternalEdges(tons: TopologyOutgoingNode[], tins: TopologyIncomingNode[]): EdgeModel[] {
     const result: EdgeModel[] = [];
     tons.filter((ton) => ton.type === 'internal').forEach((ton, index) => {
         const step = ton.step as any;

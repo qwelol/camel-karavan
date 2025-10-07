@@ -97,7 +97,9 @@ export function PropertyPlaceholderDropdown(props: Props) {
         !SYNTAX_EXAMPLES.map((se) => se.value).includes(removeBrackets(placeholderValue)) &&
         SYNTAX_EXAMPLES.findIndex((se) => removeBrackets(placeholderValue).startsWith(se.key)) === -1;
     const popoverId =
-        'popover-selector-' + property.hasOwnProperty('name') ? (property as any).name : (property as any).id;
+        'popover-selector-' + Object.prototype.hasOwnProperty.call(property, 'name')
+            ? (property as any).name
+            : (property as any).id;
 
     const hasPlaceholders = propertyPlaceholders && propertyPlaceholders.length > 0;
 

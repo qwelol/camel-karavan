@@ -66,9 +66,9 @@ export function ObjectField(props: Props) {
                         property={property}
                         element={value}
                         onExpressionChange={expressionChanged}
-                        onParameterChange={(parameter, value) => propertyChanged(property.name, value)}
-                        onDataFormatChange={(value1) => {}}
-                        onPropertyChange={(fieldId, value) => propertyChanged(property.name, value)}
+                        onParameterChange={(_parameter, value) => propertyChanged(property.name, value)}
+                        onDataFormatChange={(_value1) => {}}
+                        onPropertyChange={(_fieldId, value) => propertyChanged(property.name, value)}
                         value={val ? (val as any)[property.name] : undefined}
                     />
                 ))}

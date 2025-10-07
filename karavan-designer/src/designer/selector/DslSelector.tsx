@@ -46,13 +46,13 @@ import TimesIcon from '@patternfly/react-icons/dist/esm/icons/times-icon';
 import { addPreferredElement, deletePreferredElement, getPreferredElements } from './DslPreferences';
 import { DslFastCard } from './DslFastCard';
 import { DslCard } from './DslCard';
-import { useDebounceCallback, useDebounceValue } from 'usehooks-ts';
+import { useDebounceValue } from 'usehooks-ts';
 
 interface Props {
     tabIndex?: string | number;
 }
 
-export function DslSelector(props: Props) {
+export function DslSelector(_props: Props) {
     const [
         showSelector,
         showSteps,

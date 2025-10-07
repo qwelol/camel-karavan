@@ -85,7 +85,7 @@ export function InfrastructureSelector(props: Props) {
                 <Tbody>
                     {configMaps
                         .filter((name) => checkFilter(name))
-                        .map((name, idx: number) => {
+                        .map((name, _idx: number) => {
                             const configMapName = name.split('/')[0];
                             const data = name.split('/')[1];
                             return (
@@ -98,7 +98,7 @@ export function InfrastructureSelector(props: Props) {
                                         <Button
                                             style={{ padding: '6px' }}
                                             variant={'link'}
-                                            onClick={(e) => props.onSelect?.('configmap:' + name)}
+                                            onClick={(_e) => props.onSelect?.('configmap:' + name)}
                                         >
                                             {data}
                                         </Button>
@@ -125,7 +125,7 @@ export function InfrastructureSelector(props: Props) {
                 <Tbody>
                     {secrets
                         .filter((name) => checkFilter(name))
-                        .map((name, idx: number) => {
+                        .map((name, _idx: number) => {
                             const configMapName = name.split('/')[0];
                             const data = name.split('/')[1];
                             return (
@@ -138,7 +138,7 @@ export function InfrastructureSelector(props: Props) {
                                         <Button
                                             style={{ padding: '6px' }}
                                             variant={'link'}
-                                            onClick={(e) => props.onSelect?.('secret:' + name)}
+                                            onClick={(_e) => props.onSelect?.('secret:' + name)}
                                         >
                                             {data}
                                         </Button>
@@ -167,7 +167,7 @@ export function InfrastructureSelector(props: Props) {
                 <Tbody>
                     {services
                         .filter((name) => checkFilter(name))
-                        .map((name, idx: number) => {
+                        .map((name, _idx: number) => {
                             const serviceName = name.split('|')[0];
                             const hostPort = name.split('|')[1];
                             const host = hostPort.split(':')[0];
@@ -184,7 +184,7 @@ export function InfrastructureSelector(props: Props) {
                                         <Button
                                             style={{ padding: '6px' }}
                                             variant={'link'}
-                                            onClick={(e) => props.onSelect?.(hostPort)}
+                                            onClick={(_e) => props.onSelect?.(hostPort)}
                                         >
                                             {serviceName}
                                         </Button>
@@ -193,7 +193,7 @@ export function InfrastructureSelector(props: Props) {
                                         <Button
                                             style={{ padding: '6px' }}
                                             variant={'link'}
-                                            onClick={(e) => props.onSelect?.(host)}
+                                            onClick={(_e) => props.onSelect?.(host)}
                                         >
                                             {host}
                                         </Button>
@@ -202,7 +202,7 @@ export function InfrastructureSelector(props: Props) {
                                         <Button
                                             style={{ padding: '6px' }}
                                             variant={'link'}
-                                            onClick={(e) => props.onSelect?.(port)}
+                                            onClick={(_e) => props.onSelect?.(port)}
                                         >
                                             {port}
                                         </Button>

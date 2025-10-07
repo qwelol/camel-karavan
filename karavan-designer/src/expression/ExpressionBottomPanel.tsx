@@ -33,7 +33,7 @@ export function ExpressionBottomPanel(props: Props) {
     const showFuncs = funcs.length > 0;
 
     function getRows(data: Context[]) {
-        return data?.map((context, index, array) => (
+        return data?.map((context, index, _array) => (
             <Tr key={index} style={{ padding: '0' }}>
                 <Td style={{ padding: '0px 0px 6px 0px' }} modifier='fitContent'>
                     <ClipboardCopy key={index} hoverTip='Copy' clickTip='Copied' variant='inline-compact'>

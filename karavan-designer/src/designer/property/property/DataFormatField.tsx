@@ -89,7 +89,7 @@ export function DataFormatField(props: Props) {
     }
 
     function getFilteredProperties(): PropertyMeta[] {
-        let propertyMetas = CamelDefinitionApiExt.getElementPropertiesByName(dataFormatString).sort((a, b) =>
+        let propertyMetas = CamelDefinitionApiExt.getElementPropertiesByName(dataFormatString).sort((a, _b) =>
             a.name === 'library' ? -1 : 1,
         );
         const filter = propertyFilter.toLocaleLowerCase();
@@ -162,7 +162,7 @@ export function DataFormatField(props: Props) {
                     onToggle={() => {
                         openSelect();
                     }}
-                    onSelect={(_, dataFormat, isPlaceholder) => dataFormatChanged(dataFormat.toString(), value)}
+                    onSelect={(_, dataFormat, _isPlaceholder) => dataFormatChanged(dataFormat.toString(), value)}
                     selections={dataFormat}
                     isOpen={selectIsOpen}
                     aria-labelledby={'dataFormat'}
@@ -177,7 +177,7 @@ export function DataFormatField(props: Props) {
                     {propertiesAdvanced.length > 0 && (
                         <ExpandableSection
                             toggleText={'Advanced data format properties'}
-                            onToggle={(_event, isExpanded) => setShowAdvanced(!showAdvanced)}
+                            onToggle={(_event, _isExpanded) => setShowAdvanced(!showAdvanced)}
                             isExpanded={getShowExpanded()}
                         >
                             {getPropertyFields(value, propertiesAdvanced)}

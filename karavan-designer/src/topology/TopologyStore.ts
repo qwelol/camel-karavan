@@ -35,30 +35,30 @@ export const useTopologyStore = createWithEqualityFn<TopologyState>(
     (set) => ({
         selectedIds: [],
         setSelectedIds: (selectedIds: string[]) => {
-            set((state: TopologyState) => {
+            set((_state: TopologyState) => {
                 return { selectedIds: selectedIds };
             });
         },
         setFileName: (fileName?: string) => {
-            set((state: TopologyState) => {
+            set((_state: TopologyState) => {
                 return { fileName: fileName };
             });
         },
         ranker: 'network-simplex',
         setRanker: (ranker: string) => {
-            set((state: TopologyState) => {
+            set((_state: TopologyState) => {
                 return { ranker: ranker };
             });
         },
         nodeData: undefined,
         setNodeData: (nodeData: any) => {
-            set((state: TopologyState) => {
+            set((_state: TopologyState) => {
                 return { nodeData: nodeData };
             });
         },
         showGroups: true,
         setShowGroups: (showGroups: boolean) => {
-            set((state: TopologyState) => {
+            set((_state: TopologyState) => {
                 return { showGroups: showGroups };
             });
         },

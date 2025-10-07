@@ -54,7 +54,7 @@ export function TopologyToolbar(props: Props) {
                         isDisabled={!isDev}
                         variant={'primary'}
                         icon={<PlusIcon />}
-                        onClick={(e) => props.onClickAddRoute()}
+                        onClick={(_e) => props.onClickAddRoute()}
                     >
                         Route
                     </Button>
@@ -68,7 +68,7 @@ export function TopologyToolbar(props: Props) {
                         isDisabled={!isDev}
                         variant={'secondary'}
                         icon={<PlusIcon />}
-                        onClick={(e) => props.onClickAddREST()}
+                        onClick={(_e) => props.onClickAddREST()}
                     >
                         REST
                     </Button>
@@ -82,7 +82,7 @@ export function TopologyToolbar(props: Props) {
                         isDisabled={!isDev}
                         variant={'secondary'}
                         icon={<PlusIcon />}
-                        onClick={(e) => props.onClickAddKamelet()}
+                        onClick={(_e) => props.onClickAddKamelet()}
                     >
                         Kamelet
                     </Button>
@@ -96,7 +96,7 @@ export function TopologyToolbar(props: Props) {
                         isDisabled={!isDev}
                         variant={'secondary'}
                         icon={<PlusIcon />}
-                        onClick={(e) => props.onClickAddBean()}
+                        onClick={(_e) => props.onClickAddBean()}
                     >
                         Bean
                     </Button>

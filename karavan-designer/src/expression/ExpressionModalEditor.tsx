@@ -73,14 +73,14 @@ export function ExpressionModalEditor(props: Props) {
             isOpen={showEditor}
             onClose={() => close()}
             actions={[
-                <Button key='save' variant='primary' size='sm' onClick={(e) => closeAndSave()}>
+                <Button key='save' variant='primary' size='sm' onClick={(_e) => closeAndSave()}>
                     Save
                 </Button>,
-                <Button key='cancel' variant='secondary' size='sm' onClick={(e) => close()}>
+                <Button key='cancel' variant='secondary' size='sm' onClick={(_e) => close()}>
                     Close
                 </Button>,
             ]}
-            onEscapePress={(e) => close()}
+            onEscapePress={(_e) => close()}
         >
             <div className='container'>
                 <div className='panel-top'>
@@ -108,7 +108,7 @@ export function ExpressionModalEditor(props: Props) {
                     style={{ padding: '0' }}
                     variant='link'
                     icon={showVariables ? <ArrowDown /> : <ArrowUp />}
-                    onClick={(e) => {
+                    onClick={(_e) => {
                         setShowVariables(!showVariables);
                         setKey(Math.random().toString());
                     }}

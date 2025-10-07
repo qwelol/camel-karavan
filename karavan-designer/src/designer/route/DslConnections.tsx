@@ -47,7 +47,7 @@ export function DslConnections() {
 
     useEffect(() => {
         const integrations = getIntegrations(files);
-        setTons((prevState) => {
+        setTons((_prevState) => {
             const data = new Map<string, string[]>();
             TopologyUtils.findTopologyRouteOutgoingNodes(integrations).forEach((t) => {
                 const key = (t.step as any)?.uri + ':' + (t.step as any)?.parameters?.name;
@@ -506,6 +506,7 @@ export function DslConnections() {
         ) {
             const next = steps.get(pos.nextstep.uuid);
             if (pos.step.hasSteps() && pos.prevStep) {
+                // Skip processing for steps with substeps
             } else {
                 list.push(...addArrowToList(list, pos, next, true, true));
             }
@@ -520,6 +521,7 @@ export function DslConnections() {
         ) {
             const next = steps.get(pos.nextstep.uuid);
             if (next && !isSpecial(next) && next.inSteps) {
+                // Skip processing for special steps
             }
         }
 
@@ -540,7 +542,6 @@ export function DslConnections() {
         const endY = rect2.y - top - radY - (toHeader ? 9 : 6);
 
         const iRadX = startX > endX ? -1 * radX : radX;
-        const iRadY = startY > endY ? -1 * radY : radY;
 
         const LX1 = startX;
         const LY1 = endY - radY;

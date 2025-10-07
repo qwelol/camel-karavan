@@ -60,20 +60,20 @@ export function DslElementMoveModal() {
             aria-label='title'
             className='move-modal'
             isOpen={showMoveConfirmation}
-            onClose={(event) => cancelMove()}
+            onClose={(_event) => cancelMove()}
             variant={ModalVariant.small}
         >
             <Flex direction={{ default: 'column' }}>
                 <div>Select move type:</div>
                 {canReplace() && (
-                    <Button key='place' variant='primary' onClick={(event) => confirmMove(false)}>
+                    <Button key='place' variant='primary' onClick={(_event) => confirmMove(false)}>
                         Replace (target down)
                     </Button>
                 )}
-                <Button key='child' variant='secondary' onClick={(event) => confirmMove(true)}>
+                <Button key='child' variant='secondary' onClick={(_event) => confirmMove(true)}>
                     Set as child
                 </Button>
-                <Button key='cancel' variant='tertiary' onClick={(event) => cancelMove()}>
+                <Button key='cancel' variant='tertiary' onClick={(_event) => cancelMove()}>
                     Cancel
                 </Button>
             </Flex>

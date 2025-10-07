@@ -36,14 +36,14 @@ export function DeleteConfirmation() {
             isOpen={showDeleteConfirmation}
             onClose={() => setShowDeleteConfirmation(false)}
             actions={[
-                <Button key='confirm' variant='primary' onClick={(e) => deleteElement()}>
+                <Button key='confirm' variant='primary' onClick={(_e) => deleteElement()}>
                     Delete
                 </Button>,
-                <Button key='cancel' variant='link' onClick={(e) => setShowDeleteConfirmation(false)}>
+                <Button key='cancel' variant='link' onClick={(_e) => setShowDeleteConfirmation(false)}>
                     Cancel
                 </Button>,
             ]}
-            onEscapePress={(e) => setShowDeleteConfirmation(false)}
+            onEscapePress={(_e) => setShowDeleteConfirmation(false)}
         >
             <div>{deleteMessage}</div>
         </Modal>

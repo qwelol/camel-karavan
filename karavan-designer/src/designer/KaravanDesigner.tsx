@@ -162,14 +162,12 @@ export function KaravanDesigner(props: Props) {
                             padding: '0',
                             margin: '0',
                         }}
-                        onClick={(event) => EventBus.sendAlert(message[0], message[1], 'danger')}
+                        onClick={() => EventBus.sendAlert(message[0], message[1], 'danger')}
                     />
                 )}
             </div>
         );
     }
-
-    const isKamelet = integration.type === 'kamelet';
 
     return (
         <PageSection

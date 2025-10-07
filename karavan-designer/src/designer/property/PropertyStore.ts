@@ -27,7 +27,7 @@ interface PropertiesState {
 }
 
 export const usePropertiesStore = createWithEqualityFn<PropertiesState>(
-    (set, get) => ({
+    (set, _get) => ({
         requiredOnly: false,
         changedOnly: false,
         propertyFilter: '',

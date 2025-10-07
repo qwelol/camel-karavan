@@ -279,7 +279,7 @@ export function SelectField(props: Props) {
             selected={selected}
             onSelect={onSelect}
             onOpenChange={(isOpen) => {
-                !isOpen && closeMenu();
+                if (!isOpen) closeMenu();
             }}
             toggle={toggle}
             shouldFocusToggleOnSelect={false}

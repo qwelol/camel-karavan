@@ -42,29 +42,11 @@ interface Props {
 }
 
 export function DslElementHeader(props: Props) {
-    const {
-        selectElement,
-        moveElement,
-        onShowDeleteConfirmation,
-        openSelector,
-        isKamelet,
-        isSourceKamelet,
-        isActionKamelet,
-    } = useRouteDesignerHook();
+    const { onShowDeleteConfirmation, openSelector, isKamelet } = useRouteDesignerHook();
 
     const [integration] = useIntegrationStore((s) => [s.integration], shallow);
 
-    const [selectedUuids, selectedStep, showMoveConfirmation, setShowMoveConfirmation, setMoveElements] =
-        useDesignerStore(
-            (s) => [
-                s.selectedUuids,
-                s.selectedStep,
-                s.showMoveConfirmation,
-                s.setShowMoveConfirmation,
-                s.setMoveElements,
-            ],
-            shallow,
-        );
+    const [selectedUuids] = useDesignerStore((s) => [s.selectedUuids], shallow);
 
     const step: CamelElement = props.step;
 
@@ -107,7 +89,7 @@ export function DslElementHeader(props: Props) {
         const hasStepsField = children.filter((c: ChildElement) => c.name === 'steps').length === 1;
         const stepsChildrenCount = children
             .filter((c) => c.name === 'steps')
-            .map((child: ChildElement, index: number) => {
+            .map((child: ChildElement, _index: number) => {
                 const children: CamelElement[] = CamelDefinitionApiExt.getElementChildren(step, child);
                 return children.length;
             })
@@ -116,7 +98,7 @@ export function DslElementHeader(props: Props) {
         const hasNonStepsFields =
             children.filter((c) => c.name !== 'steps' && c.name !== 'expression' && c.name !== 'onWhen').length > 0;
         const childrenCount = children
-            .map((child: ChildElement, index: number) => {
+            .map((child: ChildElement, _index: number) => {
                 const children: CamelElement[] = CamelDefinitionApiExt.getElementChildren(step, child);
                 return children.length;
             })

@@ -71,18 +71,18 @@ export const useIntegrationStore = createWithEqualityFn<IntegrationState>(
         },
         files: [],
         setFiles: (files: IntegrationFile[]) => {
-            set((state: IntegrationState) => {
+            set(() => {
                 return { files: files };
             });
         },
         resetFiles: (files: IntegrationFile[]) => {
-            set((state: IntegrationState) => {
+            set(() => {
                 return { files: [...files] };
             });
         },
         variables: [],
         setVariables: (variables: string[]) => {
-            set((state: IntegrationState) => {
+            set(() => {
                 return { variables: [...variables] };
             });
         },
@@ -327,7 +327,7 @@ export const useDesignerStore = createWithEqualityFn<DesignerState & DesignerAct
             });
         },
         setBeans: (beans: BeanFactoryDefinition[]) => {
-            set((state: DesignerState) => {
+            set(() => {
                 return { beans: [...beans] };
             });
         },

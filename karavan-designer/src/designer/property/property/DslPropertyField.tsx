@@ -71,7 +71,6 @@ import {
     ExpressionDefinition,
     BeanFactoryDefinition,
 } from 'karavan-core/lib/model/CamelDefinition';
-import { TemplateApi } from 'karavan-core/lib/api/TemplateApi';
 import { KubernetesIcon } from '../../icons/ComponentIcons';
 import { BeanProperties } from './BeanProperties';
 import { PropertyPlaceholderDropdown } from './PropertyPlaceholderDropdown';
@@ -120,7 +119,6 @@ export function DslPropertyField(props: Props) {
     const [showEditor, setShowEditor] = useState<boolean>(false);
     const [infrastructureSelector, setInfrastructureSelector] = useState<boolean>(false);
     const [infrastructureSelectorProperty, setInfrastructureSelectorProperty] = useState<string | undefined>(undefined);
-    const [customCode, setCustomCode] = useState<string>('');
     const ref = useRef<any>(null);
     const [textValue, setTextValue] = useState<any>();
     const [variableType, setVariableType] = useState<'global:' | 'route:' | ''>('');
@@ -240,7 +238,7 @@ export function DslPropertyField(props: Props) {
                     <Tooltip position={'top'} content={<div>{tooltip}</div>}>
                         <button
                             className={className}
-                            onClick={(e) => props.onPropertyChange?.(property.name, x)}
+                            onClick={(_e) => props.onPropertyChange?.(property.name, x)}
                             aria-label='Add element'
                         >
                             {icon}
@@ -438,7 +436,7 @@ export function DslPropertyField(props: Props) {
                     <PropertyPlaceholderDropdown
                         property={property}
                         value={value}
-                        onDslPropertyChange={(_, v, newRoute) => {
+                        onDslPropertyChange={(_, v, _newRoute) => {
                             setTextValue(v);
                             propertyChanged(property.name, v);
                             setCheckChanges(true);
@@ -466,7 +464,7 @@ export function DslPropertyField(props: Props) {
                             position='bottom-end'
                             content={'Select from ' + capitalize(InfrastructureAPI.infrastructure)}
                         >
-                            <Button variant='control' onClick={(e) => openInfrastructureSelector(property.name)}>
+                            <Button variant='control' onClick={(_e) => openInfrastructureSelector(property.name)}>
                                 {icon}
                             </Button>
                         </Tooltip>
@@ -510,7 +508,7 @@ export function DslPropertyField(props: Props) {
                 {showEditorButton && (
                     <InputGroupItem>
                         <Tooltip position='bottom-end' content={'Show Editor'}>
-                            <Button variant='control' onClick={(e) => setShowEditor(!showEditor)}>
+                            <Button variant='control' onClick={(_e) => setShowEditor(!showEditor)}>
                                 <EditorIcon />
                             </Button>
                         </Tooltip>
@@ -538,7 +536,7 @@ export function DslPropertyField(props: Props) {
                     <PropertyPlaceholderDropdown
                         property={property}
                         value={value}
-                        onDslPropertyChange={(_, v, newRoute) => {
+                        onDslPropertyChange={(_, v, _newRoute) => {
                             setTextValue(v);
                             propertyChanged(property.name, v);
                             setCheckChanges(true);
@@ -549,24 +547,7 @@ export function DslPropertyField(props: Props) {
         );
     }
 
-    function showCode(name: string, javaType: string) {
-        const { property } = props;
-        InfrastructureAPI.onGetCustomCode?.(name, property.javaType)
-            .then((value) => {
-                if (value === undefined) {
-                    const code = TemplateApi.generateCode(property.javaType, name) || '';
-                    setCustomCode(code);
-                    setShowEditor(true);
-                } else {
-                    setCustomCode(value);
-                    setShowEditor(true);
-                }
-            })
-            .catch((reason: any) => {});
-    }
-
     function getJavaTypeGeneratedInput(property: PropertyMeta, value: any) {
-        const { dslLanguage } = props;
         const selectOptions: SelectOptionProps[] = [];
         if (beans) {
             selectOptions.push(
@@ -618,7 +599,7 @@ export function DslPropertyField(props: Props) {
                 </InputGroupItem>
                 <InputGroupItem>
                     <Tooltip position='bottom-end' content={'Show Editor'}>
-                        <Button variant='control' onClick={(e) => setShowEditor(!showEditor)}>
+                        <Button variant='control' onClick={(_e) => setShowEditor(!showEditor)}>
                             <EditorIcon />
                         </Button>
                     </Tooltip>
@@ -736,7 +717,7 @@ export function DslPropertyField(props: Props) {
                 onToggle={(_event, isExpanded) => {
                     openSelect(property.name, isExpanded);
                 }}
-                onSelect={(e, value, isPlaceholder) =>
+                onSelect={(_e, value, isPlaceholder) =>
                     propertyChanged(property.name, !isPlaceholder ? value : undefined)
                 }
                 selections={value}
@@ -766,7 +747,7 @@ export function DslPropertyField(props: Props) {
                 onToggle={(_event, isExpanded) => {
                     openSelect(property.name, isExpanded);
                 }}
-                onSelect={(e, value, isPlaceholder) =>
+                onSelect={(_e, value, isPlaceholder) =>
                     propertyChanged(property.name, !isPlaceholder ? value : undefined)
                 }
                 selections={value}
@@ -800,7 +781,7 @@ export function DslPropertyField(props: Props) {
                 onToggle={(_event, isExpanded) => {
                     openSelect(property.name, isExpanded);
                 }}
-                onSelect={(e, value, isPlaceholder) =>
+                onSelect={(_e, value, isPlaceholder) =>
                     propertyChanged(property.name, !isPlaceholder ? value : undefined)
                 }
                 selections={value}
@@ -876,11 +857,11 @@ export function DslPropertyField(props: Props) {
                         placeholderText='Select or type an URI'
                         variant={SelectVariant.typeahead}
                         aria-label={property.name}
-                        onClear={(event) => propertyChanged(property.name, undefined, undefined)}
+                        onClear={(_event) => propertyChanged(property.name, undefined, undefined)}
                         onToggle={(_event, isExpanded) => {
                             openSelect(property.name, isExpanded);
                         }}
-                        onSelect={(e, value, isPlaceholder) => {
+                        onSelect={(_e, value, isPlaceholder) => {
                             propertyChanged(property.name, !isPlaceholder ? value : undefined, undefined);
                         }}
                         selections={value}
@@ -898,7 +879,7 @@ export function DslPropertyField(props: Props) {
                         <Button
                             isDisabled={value === undefined}
                             variant='control'
-                            onClick={(e) => {
+                            onClick={(_e) => {
                                 if (value) {
                                     const newRoute = CamelUi.createNewInternalRoute(value);
                                     propertyChanged(property.name, value, newRoute);
@@ -950,7 +931,7 @@ export function DslPropertyField(props: Props) {
                 <Button
                     variant='link'
                     className='delete-button'
-                    onClick={(e) => {
+                    onClick={(_e) => {
                         const v = Array.from(value);
                         v.splice(index, 1);
                         propertyChanged(property.name, v);
@@ -984,7 +965,7 @@ export function DslPropertyField(props: Props) {
                 <Button
                     variant='link'
                     className='add-button'
-                    onClick={(e) => {
+                    onClick={(_e) => {
                         const valArray = value !== null ? [...value] : [];
                         valArray.push(CamelDefinitionApi.createStep(property.type, {}));
                         propertyChanged(property.name, valArray);
@@ -1022,7 +1003,7 @@ export function DslPropertyField(props: Props) {
                         </ChipGroup>
                     </TextInputGroupMain>
                     <TextInputGroupUtilities>
-                        <Button variant='plain' onClick={(e) => arraySave(property.name)} aria-label='Add element'>
+                        <Button variant='plain' onClick={(_e) => arraySave(property.name)} aria-label='Add element'>
                             <PlusIcon />
                         </Button>
                     </TextInputGroupUtilities>
@@ -1253,9 +1234,7 @@ export function DslPropertyField(props: Props) {
     const isVariable = getIsVariable();
     const beanConstructors = element?.dslName === 'BeanFactoryDefinition' && property.name === 'constructors';
     const beanProperties = element?.dslName === 'BeanFactoryDefinition' && property.name === 'properties';
-    const isSpi =
-        property.javaType.startsWith('org.apache.camel.spi') ||
-        property.javaType.startsWith('org.apache.camel.AggregationStrategy');
+
     return (
         <div>
             <FormGroup

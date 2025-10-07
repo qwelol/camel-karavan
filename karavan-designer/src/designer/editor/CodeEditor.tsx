@@ -24,7 +24,7 @@ import { CamelUtil } from 'karavan-core/lib/api/CamelUtil';
 
 export function CodeEditor() {
     const [integration, setIntegration] = useIntegrationStore((s) => [s.integration, s.setIntegration], shallow);
-    const [setNotification, badge] = useDesignerStore((s) => [s.setNotification, s.notificationBadge], shallow);
+    const [setNotification] = useDesignerStore((s) => [s.setNotification], shallow);
     const [code, setCode] = useState<string>('');
 
     useEffect(() => {
@@ -62,7 +62,7 @@ export function CodeEditor() {
             value={code}
             className={'code-editor'}
             defaultValue={code}
-            onChange={(value, ev) => onChange(value)}
+            onChange={(value) => onChange(value)}
         />
     );
 }

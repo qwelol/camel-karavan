@@ -15,19 +15,7 @@
  * limitations under the License.
  */
 import * as React from 'react';
-import {
-    Bullseye,
-    Button,
-    Divider,
-    Flex,
-    FlexItem,
-    Masthead,
-    Page,
-    PageSidebar,
-    PageSidebarBody,
-    Spinner,
-    Tooltip,
-} from '@patternfly/react-core';
+import { Bullseye, Button, Divider, Flex, FlexItem, Page, Spinner, Tooltip } from '@patternfly/react-core';
 import { KameletApi } from 'karavan-core/lib/api/KameletApi';
 import { ComponentApi } from 'karavan-core/lib/api/ComponentApi';
 import { BlueprintIcon } from '@patternfly/react-icons';
@@ -55,10 +43,9 @@ class MenuItem {
     }
 }
 
-export function App() {
+export default function App() {
     const [pageId, setPageId] = useState<string>('designer');
     const [name, setName] = useState<string>('example.yaml');
-    const [key, setKey] = useState<string>('');
     const [yaml, setYaml] = useState<string>('');
     const [loaded, setLoaded] = useState<boolean>(false);
 
@@ -88,11 +75,11 @@ export function App() {
                 KameletApi.saveKamelets(kamelets, true);
 
                 const jsons: string[] = [];
-                JSON.parse(data[1]).forEach((c: any) => jsons.push(JSON.stringify(c)));
+                JSON.parse(data[1]).forEach((c: unknown) => jsons.push(JSON.stringify(c)));
                 ComponentApi.saveComponents(jsons, true);
 
                 jsons.length = 0;
-                JSON.parse(data[2]).forEach((c: any) => jsons.push(JSON.stringify(c)));
+                JSON.parse(data[2]).forEach((c: unknown) => jsons.push(JSON.stringify(c)));
                 SpiBeanApi.saveSpiBeans(jsons, true);
 
                 setLoaded(true);
@@ -121,7 +108,7 @@ export function App() {
             });
     });
 
-    function save(filename: string, yaml: string, propertyOnly: boolean) {}
+    function save() {}
 
     function getSpinner() {
         return (
@@ -156,7 +143,7 @@ export function App() {
                                 icon={page.icon}
                                 variant={'plain'}
                                 className={pageId === page.pageId ? 'nav-button-selected' : ''}
-                                onClick={(event) => setPageId(page.pageId)}
+                                onClick={() => setPageId(page.pageId)}
                             />
                         </Tooltip>
                     </FlexItem>
@@ -172,20 +159,13 @@ export function App() {
         const dark = document.body.className.includes('vscode-dark');
         switch (pageId) {
             case 'designer':
-                return (
-                    <DesignerPage
-                        name={name}
-                        yaml={yaml}
-                        onSave={(filename, yaml1, propertyOnly) => save(filename, yaml1, propertyOnly)}
-                        dark={dark}
-                    />
-                );
+                return <DesignerPage name={name} yaml={yaml} onSave={save} dark={dark} />;
 
             case 'topology':
                 return (
                     <TopologyTab
                         files={[new IntegrationFile('demo.camel.yaml', yaml)]}
-                        onSetFile={(fileName) => {}}
+                        onSetFile={() => {}}
                         onClickAddRoute={() => {}}
                         onClickAddREST={() => {}}
                         onClickAddBean={() => {}}
@@ -194,18 +174,6 @@ export function App() {
                     />
                 );
         }
-    }
-
-    function getHeader() {
-        return <Masthead></Masthead>;
-    }
-
-    function getSidebar() {
-        return (
-            <PageSidebar isSidebarOpen={true} id='fill-sidebar'>
-                <PageSidebarBody>Navigation</PageSidebarBody>
-            </PageSidebar>
-        );
     }
 
     return (
@@ -226,5 +194,3 @@ export function App() {
         </Page>
     );
 }
-
-export default App;

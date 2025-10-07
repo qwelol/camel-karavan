@@ -40,29 +40,14 @@ interface Props {
 
 export function DslElement(props: Props) {
     const headerRef = React.useRef<HTMLDivElement>(null);
-    const {
-        selectElement,
-        moveElement,
-        onShowDeleteConfirmation,
-        openSelector,
-        isKamelet,
-        isSourceKamelet,
-        isActionKamelet,
-    } = useRouteDesignerHook();
+    const { selectElement, moveElement, openSelector } = useRouteDesignerHook();
 
     const [integration] = useIntegrationStore((s) => [s.integration], shallow);
 
-    const [selectedUuids, selectedStep, showMoveConfirmation, setShowMoveConfirmation, setMoveElements] =
-        useDesignerStore(
-            (s) => [
-                s.selectedUuids,
-                s.selectedStep,
-                s.showMoveConfirmation,
-                s.setShowMoveConfirmation,
-                s.setMoveElements,
-            ],
-            shallow,
-        );
+    const [selectedUuids, setShowMoveConfirmation, setMoveElements] = useDesignerStore(
+        (s) => [s.selectedUuids, s.setShowMoveConfirmation, s.setMoveElements],
+        shallow,
+    );
     const [isDragging, setIsDragging] = useState<boolean>(false);
 
     const [isDraggedOver, setIsDraggedOver] = useState<boolean>(false);
@@ -187,7 +172,7 @@ export function DslElement(props: Props) {
         return style;
     }
 
-    function getChildrenElementsStyle(child: ChildElement, notOnlySteps: boolean) {
+    function getChildrenElementsStyle(child: ChildElement, _notOnlySteps: boolean) {
         const style: CSSProperties = {
             borderColor: 'var(--step-border-color)',
             borderWidth: '1px',
