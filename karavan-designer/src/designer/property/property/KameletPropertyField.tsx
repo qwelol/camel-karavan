@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import {
     FormGroup,
     Popover,
@@ -31,16 +31,14 @@ import '@patternfly/patternfly/patternfly.css';
 import HelpIcon from '@patternfly/react-icons/dist/js/icons/help-icon';
 import { Property } from 'karavan-core/lib/model/KameletModels';
 import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
-import ShowIcon from '@patternfly/react-icons/dist/js/icons/eye-icon';
-import HideIcon from '@patternfly/react-icons/dist/js/icons/eye-slash-icon';
 import { usePropertiesHook } from '../usePropertiesHook';
 import { SelectDirection, SelectOption, SelectVariant } from '@patternfly/react-core/deprecated';
 import { PropertyPlaceholderDropdown } from './PropertyPlaceholderDropdown';
 import EditorIcon from '@patternfly/react-icons/dist/js/icons/code-icon';
 import {
-    InfrastructureDebouncedTextInput,
     InfrastructureManagedSelect,
     WithInfrastructureProps,
+    PasswordInfrastructureDebouncedTextInput,
 } from '../../utils/components';
 import NiceModal from '@ebay/nice-modal-react';
 import { ExpressionModal } from '../../utils/modals';
@@ -53,8 +51,6 @@ interface Props {
 
 export function KameletPropertyField(props: Props) {
     const { onParametersChange } = usePropertiesHook();
-
-    const [showPassword, setShowPassword] = useState<boolean>(false);
 
     function parametersChanged(parameter: string, value: string | number | boolean | any, pathParameter?: boolean) {
         onParametersChange(parameter, value, pathParameter);
@@ -112,10 +108,10 @@ export function KameletPropertyField(props: Props) {
                     </InfrastructureManagedSelect>
                 )}
                 {(!selectFromList || property.format === 'password') && (
-                    <InfrastructureDebouncedTextInput
+                    <PasswordInfrastructureDebouncedTextInput
                         className='text-field'
                         isRequired
-                        type={property.format && !showPassword ? 'password' : 'text'}
+                        isSecret={property.format === 'password'}
                         autoComplete='off'
                         id={id}
                         name={id}
@@ -166,13 +162,6 @@ export function KameletPropertyField(props: Props) {
                         }}
                     />
                 </InputGroupItem>
-                {property.format === 'password' && (
-                    <Tooltip position='bottom-end' content={showPassword ? 'Hide' : 'Show'}>
-                        <Button variant='control' onClick={(_e) => setShowPassword(!showPassword)}>
-                            {showPassword ? <ShowIcon /> : <HideIcon />}
-                        </Button>
-                    </Tooltip>
-                )}
             </InputGroup>
         );
     }

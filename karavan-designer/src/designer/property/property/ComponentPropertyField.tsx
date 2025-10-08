@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useState } from 'react';
+import React, { useId } from 'react';
 import {
     FormGroup,
     Popover,
@@ -36,8 +36,6 @@ import { CamelUi, RouteToCreate } from '../../utils/CamelUi';
 import { CamelElement } from 'karavan-core/lib/model/IntegrationDefinition';
 import { ToDefinition } from 'karavan-core/lib/model/CamelDefinition';
 import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
-import ShowIcon from '@patternfly/react-icons/dist/js/icons/eye-icon';
-import HideIcon from '@patternfly/react-icons/dist/js/icons/eye-slash-icon';
 import PlusIcon from '@patternfly/react-icons/dist/esm/icons/plus-icon';
 import { usePropertiesHook } from '../usePropertiesHook';
 import { useDesignerStore, useIntegrationStore } from '../../DesignerStore';
@@ -46,11 +44,10 @@ import EditorIcon from '@patternfly/react-icons/dist/js/icons/code-icon';
 import { PropertyPlaceholderDropdown } from './PropertyPlaceholderDropdown';
 import { INTERNAL_COMPONENTS } from 'karavan-core/lib/api/ComponentApi';
 import { PropertyUtil } from './PropertyUtil';
-import { DebouncedTextInput, InfrastructureDebouncedTextInput, ManagedSelect } from '../../utils/components';
+import { DebouncedTextInput, ManagedSelect, PasswordInfrastructureDebouncedTextInput } from '../../utils/components';
 import NiceModal from '@ebay/nice-modal-react';
 import { ExpressionModal } from '../../utils/modals';
 
-const prefix = 'parameters';
 const beanPrefix = '#bean:';
 
 interface Props {
@@ -71,8 +68,7 @@ export function ComponentPropertyField(props: Props) {
     const [integration, files] = useIntegrationStore((state) => [state.integration, state.files], shallow);
     const [beans] = useDesignerStore((s) => [s.beans], shallow);
 
-    const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [id] = useState<string>(prefix + '-' + props.property.name);
+    const id = useId();
 
     function parametersChanged(
         parameter: string,
@@ -96,7 +92,7 @@ export function ComponentPropertyField(props: Props) {
         return (
             <ManagedSelect
                 id={id}
-                name={id}
+                name={props.property.name}
                 variant={SelectVariant.typeahead}
                 aria-label={property.name}
                 onSelect={(_e, value, isPlaceholder) =>
@@ -156,11 +152,11 @@ export function ComponentPropertyField(props: Props) {
             );
         }
         return (
-            <InputGroup id={id} name={id}>
+            <InputGroup>
                 <InputGroupItem isFill>
                     <ManagedSelect
                         id={id}
-                        name={id}
+                        name={props.property.name}
                         placeholderText='Select or type an URI'
                         variant={SelectVariant.typeahead}
                         aria-label={property.name}
@@ -211,21 +207,21 @@ export function ComponentPropertyField(props: Props) {
 
         return (
             <InputGroup>
-                <InfrastructureDebouncedTextInput
+                <PasswordInfrastructureDebouncedTextInput
                     className='text-field'
                     isRequired
-                    type={property.secret && !showPassword ? 'password' : 'text'}
+                    isSecret={property.secret}
                     autoComplete='off'
                     id={id}
-                    name={id}
+                    name={props.property.name}
                     value={value !== undefined ? value : property.defaultValue}
-                    onChange={(v) => {
+                    onChange={(_, v) => {
                         parametersChanged(property.name, v, property.kind === 'path');
                     }}
                     debounceDelay={700}
                     showInfrastructureButton={showInfraSelectorButton}
                     currentValue={value}
-                    onInfrastructureSelect={(val) => {
+                    onInfrastructureSelect={(val: string) => {
                         parametersChanged(property.name, val);
                     }}
                 />
@@ -249,13 +245,6 @@ export function ComponentPropertyField(props: Props) {
                         </Button>
                     </Tooltip>
                 </InputGroupItem>
-                {property.secret && (
-                    <Tooltip position='bottom-end' content={showPassword ? 'Hide' : 'Show'}>
-                        <Button variant='control' onClick={(_e) => setShowPassword(!showPassword)}>
-                            {showPassword ? <ShowIcon /> : <HideIcon />}
-                        </Button>
-                    </Tooltip>
-                )}
                 <InputGroupItem>
                     <PropertyPlaceholderDropdown
                         property={property}
@@ -279,7 +268,7 @@ export function ComponentPropertyField(props: Props) {
                         type={property.secret ? 'password' : 'text'}
                         autoComplete='off'
                         id={id}
-                        name={id}
+                        name={props.property.name}
                         value={value !== undefined ? value : property.defaultValue}
                         onChange={(_, v) => {
                             parametersChanged(property.name, v, property.kind === 'path');
@@ -310,7 +299,7 @@ export function ComponentPropertyField(props: Props) {
         return (
             <ManagedSelect
                 id={id}
-                name={id}
+                name={props.property.name}
                 variant={SelectVariant.single}
                 aria-label={property.name}
                 onSelect={(e, value, isPlaceholder) =>
@@ -337,10 +326,10 @@ export function ComponentPropertyField(props: Props) {
                 <InputGroupItem>
                     <Switch
                         id={id}
-                        name={id}
+                        name={props.property.name}
                         isDisabled={isDisabled}
                         className='switch-placeholder'
-                        aria-label={id}
+                        aria-label={property.name}
                         isChecked={isChecked}
                         value={value?.toString()}
                         onChange={(_, v) => {

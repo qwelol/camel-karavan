@@ -14,13 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { withInfrastructure, WithInfrastructureProps } from './withInfrastructure';
-import { DebouncedTextInput, DebouncedTextInputProps } from './DebouncedTextInput';
-import { ManagedSelect, ManagedSelectProps } from './ManagedSelect';
+import { TextInput } from '@patternfly/react-core';
+import { withPasswordToggle } from './withPasswordToggle';
+import { InfrastructureDebouncedTextInput, InfrastructureDebouncedTextInputProps } from './InfrastructureComponents';
 
-export const InfrastructureDebouncedTextInput = withInfrastructure<DebouncedTextInputProps, HTMLInputElement>(
-    DebouncedTextInput,
+export const PasswordTextInput = withPasswordToggle<React.ComponentProps<typeof TextInput>, HTMLInputElement>(
+    TextInput,
 );
-export const InfrastructureManagedSelect = withInfrastructure<ManagedSelectProps, HTMLDivElement>(ManagedSelect);
 
-export type InfrastructureDebouncedTextInputProps = DebouncedTextInputProps & WithInfrastructureProps;
+export const PasswordInfrastructureDebouncedTextInput = withPasswordToggle<
+    InfrastructureDebouncedTextInputProps,
+    HTMLInputElement
+>(InfrastructureDebouncedTextInput);
