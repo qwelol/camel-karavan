@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     FormGroup,
     Popover,
@@ -31,13 +31,17 @@ import {
     Card,
     InputGroup,
     SelectOptionProps,
-    capitalize,
     InputGroupItem,
     TextVariants,
     ToggleGroup,
     ToggleGroupItem,
 } from '@patternfly/react-core';
-import { DebouncedTextInput, DebouncedTextArea, ManagedSelect } from '../../utils/components';
+import {
+    DebouncedTextInput,
+    DebouncedTextArea,
+    ManagedSelect,
+    InfrastructureDebouncedTextInput,
+} from '../../utils/components';
 import { SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
 import '../../karavan.css';
 import './DslPropertyField.css';
@@ -60,17 +64,15 @@ import { MediaTypes } from '../../utils/MediaTypes';
 import { ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
 import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
 import EditorIcon from '@patternfly/react-icons/dist/js/icons/code-icon';
-import DockerIcon from '@patternfly/react-icons/dist/js/icons/docker-icon';
 import { useDesignerStore, useIntegrationStore } from '../../DesignerStore';
 import { shallow } from 'zustand/shallow';
 import NiceModal from '@ebay/nice-modal-react';
-import { InfrastructureModal, ExpressionModal } from '../../utils/modals';
+import { ExpressionModal } from '../../utils/modals';
 import {
     DataFormatDefinition,
     ExpressionDefinition,
     BeanFactoryDefinition,
 } from 'karavan-core/lib/model/CamelDefinition';
-import { KubernetesIcon } from '../../icons/ComponentIcons';
 import { BeanProperties } from './BeanProperties';
 import { PropertyPlaceholderDropdown } from './PropertyPlaceholderDropdown';
 import { VariablesDropdown } from './VariablesDropdown';
@@ -114,7 +116,6 @@ export function DslPropertyField(props: Props) {
 
     const [isShowAdvanced, setIsShowAdvanced] = useState<string[]>([]);
     const [arrayValues, setArrayValues] = useState<Map<string, string>>(new Map<string, string>());
-    const ref = useRef<any>(null);
     const [variableType, setVariableType] = useState<'global:' | 'route:' | ''>('');
 
     useEffect(() => {
@@ -235,22 +236,6 @@ export function DslPropertyField(props: Props) {
         );
     }
 
-    function selectInfrastructure(propertyName: string, value: string) {
-        // check if there is a selection
-        const textVal = ref.current;
-        if (textVal != null) {
-            const cursorStart = textVal.selectionStart;
-            const cursorEnd = textVal.selectionEnd;
-            if (cursorStart !== cursorEnd) {
-                const prevValue = props.value;
-                const selectedText = prevValue.substring(cursorStart, cursorEnd);
-                value = prevValue.replace(selectedText, value);
-            }
-        }
-        if (value.startsWith('config') || value.startsWith('secret')) value = '{{' + value + '}}';
-        propertyChanged(propertyName, value);
-    }
-
     function getVariableInput(property: PropertyMeta) {
         const variableValue = value?.toString().replace(GLOBAL, '').replace(ROUTE, '') || '';
         return (
@@ -292,7 +277,6 @@ export function DslPropertyField(props: Props) {
                 </InputGroupItem>
                 <InputGroupItem isFill>
                     <DebouncedTextInput
-                        ref={ref}
                         className='text-field route-variable'
                         isRequired
                         type='text'
@@ -330,7 +314,6 @@ export function DslPropertyField(props: Props) {
             <InputGroup>
                 <InputGroupItem isFill>
                     <DebouncedTextInput
-                        ref={ref}
                         className='text-field'
                         isRequired
                         type={property.secret ? 'password' : 'text'}
@@ -368,36 +351,15 @@ export function DslPropertyField(props: Props) {
     function getStringInput(property: PropertyMeta) {
         const inInfrastructure = InfrastructureAPI.infrastructure !== 'local';
         const noInfraSelectorButton = ['uri', 'id', 'description', 'group'].includes(property.name);
-        const icon =
-            InfrastructureAPI.infrastructure === 'kubernetes' ? KubernetesIcon('infra-button') : <DockerIcon />;
+        const showInfraSelectorButton = inInfrastructure && !noInfraSelectorButton;
+
         const isNumber = ['integer', 'number', 'duration'].includes(property.type);
         const uriReadOnly = isUriReadOnly(property);
         const showEditorButton =
             !uriReadOnly && !isNumber && !property.secret && !['id', 'description'].includes(property.name);
         return (
             <InputGroup>
-                {inInfrastructure && !noInfraSelectorButton && (
-                    <InputGroupItem>
-                        <Tooltip
-                            position='bottom-end'
-                            content={'Select from ' + capitalize(InfrastructureAPI.infrastructure)}
-                        >
-                            <Button
-                                variant='control'
-                                onClick={async () => {
-                                    const value = await NiceModal.show(InfrastructureModal, {});
-                                    if (typeof value === 'string') {
-                                        selectInfrastructure(property.name, value);
-                                    }
-                                }}
-                            >
-                                {icon}
-                            </Button>
-                        </Tooltip>
-                    </InputGroupItem>
-                )}
-                <DebouncedTextInput
-                    ref={ref}
+                <InfrastructureDebouncedTextInput
                     className='text-field'
                     isRequired
                     type={property.secret ? 'password' : 'text'}
@@ -416,6 +378,11 @@ export function DslPropertyField(props: Props) {
                         }
                     }}
                     readOnlyVariant={uriReadOnly ? 'default' : undefined}
+                    showInfrastructureButton={showInfraSelectorButton}
+                    currentValue={value}
+                    onInfrastructureSelect={(val) => {
+                        propertyChanged(property.name, val);
+                    }}
                 />
                 {showEditorButton && (
                     <InputGroupItem>

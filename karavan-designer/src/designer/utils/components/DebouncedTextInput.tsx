@@ -18,7 +18,7 @@ import React, { useCallback, useState, forwardRef } from 'react';
 import { TextInput, TextInputProps } from '@patternfly/react-core';
 import { useDebounce } from '../hooks/useDebounce';
 
-interface DebouncedTextInputProps extends Omit<TextInputProps, 'onChange'> {
+export interface DebouncedTextInputProps extends Omit<TextInputProps, 'onChange'> {
     debounceDelay?: number;
     onChange?: (event: React.FormEvent<HTMLInputElement>, value: string) => void;
 }

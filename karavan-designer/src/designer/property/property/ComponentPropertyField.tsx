@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
     FormGroup,
     Popover,
@@ -22,7 +22,6 @@ import {
     InputGroup,
     Tooltip,
     Button,
-    capitalize,
     InputGroupItem,
     TextInputGroup,
     TextVariants,
@@ -37,21 +36,19 @@ import { CamelUi, RouteToCreate } from '../../utils/CamelUi';
 import { CamelElement } from 'karavan-core/lib/model/IntegrationDefinition';
 import { ToDefinition } from 'karavan-core/lib/model/CamelDefinition';
 import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
-import DockerIcon from '@patternfly/react-icons/dist/js/icons/docker-icon';
 import ShowIcon from '@patternfly/react-icons/dist/js/icons/eye-icon';
 import HideIcon from '@patternfly/react-icons/dist/js/icons/eye-slash-icon';
 import PlusIcon from '@patternfly/react-icons/dist/esm/icons/plus-icon';
 import { usePropertiesHook } from '../usePropertiesHook';
 import { useDesignerStore, useIntegrationStore } from '../../DesignerStore';
 import { shallow } from 'zustand/shallow';
-import { KubernetesIcon } from '../../icons/ComponentIcons';
 import EditorIcon from '@patternfly/react-icons/dist/js/icons/code-icon';
 import { PropertyPlaceholderDropdown } from './PropertyPlaceholderDropdown';
 import { INTERNAL_COMPONENTS } from 'karavan-core/lib/api/ComponentApi';
 import { PropertyUtil } from './PropertyUtil';
-import { DebouncedTextInput, ManagedSelect } from '../../utils/components';
+import { DebouncedTextInput, InfrastructureDebouncedTextInput, ManagedSelect } from '../../utils/components';
 import NiceModal from '@ebay/nice-modal-react';
-import { InfrastructureModal, ExpressionModal } from '../../utils/modals';
+import { ExpressionModal } from '../../utils/modals';
 
 const prefix = 'parameters';
 const beanPrefix = '#bean:';
@@ -76,7 +73,6 @@ export function ComponentPropertyField(props: Props) {
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [id] = useState<string>(prefix + '-' + props.property.name);
-    const ref = useRef<any>(null);
 
     function parametersChanged(
         parameter: string,
@@ -208,63 +204,32 @@ export function ComponentPropertyField(props: Props) {
         );
     }
 
-    function selectInfrastructure(propertyName: string, value: string) {
-        // check if there is a selection
-        const textVal = ref.current;
-        if (textVal != null) {
-            const cursorStart = textVal.selectionStart;
-            const cursorEnd = textVal.selectionEnd;
-            if (cursorStart !== cursorEnd) {
-                const prevValue = props.value;
-                const selectedText = prevValue.substring(cursorStart, cursorEnd);
-                value = prevValue.replace(selectedText, value);
-            }
-        }
-        if (value.startsWith('config') || value.startsWith('secret')) value = '{{' + value + '}}';
-        parametersChanged(propertyName, value);
-    }
-
     function getStringInput(property: ComponentProperty) {
         const inInfrastructure = InfrastructureAPI.infrastructure !== 'local';
         const noInfraSelectorButton = ['uri', 'id', 'description', 'group'].includes(property.name);
-        const icon =
-            InfrastructureAPI.infrastructure === 'kubernetes' ? KubernetesIcon('infra-button') : <DockerIcon />;
+        const showInfraSelectorButton = inInfrastructure && !noInfraSelectorButton;
+
         return (
             <InputGroup>
-                {inInfrastructure && !noInfraSelectorButton && (
-                    <Tooltip
-                        position='bottom-end'
-                        content={'Select from ' + capitalize(InfrastructureAPI.infrastructure)}
-                    >
-                        <Button
-                            variant='control'
-                            onClick={async () => {
-                                const value = await NiceModal.show(InfrastructureModal, {});
-                                if (typeof value === 'string') {
-                                    selectInfrastructure(property.name, value);
-                                }
-                            }}
-                        >
-                            {icon}
-                        </Button>
-                    </Tooltip>
-                )}
-                {property.secret && (
-                    <DebouncedTextInput
-                        className='text-field'
-                        isRequired
-                        ref={ref}
-                        type={property.secret && !showPassword ? 'password' : 'text'}
-                        autoComplete='off'
-                        id={id}
-                        name={id}
-                        value={value !== undefined ? value : property.defaultValue}
-                        onChange={(_, v) => {
-                            parametersChanged(property.name, v, property.kind === 'path');
-                        }}
-                        debounceDelay={700}
-                    />
-                )}
+                <InfrastructureDebouncedTextInput
+                    className='text-field'
+                    isRequired
+                    type={property.secret && !showPassword ? 'password' : 'text'}
+                    autoComplete='off'
+                    id={id}
+                    name={id}
+                    value={value !== undefined ? value : property.defaultValue}
+                    onChange={(v) => {
+                        parametersChanged(property.name, v, property.kind === 'path');
+                    }}
+                    debounceDelay={700}
+                    showInfrastructureButton={showInfraSelectorButton}
+                    currentValue={value}
+                    onInfrastructureSelect={(val) => {
+                        parametersChanged(property.name, val);
+                    }}
+                />
+
                 <InputGroupItem>
                     <Tooltip position='bottom-end' content={'Show Editor'}>
                         <Button

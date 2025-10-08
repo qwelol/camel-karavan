@@ -17,7 +17,7 @@
 import React, { useState, useCallback } from 'react';
 import { Select, SelectProps, SelectOptionObject } from '@patternfly/react-core/deprecated';
 
-interface ManagedSelectProps extends Omit<SelectProps, 'isOpen' | 'onToggle' | 'onSelect'> {
+export interface ManagedSelectProps extends Omit<SelectProps, 'isOpen' | 'onToggle' | 'onSelect'> {
     onSelect: NonNullable<SelectProps['onSelect']>;
 }
 

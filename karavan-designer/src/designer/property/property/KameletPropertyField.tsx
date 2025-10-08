@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
     FormGroup,
     Popover,
@@ -22,7 +22,6 @@ import {
     InputGroup,
     Button,
     Tooltip,
-    capitalize,
     Text,
     TextVariants,
     InputGroupItem,
@@ -34,15 +33,17 @@ import { Property } from 'karavan-core/lib/model/KameletModels';
 import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
 import ShowIcon from '@patternfly/react-icons/dist/js/icons/eye-icon';
 import HideIcon from '@patternfly/react-icons/dist/js/icons/eye-slash-icon';
-import DockerIcon from '@patternfly/react-icons/dist/js/icons/docker-icon';
 import { usePropertiesHook } from '../usePropertiesHook';
 import { SelectDirection, SelectOption, SelectVariant } from '@patternfly/react-core/deprecated';
-import { KubernetesIcon } from '../../icons/ComponentIcons';
 import { PropertyPlaceholderDropdown } from './PropertyPlaceholderDropdown';
 import EditorIcon from '@patternfly/react-icons/dist/js/icons/code-icon';
-import { DebouncedTextInput, ManagedSelect } from '../../utils/components';
+import {
+    InfrastructureDebouncedTextInput,
+    InfrastructureManagedSelect,
+    WithInfrastructureProps,
+} from '../../utils/components';
 import NiceModal from '@ebay/nice-modal-react';
-import { InfrastructureModal, ExpressionModal } from '../../utils/modals';
+import { ExpressionModal } from '../../utils/modals';
 
 interface Props {
     property: Property;
@@ -54,26 +55,9 @@ export function KameletPropertyField(props: Props) {
     const { onParametersChange } = usePropertiesHook();
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
-    const ref = useRef<any>(null);
 
     function parametersChanged(parameter: string, value: string | number | boolean | any, pathParameter?: boolean) {
         onParametersChange(parameter, value, pathParameter);
-    }
-
-    function selectInfrastructure(propertyId: string, value: string) {
-        // check if there is a selection
-        const textVal = ref.current;
-        if (textVal != null) {
-            const cursorStart = textVal.selectionStart;
-            const cursorEnd = textVal.selectionEnd;
-            if (cursorStart !== cursorEnd) {
-                const prevValue = props.value;
-                const selectedText = prevValue.substring(cursorStart, cursorEnd);
-                value = prevValue.replace(selectedText, value);
-            }
-        }
-        if (value.startsWith('config') || value.startsWith('secret')) value = '{{' + value + '}}';
-        parametersChanged(propertyId, value);
     }
 
     function getSpecialStringInput() {
@@ -82,12 +66,12 @@ export function KameletPropertyField(props: Props) {
         const id = prefix + '-' + property.id;
         const inInfrastructure = InfrastructureAPI.infrastructure !== 'local';
         const noInfraSelectorButton = ['uri', 'id', 'description', 'group'].includes(property.id);
-        const icon =
-            InfrastructureAPI.infrastructure === 'kubernetes' ? KubernetesIcon('infra-button') : <DockerIcon />;
+
         const showInfraSelectorButton = inInfrastructure && !noInfraSelectorButton;
         const showEditorButton = property.type === 'string' && property.format !== 'password';
         const selectFromList: boolean = property.enum !== undefined && property?.enum?.length > 0;
         const selectOptions: JSX.Element[] = [];
+
         if (selectFromList && property.enum) {
             selectOptions.push(
                 ...property.enum.map((value: string) => (
@@ -95,28 +79,19 @@ export function KameletPropertyField(props: Props) {
                 )),
             );
         }
+
+        const infrastructureProps: WithInfrastructureProps = {
+            showInfrastructureButton: showInfraSelectorButton,
+            currentValue: value,
+            onInfrastructureSelect: (val) => {
+                parametersChanged(property.id, val);
+            },
+        };
+
         return (
             <InputGroup>
-                {showInfraSelectorButton && (
-                    <Tooltip
-                        position='bottom-end'
-                        content={'Select from ' + capitalize(InfrastructureAPI.infrastructure)}
-                    >
-                        <Button
-                            variant='control'
-                            onClick={async () => {
-                                const value = await NiceModal.show(InfrastructureModal, {});
-                                if (typeof value === 'string') {
-                                    selectInfrastructure(property.id, value);
-                                }
-                            }}
-                        >
-                            {icon}
-                        </Button>
-                    </Tooltip>
-                )}
                 {selectFromList && (
-                    <ManagedSelect
+                    <InfrastructureManagedSelect
                         id={id}
                         name={id}
                         placeholderText='Select or type an URI'
@@ -131,13 +106,13 @@ export function KameletPropertyField(props: Props) {
                         isInputFilterPersisted={true}
                         aria-labelledby={property.id}
                         direction={SelectDirection.down}
+                        {...infrastructureProps}
                     >
                         {selectOptions}
-                    </ManagedSelect>
+                    </InfrastructureManagedSelect>
                 )}
                 {(!selectFromList || property.format === 'password') && (
-                    <DebouncedTextInput
-                        ref={ref}
+                    <InfrastructureDebouncedTextInput
                         className='text-field'
                         isRequired
                         type={property.format && !showPassword ? 'password' : 'text'}
@@ -158,6 +133,7 @@ export function KameletPropertyField(props: Props) {
                             ) : undefined
                         }
                         debounceDelay={700}
+                        {...infrastructureProps}
                     />
                 )}
                 {showEditorButton && (
