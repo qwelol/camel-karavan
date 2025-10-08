@@ -37,8 +37,8 @@ import {
     ToggleGroup,
     ToggleGroupItem,
 } from '@patternfly/react-core';
-import { DebouncedTextInput, DebouncedTextArea } from '../../utils/components';
-import { Select, SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
+import { DebouncedTextInput, DebouncedTextArea, ManagedSelect } from '../../utils/components';
+import { SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
 import '../../karavan.css';
 import './DslPropertyField.css';
 import '@patternfly/patternfly/patternfly.css';
@@ -114,7 +114,6 @@ export function DslPropertyField(props: Props) {
 
     const [isShowAdvanced, setIsShowAdvanced] = useState<string[]>([]);
     const [arrayValues, setArrayValues] = useState<Map<string, string>>(new Map<string, string>());
-    const [selectStatus, setSelectStatus] = useState<Map<string, boolean>>(new Map<string, boolean>());
     const ref = useRef<any>(null);
     const [variableType, setVariableType] = useState<'global:' | 'route:' | ''>('');
 
@@ -134,21 +133,8 @@ export function DslPropertyField(props: Props) {
         }
     }
 
-    function openSelect(propertyName: string, isExpanded: boolean) {
-        setSelectStatus(new Map<string, boolean>([[propertyName, isExpanded]]));
-    }
-
-    function clearSelection(propertyName: string) {
-        setSelectStatus(new Map<string, boolean>([[propertyName, false]]));
-    }
-
-    function isSelectOpen(propertyName: string): boolean {
-        return selectStatus.get(propertyName) === true;
-    }
-
     function propertyChanged(fieldId: string, value: string | number | boolean | any, newRoute?: RouteToCreate) {
         props.onPropertyChange?.(fieldId, value, newRoute);
-        clearSelection(fieldId);
         if (isVariable) {
             addVariable(value);
         }
@@ -613,22 +599,18 @@ export function DslPropertyField(props: Props) {
             );
         }
         return (
-            <Select
+            <ManagedSelect
                 variant={SelectVariant.single}
                 aria-label={property.name}
-                onToggle={(_event, isExpanded) => {
-                    openSelect(property.name, isExpanded);
-                }}
                 onSelect={(_e, value, isPlaceholder) =>
                     propertyChanged(property.name, !isPlaceholder ? value : undefined)
                 }
                 selections={value}
-                isOpen={isSelectOpen(property.name)}
                 aria-labelledby={property.name}
                 direction={SelectDirection.down}
             >
                 {selectOptions}
-            </Select>
+            </ManagedSelect>
         );
     }
 
@@ -643,23 +625,19 @@ export function DslPropertyField(props: Props) {
             );
         }
         return (
-            <Select
+            <ManagedSelect
                 variant={SelectVariant.single}
                 aria-label={property.name}
-                onToggle={(_event, isExpanded) => {
-                    openSelect(property.name, isExpanded);
-                }}
                 onSelect={(_e, value, isPlaceholder) =>
                     propertyChanged(property.name, !isPlaceholder ? value : undefined)
                 }
                 selections={value}
-                isOpen={isSelectOpen(property.name)}
                 id={property.name}
                 aria-labelledby={property.name}
                 direction={SelectDirection.down}
             >
                 {selectOptions}
-            </Select>
+            </ManagedSelect>
         );
     }
 
@@ -676,18 +654,14 @@ export function DslPropertyField(props: Props) {
 
     function getMediaTypeSelect(property: PropertyMeta, value: any) {
         return (
-            <Select
+            <ManagedSelect
                 placeholderText='Select Media Type'
                 variant={SelectVariant.typeahead}
                 aria-label={property.name}
-                onToggle={(_event, isExpanded) => {
-                    openSelect(property.name, isExpanded);
-                }}
                 onSelect={(_e, value, isPlaceholder) =>
                     propertyChanged(property.name, !isPlaceholder ? value : undefined)
                 }
                 selections={value}
-                isOpen={isSelectOpen(property.name)}
                 isCreatable={false}
                 isInputFilterPersisted={false}
                 onFilter={(e, text) => getMediaTypeSelectOptions(text)}
@@ -695,7 +669,7 @@ export function DslPropertyField(props: Props) {
                 direction={SelectDirection.down}
             >
                 {getMediaTypeSelectOptions()}
-            </Select>
+            </ManagedSelect>
         );
     }
 
@@ -755,26 +729,22 @@ export function DslPropertyField(props: Props) {
         return (
             <InputGroup id={property.name} name={property.name}>
                 <InputGroupItem isFill>
-                    <Select
+                    <ManagedSelect
                         placeholderText='Select or type an URI'
                         variant={SelectVariant.typeahead}
                         aria-label={property.name}
                         onClear={(_event) => propertyChanged(property.name, undefined, undefined)}
-                        onToggle={(_event, isExpanded) => {
-                            openSelect(property.name, isExpanded);
-                        }}
                         onSelect={(_e, value, isPlaceholder) => {
                             propertyChanged(property.name, !isPlaceholder ? value : undefined, undefined);
                         }}
                         selections={value}
-                        isOpen={isSelectOpen(property.name)}
                         isCreatable={true}
                         isInputFilterPersisted={true}
                         aria-labelledby={property.name}
                         direction={SelectDirection.down}
                     >
                         {selectOptions}
-                    </Select>
+                    </ManagedSelect>
                 </InputGroupItem>
                 <InputGroupItem>
                     <Tooltip position='bottom-end' content={'Create route'}>

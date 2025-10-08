@@ -28,7 +28,7 @@ import {
     TextVariants,
     Text,
 } from '@patternfly/react-core';
-import { Select, SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
+import { SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
 import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
 import HelpIcon from '@patternfly/react-icons/dist/js/icons/help-icon';
@@ -49,7 +49,7 @@ import EditorIcon from '@patternfly/react-icons/dist/js/icons/code-icon';
 import { PropertyPlaceholderDropdown } from './PropertyPlaceholderDropdown';
 import { INTERNAL_COMPONENTS } from 'karavan-core/lib/api/ComponentApi';
 import { PropertyUtil } from './PropertyUtil';
-import { DebouncedTextInput } from '../../utils/components';
+import { DebouncedTextInput, ManagedSelect } from '../../utils/components';
 import NiceModal from '@ebay/nice-modal-react';
 import { InfrastructureModal, ExpressionModal } from '../../utils/modals';
 
@@ -74,7 +74,6 @@ export function ComponentPropertyField(props: Props) {
     const [integration, files] = useIntegrationStore((state) => [state.integration, state.files], shallow);
     const [beans] = useDesignerStore((s) => [s.beans], shallow);
 
-    const [selectStatus, setSelectStatus] = useState<Map<string, boolean>>(new Map<string, boolean>());
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [id] = useState<string>(prefix + '-' + props.property.name);
     const ref = useRef<any>(null);
@@ -86,15 +85,6 @@ export function ComponentPropertyField(props: Props) {
         newRoute?: RouteToCreate,
     ) {
         onParametersChange(parameter, value, pathParameter, newRoute);
-        setSelectStatus(new Map<string, boolean>([[parameter, false]]));
-    }
-
-    function openSelect(propertyName: string, isExpanded: boolean) {
-        setSelectStatus(new Map<string, boolean>([[propertyName, isExpanded]]));
-    }
-
-    function isSelectOpen(propertyName: string): boolean {
-        return selectStatus.has(propertyName) && selectStatus.get(propertyName) === true;
     }
 
     function getSelectBean(property: ComponentProperty, value: any) {
@@ -108,26 +98,22 @@ export function ComponentPropertyField(props: Props) {
             );
         }
         return (
-            <Select
+            <ManagedSelect
                 id={id}
                 name={id}
                 variant={SelectVariant.typeahead}
                 aria-label={property.name}
-                onToggle={(_event, isExpanded) => {
-                    openSelect(property.name, isExpanded);
-                }}
                 onSelect={(_e, value, isPlaceholder) =>
                     parametersChanged(property.name, !isPlaceholder ? value : undefined)
                 }
                 selections={value}
                 isCreatable={true}
                 createText=''
-                isOpen={isSelectOpen(property.name)}
                 aria-labelledby={property.name}
                 direction={SelectDirection.down}
             >
                 {selectOptions}
-            </Select>
+            </ManagedSelect>
         );
     }
 
@@ -176,15 +162,12 @@ export function ComponentPropertyField(props: Props) {
         return (
             <InputGroup id={id} name={id}>
                 <InputGroupItem isFill>
-                    <Select
+                    <ManagedSelect
                         id={id}
                         name={id}
                         placeholderText='Select or type an URI'
                         variant={SelectVariant.typeahead}
                         aria-label={property.name}
-                        onToggle={(_event, isExpanded) => {
-                            openSelect(property.name, isExpanded);
-                        }}
                         onSelect={(e, value, isPlaceholder) => {
                             parametersChanged(
                                 property.name,
@@ -194,7 +177,6 @@ export function ComponentPropertyField(props: Props) {
                             );
                         }}
                         selections={value}
-                        isOpen={isSelectOpen(property.name)}
                         isCreatable={true}
                         createText=''
                         isInputFilterPersisted={true}
@@ -202,7 +184,7 @@ export function ComponentPropertyField(props: Props) {
                         direction={SelectDirection.down}
                     >
                         {selectOptions}
-                    </Select>
+                    </ManagedSelect>
                 </InputGroupItem>
                 <InputGroupItem>
                     <Tooltip position='bottom-end' content={'Create route'}>
@@ -361,24 +343,20 @@ export function ComponentPropertyField(props: Props) {
             property.enum.forEach((v) => selectOptions.push(<SelectOption key={v} value={v} />));
         }
         return (
-            <Select
+            <ManagedSelect
                 id={id}
                 name={id}
                 variant={SelectVariant.single}
                 aria-label={property.name}
-                onToggle={(_event, isExpanded) => {
-                    openSelect(property.name, isExpanded);
-                }}
                 onSelect={(e, value, isPlaceholder) =>
                     parametersChanged(property.name, !isPlaceholder ? value : undefined, property.kind === 'path')
                 }
                 selections={value !== undefined ? value.toString() : property.defaultValue}
-                isOpen={isSelectOpen(property.name)}
                 aria-labelledby={property.name}
                 direction={SelectDirection.down}
             >
                 {selectOptions}
-            </Select>
+            </ManagedSelect>
         );
     }
 

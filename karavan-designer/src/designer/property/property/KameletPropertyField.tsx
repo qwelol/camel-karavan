@@ -36,11 +36,11 @@ import ShowIcon from '@patternfly/react-icons/dist/js/icons/eye-icon';
 import HideIcon from '@patternfly/react-icons/dist/js/icons/eye-slash-icon';
 import DockerIcon from '@patternfly/react-icons/dist/js/icons/docker-icon';
 import { usePropertiesHook } from '../usePropertiesHook';
-import { Select, SelectDirection, SelectOption, SelectVariant } from '@patternfly/react-core/deprecated';
+import { SelectDirection, SelectOption, SelectVariant } from '@patternfly/react-core/deprecated';
 import { KubernetesIcon } from '../../icons/ComponentIcons';
 import { PropertyPlaceholderDropdown } from './PropertyPlaceholderDropdown';
 import EditorIcon from '@patternfly/react-icons/dist/js/icons/code-icon';
-import { DebouncedTextInput } from '../../utils/components';
+import { DebouncedTextInput, ManagedSelect } from '../../utils/components';
 import NiceModal from '@ebay/nice-modal-react';
 import { InfrastructureModal, ExpressionModal } from '../../utils/modals';
 
@@ -54,20 +54,10 @@ export function KameletPropertyField(props: Props) {
     const { onParametersChange } = usePropertiesHook();
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [selectStatus, setSelectStatus] = useState<Map<string, boolean>>(new Map<string, boolean>());
     const ref = useRef<any>(null);
 
     function parametersChanged(parameter: string, value: string | number | boolean | any, pathParameter?: boolean) {
         onParametersChange(parameter, value, pathParameter);
-        setSelectStatus(new Map<string, boolean>([[parameter, false]]));
-    }
-
-    function openSelect(propertyName: string, isExpanded: boolean) {
-        setSelectStatus(new Map<string, boolean>([[propertyName, isExpanded]]));
-    }
-
-    function isSelectOpen(propertyName: string): boolean {
-        return selectStatus.has(propertyName) && selectStatus.get(propertyName) === true;
     }
 
     function selectInfrastructure(propertyId: string, value: string) {
@@ -126,20 +116,16 @@ export function KameletPropertyField(props: Props) {
                     </Tooltip>
                 )}
                 {selectFromList && (
-                    <Select
+                    <ManagedSelect
                         id={id}
                         name={id}
                         placeholderText='Select or type an URI'
                         variant={SelectVariant.typeahead}
                         aria-label={property.id}
-                        onToggle={(_event, isExpanded) => {
-                            openSelect(property.id, isExpanded);
-                        }}
                         onSelect={(_e, value, _isPlaceholder) => {
                             parametersChanged(property.id, value);
                         }}
                         selections={value}
-                        isOpen={isSelectOpen(property.id)}
                         isCreatable={true}
                         createText=''
                         isInputFilterPersisted={true}
@@ -147,7 +133,7 @@ export function KameletPropertyField(props: Props) {
                         direction={SelectDirection.down}
                     >
                         {selectOptions}
-                    </Select>
+                    </ManagedSelect>
                 )}
                 {(!selectFromList || property.format === 'password') && (
                     <DebouncedTextInput
