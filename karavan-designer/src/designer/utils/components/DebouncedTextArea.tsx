@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useCallback, useState, forwardRef } from 'react';
+import React, { useCallback, useState, forwardRef, useRef, useEffect } from 'react';
 import { TextArea, TextAreaProps } from '@patternfly/react-core';
 import { useDebounce } from '../hooks/useDebounce';
 
@@ -27,6 +27,7 @@ export const DebouncedTextArea = forwardRef<HTMLTextAreaElement, DebouncedTextAr
     ({ debounceDelay = 1000, onChange, value, ...props }, ref) => {
         const stringValue = value?.toString() || '';
         const [localValue, setLocalValue] = useState<string>(stringValue);
+        const previousValueRef = useRef<string>(stringValue);
 
         const debouncedOnChange = useDebounce(
             useCallback(
@@ -46,11 +47,13 @@ export const DebouncedTextArea = forwardRef<HTMLTextAreaElement, DebouncedTextAr
             [debouncedOnChange],
         );
 
-        React.useEffect(() => {
-            if (stringValue !== localValue) {
+        // Синхронизируем localValue только когда внешний value действительно изменился
+        useEffect(() => {
+            if (stringValue !== previousValueRef.current) {
                 setLocalValue(stringValue);
+                previousValueRef.current = stringValue;
             }
-        }, [stringValue, localValue]);
+        }, [stringValue]);
 
         return <TextArea {...props} ref={ref} value={localValue} onChange={handleChange} />;
     },
