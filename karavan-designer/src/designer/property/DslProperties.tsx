@@ -14,19 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import {
     Form,
     Text,
     Title,
     TextVariants,
-    ExpandableSection,
     Button,
     Tooltip,
     ToggleGroupItem,
     ToggleGroup,
     TextInput,
 } from '@patternfly/react-core';
+import { ExpandableSectionWrapper } from '../utils/components';
 import '../karavan.css';
 import './DslProperties.css';
 import '@patternfly/patternfly/patternfly.css';
@@ -69,8 +69,6 @@ export function DslProperties(props: Props) {
             ],
             shallow,
         );
-
-    const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
 
     function getClonableElementHeader(): React.JSX.Element {
         const title = selectedStep && CamelDisplayUtil.getTitle(selectedStep);
@@ -217,10 +215,6 @@ export function DslProperties(props: Props) {
         return requiredOnly || changedOnly || propertyFilter?.trim().length > 0;
     }
 
-    function getShowExpanded(): boolean {
-        return showAdvanced || getPropertySelectorChanged();
-    }
-
     return (
         <div key={selectedStep ? selectedStep.uuid : 'integration'} className='properties'>
             <Form autoComplete='off' onSubmit={(event) => event.preventDefault()}>
@@ -238,13 +232,12 @@ export function DslProperties(props: Props) {
                     />
                 )}
                 {selectedStep && propertiesAdvanced.length > 0 && (
-                    <ExpandableSection
+                    <ExpandableSectionWrapper
                         toggleText={'EIP advanced properties'}
-                        onToggle={(_event, _isExpanded) => setShowAdvanced(!showAdvanced)}
-                        isExpanded={getShowExpanded()}
+                        strictExpanded={getPropertySelectorChanged()}
                     >
                         <div className='parameters'>{getPropertyFields(propertiesAdvanced)}</div>
-                    </ExpandableSection>
+                    </ExpandableSectionWrapper>
                 )}
             </Form>
         </div>

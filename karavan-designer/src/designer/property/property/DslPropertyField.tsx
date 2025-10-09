@@ -19,7 +19,6 @@ import {
     FormGroup,
     Popover,
     Switch,
-    ExpandableSection,
     Chip,
     TextInputGroup,
     TextInputGroupMain,
@@ -41,6 +40,7 @@ import {
     DebouncedTextArea,
     ManagedSelect,
     InfrastructureDebouncedTextInput,
+    ExpandableSectionWrapper,
 } from '../../utils/components';
 import { SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
 import '../../karavan.css';
@@ -114,7 +114,6 @@ export function DslPropertyField(props: Props) {
         shallow,
     );
 
-    const [isShowAdvanced, setIsShowAdvanced] = useState<string[]>([]);
     const [arrayValues, setArrayValues] = useState<Map<string, string>>(new Map<string, string>());
     const [variableType, setVariableType] = useState<'global:' | 'route:' | ''>('');
 
@@ -917,20 +916,7 @@ export function DslPropertyField(props: Props) {
 
     function getExpandableComponentProperties(properties: ComponentProperty[], label: string) {
         return (
-            <ExpandableSection
-                toggleText={label}
-                onToggle={(_event, isExpanded) => {
-                    setIsShowAdvanced((prevState) => {
-                        if (isExpanded && !isShowAdvanced.includes(label)) {
-                            prevState = [...prevState, label];
-                        } else {
-                            prevState = prevState.filter((s) => s !== label);
-                        }
-                        return prevState;
-                    });
-                }}
-                isExpanded={getShowExpanded(label)}
-            >
+            <ExpandableSectionWrapper toggleText={label} strictExpanded={getPropertySelectorChanged()}>
                 <div className='parameters'>
                     {properties.map((kp) => (
                         <ComponentPropertyField
@@ -941,7 +927,7 @@ export function DslPropertyField(props: Props) {
                         />
                     ))}
                 </div>
-            </ExpandableSection>
+            </ExpandableSectionWrapper>
         );
     }
 
@@ -1019,10 +1005,6 @@ export function DslPropertyField(props: Props) {
 
     function getPropertySelectorChanged(): boolean {
         return requiredOnly || changedOnly || propertyFilter?.trim().length > 0;
-    }
-
-    function getShowExpanded(label: string): boolean {
-        return isShowAdvanced.includes(label) || getPropertySelectorChanged();
     }
 
     function getComponentParameters(property: PropertyMeta) {

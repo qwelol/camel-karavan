@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 import React, { useState } from 'react';
-import { ExpandableSection, FormGroup, Popover } from '@patternfly/react-core';
+import { FormGroup, Popover } from '@patternfly/react-core';
+import { ExpandableSectionWrapper } from '../../utils/components';
 import { Select, SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
 import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
@@ -43,7 +44,6 @@ export function ExpressionField(props: Props) {
         shallow,
     );
     const [selectIsOpen, setSelectIsOpen] = useState<boolean>(false);
-    const [propsAreOpen, setPropsAreOpen] = useState<boolean>(false);
 
     function openSelect(isExpanded: boolean) {
         setSelectIsOpen(isExpanded);
@@ -127,10 +127,6 @@ export function ExpressionField(props: Props) {
         return requiredOnly || changedOnly || propertyFilter?.trim().length > 0;
     }
 
-    function getShowExpanded(): boolean {
-        return propsAreOpen || getPropertySelectorChanged();
-    }
-
     function getExpressionProps(): PropertyMeta | undefined {
         const dslName = getValueClassName();
         return CamelDefinitionApiExt.getElementProperties(dslName)
@@ -211,10 +207,9 @@ export function ExpressionField(props: Props) {
                         onPropertyChange={propertyChanged}
                     />
                 )}
-                <ExpandableSection
+                <ExpandableSectionWrapper
                     toggleText={'Expression properties'}
-                    onToggle={(_event, isExpanded) => setPropsAreOpen(isExpanded)}
-                    isExpanded={getShowExpanded()}
+                    strictExpanded={getPropertySelectorChanged()}
                 >
                     {value &&
                         getProps().map((property: PropertyMeta) => (
@@ -229,7 +224,7 @@ export function ExpressionField(props: Props) {
                                 onPropertyChange={propertyChanged}
                             />
                         ))}
-                </ExpandableSection>
+                </ExpandableSectionWrapper>
             </FormGroup>
         </div>
     );

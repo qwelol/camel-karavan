@@ -52,10 +52,6 @@ interface Props {
 export function KameletPropertyField(props: Props) {
     const { onParametersChange } = usePropertiesHook();
 
-    function parametersChanged(parameter: string, value: string | number | boolean | any, pathParameter?: boolean) {
-        onParametersChange(parameter, value, pathParameter);
-    }
-
     function getSpecialStringInput() {
         const { property, value } = props;
         const prefix = 'parameters';
@@ -80,7 +76,7 @@ export function KameletPropertyField(props: Props) {
             showInfrastructureButton: showInfraSelectorButton,
             currentValue: value,
             onInfrastructureSelect: (val) => {
-                parametersChanged(property.id, val);
+                onParametersChange(property.id, val);
             },
         };
 
@@ -94,7 +90,7 @@ export function KameletPropertyField(props: Props) {
                         variant={SelectVariant.typeahead}
                         aria-label={property.id}
                         onSelect={(_e, value, _isPlaceholder) => {
-                            parametersChanged(property.id, value);
+                            onParametersChange(property.id, value);
                         }}
                         selections={value}
                         isCreatable={true}
@@ -118,9 +114,9 @@ export function KameletPropertyField(props: Props) {
                         value={value}
                         onChange={(_: React.FormEvent<HTMLInputElement>, v: string) => {
                             if (isNumeric(v)) {
-                                parametersChanged(property.id, Number(v));
+                                onParametersChange(property.id, Number(v));
                             } else {
-                                parametersChanged(property.id, v);
+                                onParametersChange(property.id, v);
                             }
                         }}
                         customIcon={
@@ -144,7 +140,7 @@ export function KameletPropertyField(props: Props) {
                                         title: property.title,
                                     });
                                     if (result && typeof result === 'object' && 'value' in result) {
-                                        parametersChanged(property.id, (result as any).value);
+                                        onParametersChange(property.id, (result as any).value);
                                     }
                                 }}
                             >
@@ -158,7 +154,7 @@ export function KameletPropertyField(props: Props) {
                         property={property}
                         value={value}
                         onDslPropertyChange={(_, v, _newRoute) => {
-                            parametersChanged(property.id, v);
+                            onParametersChange(property.id, v);
                         }}
                     />
                 </InputGroupItem>
@@ -234,7 +230,7 @@ export function KameletPropertyField(props: Props) {
                         value={value?.toString()}
                         aria-label={id}
                         isChecked={Boolean(value) === true}
-                        onChange={(_e) => parametersChanged(property.id, !value)}
+                        onChange={(_e) => onParametersChange(property.id, !value)}
                     />
                 )}
             </FormGroup>

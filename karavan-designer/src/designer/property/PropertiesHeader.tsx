@@ -19,7 +19,6 @@ import {
     Text,
     Title,
     TextVariants,
-    ExpandableSection,
     Dropdown,
     MenuToggleElement,
     MenuToggle,
@@ -32,6 +31,7 @@ import {
     ClipboardCopy,
     Switch,
 } from '@patternfly/react-core';
+import { ExpandableSectionWrapper } from '../utils/components';
 import '../karavan.css';
 import './DslProperties.css';
 import '@patternfly/patternfly/patternfly.css';
@@ -56,9 +56,6 @@ export function PropertiesHeader(props: Props) {
 
     const [selectedStep] = useDesignerStore((s) => [s.selectedStep], shallow);
 
-    const [isDescriptionExpanded, setIsDescriptionExpanded] = useState<boolean>(false);
-    const [isHeadersExpanded, setIsHeadersExpanded] = useState<boolean>(false);
-    const [isExchangePropertiesExpanded, setIsExchangePropertiesExpanded] = useState<boolean>(false);
     const [isMenuOpen, setMenuOpen] = useState<boolean>(false);
     const [isStepTypeOpen, setIsStepTypeOpen] = React.useState(false);
 
@@ -154,11 +151,7 @@ export function PropertiesHeader(props: Props) {
 
     function getExchangePropertiesSection(): React.JSX.Element {
         return (
-            <ExpandableSection
-                toggleText='Exchange Properties'
-                onToggle={(_event, _isExpanded) => setIsExchangePropertiesExpanded(!isExchangePropertiesExpanded)}
-                isExpanded={isExchangePropertiesExpanded}
-            >
+            <ExpandableSectionWrapper toggleText='Exchange Properties'>
                 <Flex className='component-headers' direction={{ default: 'column' }}>
                     {exchangeProperties.map((header, index, _array) => (
                         <Flex key={index}>
@@ -201,17 +194,13 @@ export function PropertiesHeader(props: Props) {
                         </Flex>
                     ))}
                 </Flex>
-            </ExpandableSection>
+            </ExpandableSectionWrapper>
         );
     }
 
     function getComponentHeadersSection(): React.JSX.Element {
         return (
-            <ExpandableSection
-                toggleText='Headers'
-                onToggle={(_event, _isExpanded) => setIsHeadersExpanded(!isHeadersExpanded)}
-                isExpanded={isHeadersExpanded}
-            >
+            <ExpandableSectionWrapper toggleText='Headers'>
                 <Flex className='component-headers' direction={{ default: 'column' }}>
                     {headers
                         .filter((header) => groups.includes(header.group))
@@ -256,17 +245,13 @@ export function PropertiesHeader(props: Props) {
                             </Flex>
                         ))}
                 </Flex>
-            </ExpandableSection>
+            </ExpandableSectionWrapper>
         );
     }
 
     function getDescriptionSection(): React.JSX.Element {
         return (
-            <ExpandableSection
-                toggleText={isDescriptionExpanded ? 'Show less' : 'Show more'}
-                onToggle={(_event, _isExpanded) => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                isExpanded={isDescriptionExpanded}
-            >
+            <ExpandableSectionWrapper toggleTextExpanded='Show less' toggleTextCollapsed='Show more'>
                 {descriptionLines
                     .filter((_value, index) => index > 0)
                     .map((desc, index, _array) => (
@@ -274,7 +259,7 @@ export function PropertiesHeader(props: Props) {
                             {desc}
                         </Text>
                     ))}
-            </ExpandableSection>
+            </ExpandableSectionWrapper>
         );
     }
 

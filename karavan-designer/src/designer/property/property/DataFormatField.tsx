@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import React, { useState } from 'react';
-import { ExpandableSection } from '@patternfly/react-core';
+import { ExpandableSectionWrapper } from '../../utils/components';
 import { Select, SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
 import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
@@ -44,7 +44,6 @@ export function DataFormatField(props: Props) {
         shallow,
     );
     const [selectIsOpen, setSelectIsOpen] = useState<boolean>(false);
-    const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
 
     function getDataFormatString() {
         return CamelDefinitionApiExt.getDataFormat(props.value)?.name || 'json';
@@ -115,10 +114,6 @@ export function DataFormatField(props: Props) {
         return requiredOnly || changedOnly || propertyFilter?.trim().length > 0;
     }
 
-    function getShowExpanded(): boolean {
-        return showAdvanced || getPropertySelectorChanged();
-    }
-
     function getPropertyFields(value: any, properties: PropertyMeta[]) {
         return (
             <>
@@ -175,13 +170,12 @@ export function DataFormatField(props: Props) {
                 <div>
                     {getPropertyFields(value, propertiesMain)}
                     {propertiesAdvanced.length > 0 && (
-                        <ExpandableSection
+                        <ExpandableSectionWrapper
                             toggleText={'Advanced data format properties'}
-                            onToggle={(_event, _isExpanded) => setShowAdvanced(!showAdvanced)}
-                            isExpanded={getShowExpanded()}
+                            strictExpanded={getPropertySelectorChanged()}
                         >
                             {getPropertyFields(value, propertiesAdvanced)}
-                        </ExpandableSection>
+                        </ExpandableSectionWrapper>
                     )}
                 </div>
             </div>

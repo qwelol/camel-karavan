@@ -70,15 +70,6 @@ export function ComponentPropertyField(props: Props) {
 
     const id = useId();
 
-    function parametersChanged(
-        parameter: string,
-        value: string | number | boolean | any,
-        pathParameter?: boolean,
-        newRoute?: RouteToCreate,
-    ) {
-        onParametersChange(parameter, value, pathParameter, newRoute);
-    }
-
     function getSelectBean(property: ComponentProperty, value: any) {
         const selectOptions: React.JSX.Element[] = [];
         if (beans) {
@@ -96,7 +87,7 @@ export function ComponentPropertyField(props: Props) {
                 variant={SelectVariant.typeahead}
                 aria-label={property.name}
                 onSelect={(_e, value, isPlaceholder) =>
-                    parametersChanged(property.name, !isPlaceholder ? value : undefined)
+                    onParametersChange(property.name, !isPlaceholder ? value : undefined)
                 }
                 selections={value}
                 isCreatable={true}
@@ -161,7 +152,7 @@ export function ComponentPropertyField(props: Props) {
                         variant={SelectVariant.typeahead}
                         aria-label={property.name}
                         onSelect={(e, value, isPlaceholder) => {
-                            parametersChanged(
+                            onParametersChange(
                                 property.name,
                                 !isPlaceholder ? value : undefined,
                                 property.kind === 'path',
@@ -188,7 +179,7 @@ export function ComponentPropertyField(props: Props) {
                                     const newRoute = !internalUris.includes(value.toString())
                                         ? CamelUi.createNewInternalRoute(componentName.concat(...':', value.toString()))
                                         : undefined;
-                                    parametersChanged(property.name, value, property.kind === 'path', newRoute);
+                                    onParametersChange(property.name, value, property.kind === 'path', newRoute);
                                 }
                             }}
                         >
@@ -216,13 +207,13 @@ export function ComponentPropertyField(props: Props) {
                     name={props.property.name}
                     value={value !== undefined ? value : property.defaultValue}
                     onChange={(_, v) => {
-                        parametersChanged(property.name, v, property.kind === 'path');
+                        onParametersChange(property.name, v, property.kind === 'path');
                     }}
                     debounceDelay={700}
                     showInfrastructureButton={showInfraSelectorButton}
                     currentValue={value}
                     onInfrastructureSelect={(val: string) => {
-                        parametersChanged(property.name, val);
+                        onParametersChange(property.name, val);
                     }}
                 />
 
@@ -237,7 +228,7 @@ export function ComponentPropertyField(props: Props) {
                                     title: property.displayName,
                                 });
                                 if (result && typeof result === 'object' && 'value' in result) {
-                                    parametersChanged(property.name, (result as any).value, property.kind === 'path');
+                                    onParametersChange(property.name, (result as any).value, property.kind === 'path');
                                 }
                             }}
                         >
@@ -250,7 +241,7 @@ export function ComponentPropertyField(props: Props) {
                         property={property}
                         value={value}
                         onComponentPropertyChange={(parameter, v) => {
-                            parametersChanged(parameter, v);
+                            onParametersChange(parameter, v);
                         }}
                     />
                 </InputGroupItem>
@@ -271,7 +262,7 @@ export function ComponentPropertyField(props: Props) {
                         name={props.property.name}
                         value={value !== undefined ? value : property.defaultValue}
                         onChange={(_, v) => {
-                            parametersChanged(property.name, v, property.kind === 'path');
+                            onParametersChange(property.name, v, property.kind === 'path');
                         }}
                         customIcon={<Text component={TextVariants.p}>{property.type}</Text>}
                         debounceDelay={700}
@@ -282,7 +273,7 @@ export function ComponentPropertyField(props: Props) {
                         property={property}
                         value={value}
                         onComponentPropertyChange={(_, v) => {
-                            parametersChanged(property.name, v);
+                            onParametersChange(property.name, v);
                         }}
                     />
                 </InputGroupItem>
@@ -303,7 +294,7 @@ export function ComponentPropertyField(props: Props) {
                 variant={SelectVariant.single}
                 aria-label={property.name}
                 onSelect={(e, value, isPlaceholder) =>
-                    parametersChanged(property.name, !isPlaceholder ? value : undefined, property.kind === 'path')
+                    onParametersChange(property.name, !isPlaceholder ? value : undefined, property.kind === 'path')
                 }
                 selections={value !== undefined ? value.toString() : property.defaultValue}
                 aria-labelledby={property.name}
@@ -333,7 +324,7 @@ export function ComponentPropertyField(props: Props) {
                         isChecked={isChecked}
                         value={value?.toString()}
                         onChange={(_, v) => {
-                            parametersChanged(property.name, v);
+                            onParametersChange(property.name, v);
                         }}
                     />
                 </InputGroupItem>
@@ -345,7 +336,7 @@ export function ComponentPropertyField(props: Props) {
                         aria-label='placeholder'
                         value={!isValueBoolean ? value?.toString() : undefined}
                         onChange={(_, v) => {
-                            parametersChanged(property.name, v);
+                            onParametersChange(property.name, v);
                         }}
                         debounceDelay={700}
                     />
@@ -355,7 +346,7 @@ export function ComponentPropertyField(props: Props) {
                         property={property}
                         value={value}
                         onDslPropertyChange={(_, v) => {
-                            parametersChanged(property.name, v);
+                            onParametersChange(property.name, v);
                         }}
                     />
                 </InputGroupItem>
