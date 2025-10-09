@@ -17,7 +17,6 @@
 import React from 'react';
 import {
     FormGroup,
-    Popover,
     Switch,
     InputGroup,
     Button,
@@ -28,7 +27,7 @@ import {
 } from '@patternfly/react-core';
 import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
-import HelpIcon from '@patternfly/react-icons/dist/js/icons/help-icon';
+import { PropertyHelpIcon, PropertyHelpFooter, PropertyLabel } from '../../utils/components';
 import { Property } from 'karavan-core/lib/model/KameletModels';
 import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
 import { usePropertiesHook } from '../usePropertiesHook';
@@ -172,22 +171,6 @@ export function KameletPropertyField(props: Props) {
         return isSet && !isDefault;
     }
 
-    function getLabel(property: Property, value: any) {
-        const labelClassName = hasValueChanged(property, value) ? 'value-changed' : 'transparent';
-        return (
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: '3px',
-                }}
-            >
-                <Text className={labelClassName}>{property.title}</Text>
-            </div>
-        );
-    }
-
     const property = props.property;
     const value = props.value;
     const prefix = 'parameters';
@@ -196,30 +179,15 @@ export function KameletPropertyField(props: Props) {
         <div>
             <FormGroup
                 key={id}
-                label={getLabel(property, value)}
+                label={<PropertyLabel text={property.title} hasValueChanged={hasValueChanged(property, value)} />}
                 fieldId={id}
                 isRequired={props.required}
                 labelIcon={
-                    <Popover
-                        position={'left'}
-                        headerContent={property.title}
-                        bodyContent={property.description}
-                        footerContent={
-                            <div>
-                                {property.default !== undefined && <div>Default: {property.default.toString()}</div>}
-                                {property.example !== undefined && <div>Example: {property.example}</div>}
-                            </div>
-                        }
-                    >
-                        <button
-                            type='button'
-                            aria-label='More info'
-                            onClick={(e) => e.preventDefault()}
-                            className='pf-v5-c-form__group-label-help'
-                        >
-                            <HelpIcon />
-                        </button>
-                    </Popover>
+                    <PropertyHelpIcon
+                        title={property.title}
+                        description={property.description}
+                        footerContent={<PropertyHelpFooter default={property.default} example={property.example} />}
+                    />
                 }
             >
                 {['string', 'integer', 'int', 'number'].includes(property.type) && getSpecialStringInput()}

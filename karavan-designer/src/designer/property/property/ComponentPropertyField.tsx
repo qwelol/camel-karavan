@@ -17,7 +17,6 @@
 import React, { useId } from 'react';
 import {
     FormGroup,
-    Popover,
     Switch,
     InputGroup,
     Tooltip,
@@ -30,7 +29,7 @@ import {
 import { SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
 import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
-import HelpIcon from '@patternfly/react-icons/dist/js/icons/help-icon';
+import { PropertyHelpIcon, PropertyHelpFooter, PropertyLabel } from '../../utils/components';
 import { ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
 import { CamelUi, RouteToCreate } from '../../utils/CamelUi';
 import { CamelElement } from 'karavan-core/lib/model/IntegrationDefinition';
@@ -354,52 +353,29 @@ export function ComponentPropertyField(props: Props) {
         );
     }
 
-    function getLabel(property: ComponentProperty, value: any) {
-        const labelClassName = PropertyUtil.hasComponentPropertyValueChanged(property, value)
-            ? 'value-changed'
-            : 'transparent';
-        return (
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: '3px',
-                }}
-            >
-                <Text className={labelClassName}>{property.displayName}</Text>
-            </div>
-        );
-    }
-
     const property: ComponentProperty = props.property;
     const value = props.value;
     return (
         <FormGroup
             key={id}
-            label={getLabel(property, value)}
+            label={
+                <PropertyLabel
+                    text={property.displayName}
+                    hasValueChanged={PropertyUtil.hasComponentPropertyValueChanged(property, value)}
+                />
+            }
             isRequired={property.required}
             labelIcon={
-                <Popover
-                    position={'left'}
-                    headerContent={property.displayName}
-                    bodyContent={property.description}
+                <PropertyHelpIcon
+                    title={property.displayName}
+                    description={property.description}
                     footerContent={
-                        <div>
-                            {property.defaultValue !== undefined && <div>{'Default: ' + property.defaultValue}</div>}
-                            {property.required && <div>{property.displayName + ' is required'}</div>}
-                        </div>
+                        <PropertyHelpFooter
+                            default={property.defaultValue}
+                            footer={property.required ? `${property.displayName} is required` : undefined}
+                        />
                     }
-                >
-                    <button
-                        type='button'
-                        aria-label='More info'
-                        onClick={(e) => e.preventDefault()}
-                        className='pf-v5-c-form__group-label-help'
-                    >
-                        <HelpIcon />
-                    </button>
-                </Popover>
+                />
             }
         >
             {canBeInternalUri(property) && getInternalUriSelect(property, value)}

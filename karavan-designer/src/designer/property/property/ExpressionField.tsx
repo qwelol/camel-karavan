@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 import React from 'react';
-import { FormGroup, Popover } from '@patternfly/react-core';
+import { FormGroup } from '@patternfly/react-core';
 import { ExpandableSectionWrapper, ManagedSelect } from '../../utils/components';
 import { SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
 import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
-import HelpIcon from '@patternfly/react-icons/dist/js/icons/help-icon';
+import { PropertyHelpIcon } from '../../utils/components';
 import { CamelMetadataApi, Languages, PropertyMeta } from 'karavan-core/lib/model/CamelMetadata';
 import { CamelDefinitionApiExt } from 'karavan-core/lib/api/CamelDefinitionApiExt';
 import { ExpressionDefinition } from 'karavan-core/lib/model/CamelDefinition';
@@ -163,23 +163,7 @@ export function ExpressionField(props: Props) {
                 fieldId={property.name}
                 labelIcon={
                     property.description ? (
-                        <Popover
-                            position={'left'}
-                            headerContent={property.displayName}
-                            bodyContent={property.description}
-                        >
-                            <button
-                                type='button'
-                                aria-label='More info'
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                }}
-                                className='pf-v5-c-form__group-label-help'
-                            >
-                                <HelpIcon />
-                            </button>
-                        </Popover>
+                        <PropertyHelpIcon title={property.displayName} description={property.description} />
                     ) : (
                         <div></div>
                     )

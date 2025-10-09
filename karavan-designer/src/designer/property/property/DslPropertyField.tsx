@@ -17,7 +17,6 @@
 import React, { useMemo } from 'react';
 import {
     FormGroup,
-    Popover,
     Switch,
     TextInputGroup,
     Button,
@@ -43,7 +42,7 @@ import { SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-
 import '../../karavan.css';
 import './DslPropertyField.css';
 import '@patternfly/patternfly/patternfly.css';
-import HelpIcon from '@patternfly/react-icons/dist/js/icons/help-icon';
+import { PropertyHelpIcon, PropertyHelpFooter, PropertyLabel } from '../../utils/components';
 import DeleteIcon from '@patternfly/react-icons/dist/js/icons/times-circle-icon';
 import { CamelUtil } from 'karavan-core/lib/api/CamelUtil';
 import { CamelMetadataApi, PropertyMeta } from 'karavan-core/lib/model/CamelMetadata';
@@ -155,16 +154,10 @@ export function DslPropertyField(props: Props) {
             return isKamelet ? 'Kamelet properties:' : 'Component properties:';
         } else if (!['ExpressionDefinition'].includes(property.type)) {
             return (
-                <div
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: '3px',
-                    }}
-                >
-                    <Text className={labelClassName}>{CamelUtil.capitalizeName(property.displayName)}</Text>
-                </div>
+                <PropertyLabel
+                    text={CamelUtil.capitalizeName(property.displayName)}
+                    hasValueChanged={PropertyUtil.hasDslPropertyValueChanged(property, value)}
+                />
             );
         }
     }
@@ -847,31 +840,20 @@ export function DslPropertyField(props: Props) {
 
     function getLabelIcon(property: PropertyMeta) {
         return property.description ? (
-            <Popover
-                position={'left'}
-                headerContent={property.displayName}
-                bodyContent={property.description}
+            <PropertyHelpIcon
+                title={property.displayName}
+                description={property.description}
                 footerContent={
-                    <div>
-                        {property.defaultValue !== undefined && property.defaultValue.toString().trim().length > 0 && (
-                            <div>{'Default: ' + property.defaultValue}</div>
-                        )}
-                        {property.required && <b>Required</b>}
-                    </div>
+                    <PropertyHelpFooter
+                        default={
+                            property.defaultValue !== undefined && property.defaultValue.toString().trim().length > 0
+                                ? property.defaultValue
+                                : undefined
+                        }
+                        footer={property.required ? 'Required' : undefined}
+                    />
                 }
-            >
-                <button
-                    type='button'
-                    aria-label='More info'
-                    onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }}
-                    className='pf-v5-c-form__group-label-help'
-                >
-                    <HelpIcon />
-                </button>
-            </Popover>
+            />
         ) : (
             <div></div>
         );
