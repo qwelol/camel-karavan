@@ -14,19 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { TextInput, Button, Tooltip, InputGroup, InputGroupItem, capitalize } from '@patternfly/react-core';
 import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
 import { BeanFactoryDefinition } from 'karavan-core/lib/model/CamelDefinition';
 import { CamelUtil } from 'karavan-core/lib/api/CamelUtil';
 import { SensitiveKeys } from 'karavan-core/lib/model/CamelMetadata';
-import { v4 as uuidv4 } from 'uuid';
 import DeleteIcon from '@patternfly/react-icons/dist/js/icons/times-icon';
 import AddIcon from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
-import { InfrastructureSelector } from './InfrastructureSelector';
 import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
 import { PasswordTextInput } from '../../utils/components';
+import NiceModal from '@ebay/nice-modal-react';
+import { InfrastructureModal } from '../../utils/modals';
 import DockerIcon from '@patternfly/react-icons/dist/js/icons/docker-icon';
 import { useDesignerStore } from '../../DesignerStore';
 import { shallow } from 'zustand/shallow';
@@ -40,126 +40,104 @@ interface Props {
 
 export function BeanProperties(props: Props) {
     const [selectedStep] = useDesignerStore((s) => [s.selectedStep], shallow);
-    const [infrastructureSelector, setInfrastructureSelector] = useState<boolean>(false);
-    const [infrastructureSelectorProperty, setInfrastructureSelectorProperty] = useState<string | undefined>(undefined);
-    const [infrastructureSelectorUuid, setInfrastructureSelectorUuid] = useState<string | undefined>(undefined);
-    const [properties, setProperties] = useState<Map<string, [string, string]>>(new Map<string, [string, string]>());
-    const [constructors, setConstructors] = useState<Map<string, [number, string]>>(
-        new Map<string, [number, string]>(),
-    );
 
-    useEffect(() => {
-        setProperties(preparePropertiesMap((selectedStep as BeanFactoryDefinition)?.properties));
-        setConstructors(prepareConstructorsMap((selectedStep as BeanFactoryDefinition)?.constructors));
-    }, [selectedStep?.uuid]);
-
-    function preparePropertiesMap(properties: any): Map<string, [string, string]> {
-        const result = new Map<string, [string, string]>();
-        if (properties) {
-            Object.keys(properties).forEach((k, _i, _a) => result.set(uuidv4(), [k, properties[k]]));
-        }
-        return result;
+    function getPropertiesEntries(): [string, string][] {
+        const bean = selectedStep as BeanFactoryDefinition;
+        const properties = bean?.properties || {};
+        return Object.entries(properties);
     }
 
-    function prepareConstructorsMap(constructors: any): Map<string, [number, string]> {
-        const result = new Map<string, [number, string]>();
-        if (constructors) {
-            Object.keys(constructors).forEach((k, _i, _a) => result.set(uuidv4(), [parseInt(k), constructors[k]]));
-        }
-        return result;
+    function getConstructorsEntries(): [string, string][] {
+        const bean = selectedStep as BeanFactoryDefinition;
+        const constructors = bean?.constructors || {};
+        return Object.entries(constructors);
     }
 
-    function onBeanPropertyUpdate() {
+    function updateBeanProperties(newProperties: Record<string, string>) {
         if (selectedStep) {
             const bean = CamelUtil.cloneBean(selectedStep as BeanFactoryDefinition);
-            const beanProperties: any = {};
-            properties.forEach((p: any) => (beanProperties[p[0]] = p[1]));
-            bean.properties = beanProperties;
+            bean.properties = newProperties;
             props.onChange(bean);
         }
     }
 
-    function onBeanConstructorsUpdate() {
+    function updateBeanConstructors(newConstructors: Record<string, string>) {
         if (selectedStep) {
             const bean = CamelUtil.cloneBean(selectedStep as BeanFactoryDefinition);
-            const beanConstructors: any = {};
-            constructors.forEach((p: any) => (beanConstructors[p[0]] = p[1]));
-            bean.constructors = beanConstructors;
+            bean.constructors = newConstructors;
             props.onChange(bean);
         }
     }
 
-    function propertyChanged(uuid: string, key: string, value: string) {
-        setProperties((prevState) => {
-            prevState.set(uuid, [key, value]);
-            return prevState;
-        });
-        onBeanPropertyUpdate();
-    }
+    function propertyChanged(propertyKey: string, newKey: string, value: string) {
+        const bean = selectedStep as BeanFactoryDefinition;
+        const properties = { ...bean.properties };
 
-    function constructorChanged(uuid: string, key: number, value: string) {
-        setConstructors((prevState) => {
-            prevState.set(uuid, [key, value]);
-            return prevState;
-        });
-        onBeanConstructorsUpdate();
-    }
-
-    function propertyDeleted(uuid: string) {
-        setProperties((prevState) => {
-            prevState.delete(uuid);
-            return prevState;
-        });
-        onBeanPropertyUpdate();
-    }
-
-    function constructorDeleted(uuid: string) {
-        setConstructors((prevState) => {
-            prevState.delete(uuid);
-            return prevState;
-        });
-        onBeanConstructorsUpdate();
-    }
-
-    function selectInfrastructure(value: string) {
-        const propertyId = infrastructureSelectorProperty;
-        const uuid = infrastructureSelectorUuid;
-        if (propertyId && uuid) {
-            if (value.startsWith('config') || value.startsWith('secret')) value = '{{' + value + '}}';
-            propertyChanged(uuid, propertyId, value);
-            setInfrastructureSelector(false);
-            setInfrastructureSelectorProperty(undefined);
+        // Remove old key if it exists and is different
+        if (propertyKey && propertyKey !== newKey) {
+            delete properties[propertyKey];
         }
+
+        // Add new key
+        if (newKey) {
+            properties[newKey] = value;
+        }
+
+        updateBeanProperties(properties);
     }
 
-    function openInfrastructureSelector(uuid: string, propertyName: string) {
-        setInfrastructureSelector(true);
-        setInfrastructureSelectorProperty(propertyName);
-        setInfrastructureSelectorUuid(uuid);
+    function constructorChanged(constructorKey: number, newKey: number, value: string) {
+        const bean = selectedStep as BeanFactoryDefinition;
+        const constructors = { ...bean.constructors };
+
+        // Remove old key if it exists and is different
+        if (constructorKey !== undefined && constructorKey !== newKey) {
+            delete constructors[constructorKey.toString()];
+        }
+
+        // Add new key
+        if (newKey !== undefined) {
+            constructors[newKey.toString()] = value;
+        }
+
+        updateBeanConstructors(constructors);
     }
 
-    function closeInfrastructureSelector() {
-        setInfrastructureSelector(false);
+    function propertyDeleted(key: string) {
+        const bean = selectedStep as BeanFactoryDefinition;
+        const properties = { ...bean.properties };
+        delete properties[key];
+        updateBeanProperties(properties);
     }
 
-    function getInfrastructureSelectorModal() {
-        return (
-            <InfrastructureSelector
-                dark={false}
-                isOpen={infrastructureSelector}
-                onClose={() => closeInfrastructureSelector()}
-                onSelect={selectInfrastructure}
-            />
-        );
+    function constructorDeleted(key: number) {
+        const bean = selectedStep as BeanFactoryDefinition;
+        const constructors = { ...bean.constructors };
+        delete constructors[key.toString()];
+        updateBeanConstructors(constructors);
+    }
+
+    async function selectInfrastructure(propertyName: string) {
+        const infrastructureValue = await NiceModal.show(InfrastructureModal, {});
+
+        if (typeof infrastructureValue === 'string') {
+            let finalValue = infrastructureValue;
+
+            if (finalValue.startsWith('config') || finalValue.startsWith('secret')) {
+                finalValue = '{{' + finalValue + '}}';
+            }
+
+            propertyChanged(propertyName, propertyName, finalValue);
+        }
     }
 
     function getBeanConstructors() {
         return (
             <>
-                {Array.from(constructors.entries()).map((v, _index, _array) => {
-                    const i = v[0];
-                    const key = v[1][0];
-                    const value = v[1][1];
+                {getConstructorsEntries().map((v, index) => {
+                    const key = v[0];
+                    const value = v[1];
+                    const i = `constructor-${key}-${index}`;
                     const isSecret = false;
                     return (
                         <div key={'key-' + i} className='bean-property'>
@@ -172,7 +150,7 @@ export function BeanProperties(props: Props) {
                                 name={'key-' + i}
                                 value={key}
                                 onChange={(_, beanFieldName) => {
-                                    constructorChanged(i, parseInt(beanFieldName), value);
+                                    constructorChanged(parseInt(key), parseInt(beanFieldName), value);
                                 }}
                             />
                             <PasswordTextInput
@@ -184,11 +162,15 @@ export function BeanProperties(props: Props) {
                                 id={'value-' + i}
                                 name={'value-' + i}
                                 value={value}
-                                onChange={(_, value) => {
-                                    constructorChanged(i, key, value);
+                                onChange={(_, newValue) => {
+                                    constructorChanged(parseInt(key), parseInt(key), newValue);
                                 }}
                             />
-                            <Button variant='link' className='delete-button' onClick={(_e) => constructorDeleted(i)}>
+                            <Button
+                                variant='link'
+                                className='delete-button'
+                                onClick={(_e) => constructorDeleted(parseInt(key))}
+                            >
                                 <DeleteIcon />
                             </Button>
                         </div>
@@ -197,7 +179,12 @@ export function BeanProperties(props: Props) {
                 <Button
                     variant='link'
                     className='add-button'
-                    onClick={(_e) => constructorChanged(uuidv4(), constructors.size, '')}
+                    onClick={(_e) => {
+                        const bean = selectedStep as BeanFactoryDefinition;
+                        const constructors = bean?.constructors || {};
+                        const nextKey = Math.max(...Object.keys(constructors).map(Number), -1) + 1;
+                        constructorChanged(-1, nextKey, '');
+                    }}
                 >
                     <AddIcon />
                     Add argument
@@ -209,10 +196,10 @@ export function BeanProperties(props: Props) {
     function getBeanProperties() {
         return (
             <>
-                {Array.from(properties.entries()).map((v, _index, _array) => {
-                    const i = v[0];
-                    const key = v[1][0];
-                    const value = v[1][1];
+                {getPropertiesEntries().map((v, index) => {
+                    const key = v[0];
+                    const value = v[1];
+                    const i = `property-${key}-${index}`;
                     const isSecret = key !== undefined && SensitiveKeys.includes(key.toLowerCase());
                     const inInfrastructure = InfrastructureAPI.infrastructure !== 'local';
                     const icon =
@@ -232,7 +219,7 @@ export function BeanProperties(props: Props) {
                                 name={'key-' + i}
                                 value={key}
                                 onChange={(_, beanFieldName) => {
-                                    propertyChanged(i, beanFieldName, value);
+                                    propertyChanged(key, beanFieldName, value);
                                 }}
                             />
                             <InputGroup>
@@ -241,7 +228,7 @@ export function BeanProperties(props: Props) {
                                         position='bottom-end'
                                         content={'Select from ' + capitalize(InfrastructureAPI.infrastructure)}
                                     >
-                                        <Button variant='control' onClick={(_e) => openInfrastructureSelector(i, key)}>
+                                        <Button variant='control' onClick={(_e) => selectInfrastructure(key)}>
                                             {icon}
                                         </Button>
                                     </Tooltip>
@@ -256,19 +243,19 @@ export function BeanProperties(props: Props) {
                                         id={'value-' + i}
                                         name={'value-' + i}
                                         value={value}
-                                        onChange={(_, value) => {
-                                            propertyChanged(i, key, value);
+                                        onChange={(_, newValue) => {
+                                            propertyChanged(key, key, newValue);
                                         }}
                                     />
                                 </InputGroupItem>
                             </InputGroup>
-                            <Button variant='link' className='delete-button' onClick={(_e) => propertyDeleted(i)}>
+                            <Button variant='link' className='delete-button' onClick={(_e) => propertyDeleted(key)}>
                                 <DeleteIcon />
                             </Button>
                         </div>
                     );
                 })}
-                <Button variant='link' className='add-button' onClick={(_e) => propertyChanged(uuidv4(), '', '')}>
+                <Button variant='link' className='add-button' onClick={(_e) => propertyChanged('', '', '')}>
                     <AddIcon />
                     Add property
                 </Button>
@@ -281,7 +268,6 @@ export function BeanProperties(props: Props) {
         <div className='properties' key={bean ? bean.uuid : 'integration'}>
             {props.type === 'constructors' && getBeanConstructors()}
             {props.type === 'properties' && getBeanProperties()}
-            {getInfrastructureSelectorModal()}
         </div>
     );
 }

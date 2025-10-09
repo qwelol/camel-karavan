@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { FormGroup, Popover } from '@patternfly/react-core';
-import { ExpandableSectionWrapper } from '../../utils/components';
-import { Select, SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
+import { ExpandableSectionWrapper, ManagedSelect } from '../../utils/components';
+import { SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
 import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
 import HelpIcon from '@patternfly/react-icons/dist/js/icons/help-icon';
@@ -43,11 +43,6 @@ export function ExpressionField(props: Props) {
         (s) => [s.propertyFilter, s.changedOnly, s.requiredOnly],
         shallow,
     );
-    const [selectIsOpen, setSelectIsOpen] = useState<boolean>(false);
-
-    function openSelect(isExpanded: boolean) {
-        setSelectIsOpen(isExpanded);
-    }
 
     function expressionChanged(language: string, value: CamelElement) {
         if (language !== (value as any).expressionName) {
@@ -62,7 +57,6 @@ export function ExpressionField(props: Props) {
             (exp as any).uuid = props.value.uuid;
         }
         props.onExpressionChange?.(props.property.name, exp);
-        setSelectIsOpen(false);
     }
 
     function propertyChanged(fieldId: string, value: string | number | boolean | any) {
@@ -152,22 +146,18 @@ export function ExpressionField(props: Props) {
                     *
                 </span>
             </label>
-            <Select
+            <ManagedSelect
                 variant={SelectVariant.typeahead}
                 aria-label={property.name}
-                onToggle={(_event, isExpanded) => {
-                    openSelect(isExpanded);
-                }}
                 onSelect={(_e, lang, _isPlaceholder) => {
                     expressionChanged(lang.toString(), value);
                 }}
                 selections={dslLanguage}
-                isOpen={selectIsOpen}
                 aria-labelledby={property.name}
                 direction={SelectDirection.down}
             >
                 {selectOptions}
-            </Select>
+            </ManagedSelect>
             <FormGroup
                 key={property.name}
                 fieldId={property.name}

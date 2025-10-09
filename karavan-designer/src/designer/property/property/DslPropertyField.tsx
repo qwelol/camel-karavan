@@ -14,16 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
     FormGroup,
     Popover,
     Switch,
-    Chip,
     TextInputGroup,
-    TextInputGroupMain,
-    TextInputGroupUtilities,
-    ChipGroup,
     Button,
     Text,
     Tooltip,
@@ -41,6 +37,7 @@ import {
     ManagedSelect,
     InfrastructureDebouncedTextInput,
     ExpandableSectionWrapper,
+    MultiValueField,
 } from '../../utils/components';
 import { SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
 import '../../karavan.css';
@@ -114,61 +111,11 @@ export function DslPropertyField(props: Props) {
         shallow,
     );
 
-    const [arrayValues, setArrayValues] = useState<Map<string, string>>(new Map<string, string>());
-    const [variableType, setVariableType] = useState<'global:' | 'route:' | ''>('');
-
-    useEffect(() => {
-        setTextVariable(value);
-    }, []);
-
-    function setTextVariable(val: any) {
-        if (isVariable) {
-            if (val?.toString().startsWith(GLOBAL)) {
-                setVariableType(GLOBAL);
-            } else if (val?.toString().startsWith(ROUTE)) {
-                setVariableType(ROUTE);
-            } else {
-                setVariableType('');
-            }
-        }
-    }
-
     function propertyChanged(fieldId: string, value: string | number | boolean | any, newRoute?: RouteToCreate) {
         props.onPropertyChange?.(fieldId, value, newRoute);
         if (isVariable) {
             addVariable(value);
         }
-    }
-
-    function arrayChanged(fieldId: string, value: string) {
-        setArrayValues((prevState) => {
-            const map: Map<string, string> = new Map<string, string>(prevState);
-            map.set(fieldId, value);
-            return map;
-        });
-    }
-
-    function arrayDeleteValue(fieldId: string, element: string) {
-        const property: PropertyMeta = props.property;
-        const value = props.value;
-        if (property.isArray && property.type === 'string') {
-            propertyChanged(
-                fieldId,
-                (value as any).filter((x: string) => x !== element),
-            );
-        }
-    }
-
-    function arraySave(fieldId: string) {
-        const newValue = arrayValues.get(fieldId);
-        const property: PropertyMeta = props.property;
-        let value = props.value;
-        if (newValue !== undefined && newValue.length > 0 && property.isArray && property.type === 'string') {
-            if (value) (value as any).push(newValue);
-            else value = [newValue];
-        }
-        propertyChanged(fieldId, value);
-        arrayChanged(fieldId, '');
     }
 
     function isParameter(property: PropertyMeta): boolean {
@@ -248,10 +195,8 @@ export function DslPropertyField(props: Props) {
                             isSelected={variableType === GLOBAL}
                             onChange={(_, selected) => {
                                 if (selected) {
-                                    setVariableType(GLOBAL);
                                     propertyChanged(property.name, GLOBAL.concat(variableValue));
                                 } else {
-                                    setVariableType('');
                                     propertyChanged(property.name, variableValue);
                                 }
                             }}
@@ -264,10 +209,8 @@ export function DslPropertyField(props: Props) {
                             isSelected={variableType === ROUTE}
                             onChange={(_, selected) => {
                                 if (selected) {
-                                    setVariableType(ROUTE);
                                     propertyChanged(property.name, ROUTE.concat(variableValue));
                                 } else {
-                                    setVariableType('');
                                     propertyChanged(property.name, variableValue);
                                 }
                             }}
@@ -296,7 +239,6 @@ export function DslPropertyField(props: Props) {
                     <VariablesDropdown
                         onVariableChange={(name) => {
                             propertyChanged(property.name, name);
-                            setTextVariable(name);
                         }}
                     />
                 </InputGroupItem>
@@ -818,35 +760,7 @@ export function DslPropertyField(props: Props) {
 
     function getMultiValueField(property: PropertyMeta, value: any) {
         return (
-            <div>
-                <TextInputGroup className='input-group'>
-                    <TextInputGroupMain
-                        value={arrayValues.get(property.name)}
-                        onChange={(e, v) => arrayChanged(property.name, v)}
-                        onKeyUp={(e) => {
-                            if (e.key === 'Enter') arraySave(property.name);
-                        }}
-                    >
-                        <ChipGroup>
-                            {value &&
-                                Array.from(value).map((v: any, index: number) => (
-                                    <Chip
-                                        key={'chip-' + index}
-                                        className='chip'
-                                        onClick={() => arrayDeleteValue(property.name, v)}
-                                    >
-                                        {v.toString()}
-                                    </Chip>
-                                ))}
-                        </ChipGroup>
-                    </TextInputGroupMain>
-                    <TextInputGroupUtilities>
-                        <Button variant='plain' onClick={(_e) => arraySave(property.name)} aria-label='Add element'>
-                            <PlusIcon />
-                        </Button>
-                    </TextInputGroupUtilities>
-                </TextInputGroup>
-            </div>
+            <MultiValueField value={value || []} onChange={(newValue) => propertyChanged(property.name, newValue)} />
         );
     }
 
@@ -1053,6 +967,17 @@ export function DslPropertyField(props: Props) {
     const property: PropertyMeta = props.property;
     const value = props.value;
     const isVariable = getIsVariable();
+
+    const variableType = useMemo((): 'global:' | 'route:' | '' => {
+        if (isVariable && value) {
+            if (value.toString().startsWith(GLOBAL)) {
+                return GLOBAL;
+            } else if (value.toString().startsWith(ROUTE)) {
+                return ROUTE;
+            }
+        }
+        return '';
+    }, [isVariable, value]);
     const beanConstructors = element?.dslName === 'BeanFactoryDefinition' && property.name === 'constructors';
     const beanProperties = element?.dslName === 'BeanFactoryDefinition' && property.name === 'properties';
 

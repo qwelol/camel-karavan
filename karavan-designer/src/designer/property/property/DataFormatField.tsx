@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useState } from 'react';
-import { ExpandableSectionWrapper } from '../../utils/components';
-import { Select, SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
+import React from 'react';
+import { ExpandableSectionWrapper, ManagedSelect } from '../../utils/components';
+import { SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
 import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
 import { CamelMetadataApi, PropertyMeta } from 'karavan-core/lib/model/CamelMetadata';
@@ -43,14 +43,9 @@ export function DataFormatField(props: Props) {
         (s) => [s.propertyFilter, s.changedOnly, s.requiredOnly],
         shallow,
     );
-    const [selectIsOpen, setSelectIsOpen] = useState<boolean>(false);
 
     function getDataFormatString() {
         return CamelDefinitionApiExt.getDataFormat(props.value)?.name || 'json';
-    }
-
-    function openSelect() {
-        setSelectIsOpen(true);
     }
 
     function dataFormatChanged(dataFormat: string, value?: CamelElement) {
@@ -64,7 +59,6 @@ export function DataFormatField(props: Props) {
         (df as any)['id'] = (props.value as any)['id'];
 
         props.onDataFormatChange?.(df);
-        setSelectIsOpen(false);
     }
 
     function propertyChanged(fieldId: string, value: string | number | boolean | any) {
@@ -151,20 +145,16 @@ export function DataFormatField(props: Props) {
                         *
                     </span>
                 </label>
-                <Select
+                <ManagedSelect
                     variant={SelectVariant.typeahead}
                     aria-label={'dataFormat'}
-                    onToggle={() => {
-                        openSelect();
-                    }}
                     onSelect={(_, dataFormat, _isPlaceholder) => dataFormatChanged(dataFormat.toString(), value)}
                     selections={dataFormat}
-                    isOpen={selectIsOpen}
                     aria-labelledby={'dataFormat'}
                     direction={SelectDirection.down}
                 >
                     {selectOptions}
-                </Select>
+                </ManagedSelect>
             </div>
             <div className='object'>
                 <div>
