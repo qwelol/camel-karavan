@@ -14,33 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React from 'react';
-import {
-    FormGroup,
-    Switch,
-    InputGroup,
-    Button,
-    Tooltip,
-    Text,
-    TextVariants,
-    InputGroupItem,
-} from '@patternfly/react-core';
+import React, { useId } from 'react';
+import { FormGroup, Switch, InputGroup, Text, TextVariants, InputGroupItem } from '@patternfly/react-core';
 import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
-import { PropertyHelpIcon, PropertyHelpFooter, PropertyLabel } from '../../utils/components';
+import { PropertyHelpIcon, PropertyHelpFooter, PropertyLabel, EditorButton } from '../../utils/components';
 import { Property } from 'karavan-core/lib/model/KameletModels';
 import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
 import { usePropertiesHook } from '../usePropertiesHook';
 import { SelectDirection, SelectOption, SelectVariant } from '@patternfly/react-core/deprecated';
 import { PropertyPlaceholderDropdown } from './PropertyPlaceholderDropdown';
-import EditorIcon from '@patternfly/react-icons/dist/js/icons/code-icon';
 import {
     InfrastructureManagedSelect,
     WithInfrastructureProps,
     PasswordInfrastructureDebouncedTextInput,
 } from '../../utils/components';
-import NiceModal from '@ebay/nice-modal-react';
-import { ExpressionModal } from '../../utils/modals';
+import { isNumeric } from '../../utils/commonUtils';
+import { PropertyUtil } from './PropertyUtil';
 
 interface Props {
     property: Property;
@@ -49,12 +39,11 @@ interface Props {
 }
 
 export function KameletPropertyField(props: Props) {
+    const { property, value, required } = props;
     const { onParametersChange } = usePropertiesHook();
+    const id = useId();
 
     function getSpecialStringInput() {
-        const { property, value } = props;
-        const prefix = 'parameters';
-        const id = prefix + '-' + property.id;
         const inInfrastructure = InfrastructureAPI.infrastructure !== 'local';
         const noInfraSelectorButton = ['uri', 'id', 'description', 'group'].includes(property.id);
 
@@ -81,7 +70,7 @@ export function KameletPropertyField(props: Props) {
 
         return (
             <InputGroup>
-                {selectFromList && (
+                {selectFromList ? (
                     <InfrastructureManagedSelect
                         id={id}
                         name={id}
@@ -101,8 +90,7 @@ export function KameletPropertyField(props: Props) {
                     >
                         {selectOptions}
                     </InfrastructureManagedSelect>
-                )}
-                {(!selectFromList || property.format === 'password') && (
+                ) : (
                     <PasswordInfrastructureDebouncedTextInput
                         className='text-field'
                         isRequired
@@ -127,26 +115,14 @@ export function KameletPropertyField(props: Props) {
                         {...infrastructureProps}
                     />
                 )}
+
                 {showEditorButton && (
-                    <InputGroupItem>
-                        <Tooltip position='bottom-end' content={'Show Editor'}>
-                            <Button
-                                variant='control'
-                                onClick={async () => {
-                                    const result = await NiceModal.show(ExpressionModal, {
-                                        name: property.id,
-                                        value: value,
-                                        title: property.title,
-                                    });
-                                    if (result && typeof result === 'object' && 'value' in result) {
-                                        onParametersChange(property.id, (result as any).value);
-                                    }
-                                }}
-                            >
-                                <EditorIcon />
-                            </Button>
-                        </Tooltip>
-                    </InputGroupItem>
+                    <EditorButton
+                        propertyId={property.id}
+                        value={value}
+                        title={property.title}
+                        onValueChange={onParametersChange}
+                    />
                 )}
                 <InputGroupItem>
                     <PropertyPlaceholderDropdown
@@ -161,27 +137,18 @@ export function KameletPropertyField(props: Props) {
         );
     }
 
-    function isNumeric(num: any) {
-        return (typeof num === 'number' || (typeof num === 'string' && num.trim() !== '')) && !isNaN(num as number);
-    }
-
-    function hasValueChanged(property: Property, value: any): boolean {
-        const isSet = value !== undefined;
-        const isDefault = property.default !== undefined && value?.toString() === property.default?.toString();
-        return isSet && !isDefault;
-    }
-
-    const property = props.property;
-    const value = props.value;
-    const prefix = 'parameters';
-    const id = prefix + '-' + property.id;
     return (
         <div>
             <FormGroup
                 key={id}
-                label={<PropertyLabel text={property.title} hasValueChanged={hasValueChanged(property, value)} />}
+                label={
+                    <PropertyLabel
+                        text={property.title}
+                        hasValueChanged={PropertyUtil.hasKameletPropertyValueChanged(property, value)}
+                    />
+                }
                 fieldId={id}
-                isRequired={props.required}
+                isRequired={required}
                 labelIcon={
                     <PropertyHelpIcon
                         title={property.title}

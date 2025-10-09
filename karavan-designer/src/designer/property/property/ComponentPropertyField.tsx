@@ -29,7 +29,7 @@ import {
 import { SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
 import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
-import { PropertyHelpIcon, PropertyHelpFooter, PropertyLabel } from '../../utils/components';
+import { PropertyHelpIcon, PropertyHelpFooter, PropertyLabel, EditorButton } from '../../utils/components';
 import { ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
 import { CamelUi, RouteToCreate } from '../../utils/CamelUi';
 import { CamelElement } from 'karavan-core/lib/model/IntegrationDefinition';
@@ -39,13 +39,10 @@ import PlusIcon from '@patternfly/react-icons/dist/esm/icons/plus-icon';
 import { usePropertiesHook } from '../usePropertiesHook';
 import { useDesignerStore, useIntegrationStore } from '../../DesignerStore';
 import { shallow } from 'zustand/shallow';
-import EditorIcon from '@patternfly/react-icons/dist/js/icons/code-icon';
 import { PropertyPlaceholderDropdown } from './PropertyPlaceholderDropdown';
 import { INTERNAL_COMPONENTS } from 'karavan-core/lib/api/ComponentApi';
 import { PropertyUtil } from './PropertyUtil';
 import { DebouncedTextInput, ManagedSelect, PasswordInfrastructureDebouncedTextInput } from '../../utils/components';
-import NiceModal from '@ebay/nice-modal-react';
-import { ExpressionModal } from '../../utils/modals';
 
 const beanPrefix = '#bean:';
 
@@ -216,25 +213,12 @@ export function ComponentPropertyField(props: Props) {
                     }}
                 />
 
-                <InputGroupItem>
-                    <Tooltip position='bottom-end' content={'Show Editor'}>
-                        <Button
-                            variant='control'
-                            onClick={async () => {
-                                const result = await NiceModal.show(ExpressionModal, {
-                                    name: property.name,
-                                    value: value,
-                                    title: property.displayName,
-                                });
-                                if (result && typeof result === 'object' && 'value' in result) {
-                                    onParametersChange(property.name, (result as any).value, property.kind === 'path');
-                                }
-                            }}
-                        >
-                            <EditorIcon />
-                        </Button>
-                    </Tooltip>
-                </InputGroupItem>
+                <EditorButton
+                    propertyId={property.name}
+                    value={value}
+                    title={property.displayName}
+                    onValueChange={onParametersChange}
+                />
                 <InputGroupItem>
                     <PropertyPlaceholderDropdown
                         property={property}

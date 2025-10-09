@@ -42,7 +42,7 @@ import { SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-
 import '../../karavan.css';
 import './DslPropertyField.css';
 import '@patternfly/patternfly/patternfly.css';
-import { PropertyHelpIcon, PropertyHelpFooter, PropertyLabel } from '../../utils/components';
+import { PropertyHelpIcon, PropertyHelpFooter, PropertyLabel, EditorButton } from '../../utils/components';
 import DeleteIcon from '@patternfly/react-icons/dist/js/icons/times-circle-icon';
 import { CamelUtil } from 'karavan-core/lib/api/CamelUtil';
 import { CamelMetadataApi, PropertyMeta } from 'karavan-core/lib/model/CamelMetadata';
@@ -59,11 +59,8 @@ import AddIcon from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import { MediaTypes } from '../../utils/MediaTypes';
 import { ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
 import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
-import EditorIcon from '@patternfly/react-icons/dist/js/icons/code-icon';
 import { useDesignerStore, useIntegrationStore } from '../../DesignerStore';
 import { shallow } from 'zustand/shallow';
-import NiceModal from '@ebay/nice-modal-react';
-import { ExpressionModal } from '../../utils/modals';
 import {
     DataFormatDefinition,
     ExpressionDefinition,
@@ -78,6 +75,7 @@ import { SelectField } from './SelectField';
 import { PropertyUtil } from './PropertyUtil';
 import { usePropertiesStore } from '../PropertyStore';
 import { Property } from 'karavan-core/lib/model/KameletModels';
+import { isNumeric } from '../../utils/commonUtils';
 
 const beanPrefix = '#bean:';
 const classPrefix = '#class:';
@@ -239,10 +237,6 @@ export function DslPropertyField(props: Props) {
         );
     }
 
-    function isNumeric(num: any) {
-        return (typeof num === 'number' || (typeof num === 'string' && num.trim() !== '')) && !isNaN(num as number);
-    }
-
     function getSpecialStringInput(property: PropertyMeta) {
         return (
             <InputGroup>
@@ -319,25 +313,12 @@ export function DslPropertyField(props: Props) {
                     }}
                 />
                 {showEditorButton && (
-                    <InputGroupItem>
-                        <Tooltip position='bottom-end' content={'Show Editor'}>
-                            <Button
-                                variant='control'
-                                onClick={async () => {
-                                    const result = await NiceModal.show(ExpressionModal, {
-                                        name: property.name,
-                                        value: value,
-                                        title: property.displayName,
-                                    });
-                                    if (result && typeof result === 'object' && 'value' in result) {
-                                        propertyChanged(property.name, (result as any).value);
-                                    }
-                                }}
-                            >
-                                <EditorIcon />
-                            </Button>
-                        </Tooltip>
-                    </InputGroupItem>
+                    <EditorButton
+                        propertyId={property.name}
+                        value={value}
+                        title={property.displayName}
+                        onValueChange={propertyChanged}
+                    />
                 )}
                 <InputGroupItem>
                     <PropertyPlaceholderDropdown
@@ -400,26 +381,13 @@ export function DslPropertyField(props: Props) {
                         }}
                     />
                 </InputGroupItem>
-                <InputGroupItem>
-                    <Tooltip position='bottom-end' content={'Show Editor'}>
-                        <Button
-                            variant='control'
-                            onClick={async () => {
-                                const result = await NiceModal.show(ExpressionModal, {
-                                    name: property.name,
-                                    value: value,
-                                    title: `Expression (${dslLanguage?.[0]})`,
-                                    dslLanguage: dslLanguage,
-                                });
-                                if (result && typeof result === 'object' && 'value' in result) {
-                                    propertyChanged(property.name, (result as any).value);
-                                }
-                            }}
-                        >
-                            <EditorIcon />
-                        </Button>
-                    </Tooltip>
-                </InputGroupItem>
+                <EditorButton
+                    propertyId={property.name}
+                    value={value}
+                    title={`Expression (${dslLanguage?.[0]})`}
+                    onValueChange={propertyChanged}
+                    dslLanguage={dslLanguage}
+                />
             </InputGroup>
         );
     }

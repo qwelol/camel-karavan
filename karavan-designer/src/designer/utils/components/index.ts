@@ -6,6 +6,7 @@ export { MultiValueField } from './MultiValueField';
 export { PropertyHelpIcon } from './HelpIcon';
 export { PropertyHelpFooter } from './PropertyHelpFooter';
 export { PropertyLabel } from './PropertyLabel';
+export { EditorButton } from './EditorButton';
 export { type WithInfrastructureProps } from './withInfrastructure';
 export { InfrastructureDebouncedTextInput, InfrastructureManagedSelect } from './InfrastructureComponents';
 export { PasswordTextInput, PasswordInfrastructureDebouncedTextInput } from './PasswordComponents';
