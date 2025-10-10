@@ -26,7 +26,7 @@ import { Integration, CamelElement } from 'karavan-core/lib/model/IntegrationDef
 import { CamelDefinitionApi } from 'karavan-core/lib/api/CamelDefinitionApi';
 import { DslPropertyField } from './DslPropertyField';
 import { DataFormats } from 'karavan-core/lib/model/CamelMetadata';
-import { usePropertiesStore } from '../PropertyStore';
+import { usePropertiesStore, usePropertySelectorChanged } from '../PropertyStore';
 import { shallow } from 'zustand/shallow';
 import { PropertyUtil } from './PropertyUtil';
 
@@ -43,6 +43,7 @@ export function DataFormatField(props: Props) {
         (s) => [s.propertyFilter, s.changedOnly, s.requiredOnly],
         shallow,
     );
+    const propertySelectorChanged = usePropertiesStore(usePropertySelectorChanged, shallow);
 
     function getDataFormatString() {
         return CamelDefinitionApiExt.getDataFormat(props.value)?.name || 'json';
@@ -104,10 +105,6 @@ export function DataFormatField(props: Props) {
         return propertyMetas;
     }
 
-    function getPropertySelectorChanged(): boolean {
-        return requiredOnly || changedOnly || propertyFilter?.trim().length > 0;
-    }
-
     function getPropertyFields(value: any, properties: PropertyMeta[]) {
         return (
             <>
@@ -162,7 +159,7 @@ export function DataFormatField(props: Props) {
                     {propertiesAdvanced.length > 0 && (
                         <ExpandableSectionWrapper
                             toggleText={'Advanced data format properties'}
-                            strictExpanded={getPropertySelectorChanged()}
+                            strictExpanded={propertySelectorChanged}
                         >
                             {getPropertyFields(value, propertiesAdvanced)}
                         </ExpandableSectionWrapper>

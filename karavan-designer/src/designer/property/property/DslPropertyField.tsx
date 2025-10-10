@@ -73,7 +73,7 @@ import { ROUTE, GLOBAL } from 'karavan-core/lib/api/VariableUtil';
 import { SpiBeanApi } from 'karavan-core/lib/api/SpiBeanApi';
 import { SelectField } from './SelectField';
 import { PropertyUtil } from './PropertyUtil';
-import { usePropertiesStore } from '../PropertyStore';
+import { usePropertiesStore, usePropertySelectorChanged } from '../PropertyStore';
 import { Property } from 'karavan-core/lib/model/KameletModels';
 import { isNumeric } from '../../utils/commonUtils';
 
@@ -108,6 +108,8 @@ export function DslPropertyField(props: Props) {
         shallow,
     );
 
+    const propertySelectorChanged = usePropertiesStore(usePropertySelectorChanged, shallow);
+
     function propertyChanged(fieldId: string, value: string | number | boolean | any, newRoute?: RouteToCreate) {
         props.onPropertyChange?.(fieldId, value, newRoute);
         if (isVariable) {
@@ -115,14 +117,10 @@ export function DslPropertyField(props: Props) {
         }
     }
 
-    function isParameter(property: PropertyMeta): boolean {
-        return property.name === 'parameters' && property.description === 'parameters';
-    }
-
     function getLabel(property: PropertyMeta, value: any, isKamelet: boolean) {
         const labelClassName = PropertyUtil.hasDslPropertyValueChanged(property, value) ? 'value-changed' : '';
         if (
-            !isMultiValueField(property) &&
+            !isMultiValueField &&
             property.isObject &&
             !property.isArray &&
             !['ExpressionDefinition'].includes(property.type)
@@ -148,7 +146,7 @@ export function DslPropertyField(props: Props) {
                 </div>
             );
         }
-        if (isParameter(property)) {
+        if (isParameter) {
             return isKamelet ? 'Kamelet properties:' : 'Component properties:';
         } else if (!['ExpressionDefinition'].includes(property.type)) {
             return (
@@ -158,19 +156,6 @@ export function DslPropertyField(props: Props) {
                 />
             );
         }
-    }
-
-    function isUriReadOnly(property: PropertyMeta): boolean {
-        const dslName: string = props.element?.dslName || '';
-        return (
-            property.name === 'uri' &&
-            ![
-                'ToDynamicDefinition',
-                'WireTapDefinition',
-                'InterceptFromDefinition',
-                'InterceptSendToEndpointDefinition',
-            ].includes(dslName)
-        );
     }
 
     function getVariableInput(property: PropertyMeta) {
@@ -282,7 +267,7 @@ export function DslPropertyField(props: Props) {
         const showInfraSelectorButton = inInfrastructure && !noInfraSelectorButton;
 
         const isNumber = ['integer', 'number', 'duration'].includes(property.type);
-        const uriReadOnly = isUriReadOnly(property);
+        const uriReadOnly = isUriReadOnly;
         const showEditorButton =
             !uriReadOnly && !isNumber && !property.secret && !['id', 'description'].includes(property.name);
         return (
@@ -542,53 +527,6 @@ export function DslPropertyField(props: Props) {
         );
     }
 
-    function canBeInternalUri(property: PropertyMeta, element?: CamelElement): boolean {
-        if (element?.dslName === 'WireTapDefinition' && property.name === 'uri') {
-            return true;
-        } else if (element?.dslName === 'SagaDefinition' && ['compensation', 'completion'].includes(property.name)) {
-            return true;
-        } else if (
-            element &&
-            [
-                'GetDefinition',
-                'PostDefinition',
-                'PutDefinition',
-                'PatchDefinition',
-                'DeleteDefinition',
-                'HeadDefinition',
-            ].includes(element?.dslName) &&
-            property.name === 'to'
-        ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    function canBeMediaType(property: PropertyMeta, element?: CamelElement): boolean {
-        if (
-            element &&
-            [
-                'RestDefinition',
-                'GetDefinition',
-                'PostDefinition',
-                'PutDefinition',
-                'PatchDefinition',
-                'DeleteDefinition',
-                'HeadDefinition',
-            ].includes(element.dslName) &&
-            ['consumes', 'produces'].includes(property.name)
-        ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    function javaTypeGenerated(property: PropertyMeta): boolean {
-        return property.javaType.length !== 0;
-    }
-
     function getInternalUriSelect(property: PropertyMeta, value: any) {
         const selectOptions: JSX.Element[] = [];
         const uris: string[] = CamelUi.getInternalUris(files, true, true, true);
@@ -641,15 +579,6 @@ export function DslPropertyField(props: Props) {
         props.onPropertyChange?.(fieldId, mValue);
     }
 
-    function isKeyValueObject(property: PropertyMeta) {
-        const props = CamelDefinitionApiExt.getElementProperties(property.type);
-        return (
-            props.length === 2 &&
-            props.filter((p) => p.name === 'key').length === 1 &&
-            props.filter((p) => p.name === 'value').length === 1
-        );
-    }
-
     function getMultiObjectFieldProps(
         property: PropertyMeta,
         value: any,
@@ -685,7 +614,7 @@ export function DslPropertyField(props: Props) {
     }
 
     function getMultiValueObjectField(property: PropertyMeta, value: any) {
-        const isKeyValue = isKeyValueObject(property);
+        const isKeyValue = isKeyValueObject;
         return (
             <div>
                 {value &&
@@ -791,7 +720,7 @@ export function DslPropertyField(props: Props) {
 
     function getExpandableComponentProperties(properties: ComponentProperty[], label: string) {
         return (
-            <ExpandableSectionWrapper toggleText={label} strictExpanded={getPropertySelectorChanged()}>
+            <ExpandableSectionWrapper toggleText={label} strictExpanded={propertySelectorChanged}>
                 <div className='parameters'>
                     {properties.map((kp) => (
                         <ComponentPropertyField
@@ -838,15 +767,6 @@ export function DslPropertyField(props: Props) {
         return <BeanProperties type={type} onChange={changeBean} onClone={changeBean} />;
     }
 
-    function isMultiValueField(property: PropertyMeta): boolean {
-        return (
-            ['string'].includes(property.type) &&
-            property.name !== 'expression' &&
-            property.isArray &&
-            !property.enumVals
-        );
-    }
-
     function getFilteredComponentProperties(): ComponentProperty[] {
         let componentProperties = CamelUtil.getComponentProperties(element);
         const filter = propertyFilter.toLocaleLowerCase();
@@ -865,10 +785,6 @@ export function DslPropertyField(props: Props) {
             );
         }
         return componentProperties;
-    }
-
-    function getPropertySelectorChanged(): boolean {
-        return requiredOnly || changedOnly || propertyFilter?.trim().length > 0;
     }
 
     function getComponentParameters(property: PropertyMeta) {
@@ -899,24 +815,23 @@ export function DslPropertyField(props: Props) {
         );
     }
 
-    function getIsVariable() {
-        if (['variableSend', 'variableReceive'].includes(property.name)) {
-            return true;
-        } else if (property.name === 'name' && element?.dslName === 'SetVariableDefinition') {
-            return true;
-        } else if (property.name === 'name' && element?.dslName === 'RemoveVariableDefinition') {
-            return true;
-        } else if (['name', 'toName'].includes(property.name) && element?.dslName === 'ConvertVariableDefinition') {
-            return true;
-        }
-        return false;
-    }
-
-    const element = props.element;
+    const { element, property, value } = props;
     const isKamelet = CamelUtil.isKameletComponent(element);
-    const property: PropertyMeta = props.property;
-    const value = props.value;
-    const isVariable = getIsVariable();
+    const isVariable = useMemo(
+        () => PropertyUtil.isVariableProperty(property.name, element?.dslName),
+        [property.name, element?.dslName],
+    );
+
+    const canBeInternalUri = useMemo(() => PropertyUtil.canBeInternalUri(property, element), [property, element]);
+    const canBeMediaType = useMemo(() => PropertyUtil.canBeMediaType(property, element), [property, element]);
+    const isParameter = useMemo(() => PropertyUtil.isParameter(property), [property]);
+    const isUriReadOnly = useMemo(
+        () => PropertyUtil.isUriReadOnly(property, element?.dslName),
+        [property, element?.dslName],
+    );
+    const isKeyValueObject = useMemo(() => PropertyUtil.isKeyValueObject(property), [property]);
+    const isMultiValueField = useMemo(() => PropertyUtil.isMultiValueField(property), [property]);
+    const javaTypeGenerated = useMemo(() => PropertyUtil.javaTypeGenerated(property), [property]);
 
     const variableType = useMemo((): 'global:' | 'route:' | '' => {
         if (isVariable && value) {
@@ -928,6 +843,7 @@ export function DslPropertyField(props: Props) {
         }
         return '';
     }, [isVariable, value]);
+
     const beanConstructors = element?.dslName === 'BeanFactoryDefinition' && property.name === 'constructors';
     const beanProperties = element?.dslName === 'BeanFactoryDefinition' && property.name === 'properties';
 
@@ -937,7 +853,7 @@ export function DslPropertyField(props: Props) {
                 className='dsl-property-form-group'
                 label={props.hideLabel ? undefined : getLabel(property, value, isKamelet)}
                 isRequired={property.required}
-                labelIcon={isParameter(property) ? undefined : getLabelIcon(property)}
+                labelIcon={isParameter ? undefined : getLabelIcon(property)}
             >
                 {value !== undefined &&
                     ['ExpressionDefinition', 'ExpressionSubElementDefinition'].includes(property.type) &&
@@ -948,24 +864,24 @@ export function DslPropertyField(props: Props) {
                     getObjectField(property, value)}
                 {property.isObject &&
                     property.isArray &&
-                    !isMultiValueField(property) &&
+                    !isMultiValueField &&
                     getMultiValueObjectField(property, value)}
                 {property.name === 'expression' &&
                     property.type === 'string' &&
                     !property.isArray &&
                     getTextArea(property, value)}
-                {canBeInternalUri(property, element) && getInternalUriSelect(property, value)}
-                {canBeMediaType(property, element) && getMediaTypeSelect(property, value)}
-                {javaTypeGenerated(property) && getJavaTypeGeneratedInput(property, value)}
+                {canBeInternalUri && getInternalUriSelect(property, value)}
+                {canBeMediaType && getMediaTypeSelect(property, value)}
+                {javaTypeGenerated && getJavaTypeGeneratedInput(property, value)}
                 {['duration', 'integer', 'number'].includes(property.type) &&
                     !isVariable &&
                     property.name !== 'expression' &&
                     !property.name.endsWith('Ref') &&
                     !property.isArray &&
                     !property.enumVals &&
-                    !canBeInternalUri(property, element) &&
-                    !canBeMediaType(property, element) &&
-                    !javaTypeGenerated(property) &&
+                    !canBeInternalUri &&
+                    !canBeMediaType &&
+                    !javaTypeGenerated &&
                     getSpecialStringInput(property)}
                 {['string'].includes(property.type) &&
                     !isVariable &&
@@ -973,9 +889,9 @@ export function DslPropertyField(props: Props) {
                     !property.name.endsWith('Ref') &&
                     !property.isArray &&
                     !property.enumVals &&
-                    !canBeInternalUri(property, element) &&
-                    !canBeMediaType(property, element) &&
-                    !javaTypeGenerated(property) &&
+                    !canBeInternalUri &&
+                    !canBeMediaType &&
+                    !javaTypeGenerated &&
                     getStringInput(property)}
                 {isVariable && getVariableInput(property)}
                 {['string'].includes(property.type) &&
@@ -983,7 +899,7 @@ export function DslPropertyField(props: Props) {
                     !property.isArray &&
                     !property.enumVals &&
                     getSelectBean(property, value)}
-                {isMultiValueField(property) && getMultiValueField(property, value)}
+                {isMultiValueField && getMultiValueField(property, value)}
                 {property.type === 'boolean' && getBooleanInput(property, value)}
                 {property.enumVals && getSelect(property, value)}
                 {isKamelet && property.name === 'parameters' && getKameletParameters()}

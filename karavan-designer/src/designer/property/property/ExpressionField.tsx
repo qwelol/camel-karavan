@@ -28,7 +28,7 @@ import { CamelElement } from 'karavan-core/lib/model/IntegrationDefinition';
 import { CamelDefinitionApi } from 'karavan-core/lib/api/CamelDefinitionApi';
 import { DslPropertyField } from './DslPropertyField';
 import { CamelUi } from '../../utils/CamelUi';
-import { usePropertiesStore } from '../PropertyStore';
+import { usePropertiesStore, usePropertySelectorChanged } from '../PropertyStore';
 import { shallow } from 'zustand/shallow';
 import { PropertyUtil } from './PropertyUtil';
 
@@ -43,6 +43,7 @@ export function ExpressionField(props: Props) {
         (s) => [s.propertyFilter, s.changedOnly, s.requiredOnly],
         shallow,
     );
+    const propertySelectorChanged = usePropertiesStore(usePropertySelectorChanged, shallow);
 
     function expressionChanged(language: string, value: CamelElement) {
         if (language !== (value as any).expressionName) {
@@ -117,10 +118,6 @@ export function ExpressionField(props: Props) {
         return value ? (value as any)[property.name] : undefined;
     }
 
-    function getPropertySelectorChanged(): boolean {
-        return requiredOnly || changedOnly || propertyFilter?.trim().length > 0;
-    }
-
     function getExpressionProps(): PropertyMeta | undefined {
         const dslName = getValueClassName();
         return CamelDefinitionApiExt.getElementProperties(dslName)
@@ -181,10 +178,7 @@ export function ExpressionField(props: Props) {
                         onPropertyChange={propertyChanged}
                     />
                 )}
-                <ExpandableSectionWrapper
-                    toggleText={'Expression properties'}
-                    strictExpanded={getPropertySelectorChanged()}
-                >
+                <ExpandableSectionWrapper toggleText={'Expression properties'} strictExpanded={propertySelectorChanged}>
                     {value &&
                         getProps().map((property: PropertyMeta) => (
                             <DslPropertyField

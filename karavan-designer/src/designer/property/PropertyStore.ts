@@ -43,3 +43,6 @@ export const usePropertiesStore = createWithEqualityFn<PropertiesState>(
     }),
     shallow,
 );
+
+export const usePropertySelectorChanged = (s: PropertiesState) =>
+    s.requiredOnly || s.changedOnly || s.propertyFilter?.trim().length > 0;

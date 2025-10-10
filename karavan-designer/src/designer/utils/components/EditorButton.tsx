@@ -12,14 +12,7 @@ interface EditorButtonProps {
     dslLanguage?: [string, string, string];
 }
 
-export const EditorButton: React.FC<EditorButtonProps> = ({
-    propertyId,
-    value,
-    title,
-    onValueChange,
-    dslLanguage
-}) => {
-
+export const EditorButton: React.FC<EditorButtonProps> = ({ propertyId, value, title, onValueChange, dslLanguage }) => {
     const handleEditorClick = async () => {
         const result = await NiceModal.show(ExpressionModal, {
             name: propertyId,
@@ -27,7 +20,7 @@ export const EditorButton: React.FC<EditorButtonProps> = ({
             title: title,
             dslLanguage: dslLanguage,
         });
-        
+
         if (result && typeof result === 'object' && 'value' in result) {
             onValueChange(propertyId, (result as any).value);
         }
@@ -36,10 +29,7 @@ export const EditorButton: React.FC<EditorButtonProps> = ({
     return (
         <InputGroupItem>
             <Tooltip position='bottom-end' content={'Show Editor'}>
-                <Button
-                    variant='control'
-                    onClick={handleEditorClick}
-                >
+                <Button variant='control' onClick={handleEditorClick}>
                     <EditorIcon />
                 </Button>
             </Tooltip>

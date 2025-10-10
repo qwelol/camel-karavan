@@ -14,30 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { PropertyMeta } from 'karavan-core/lib/model/CamelMetadata';
-import { ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
-import { Property } from 'karavan-core/lib/model/KameletModels';
+
+import { PropertyValueUtil } from './PropertyValueUtil';
+import { PropertyTypeUtil } from './PropertyTypeUtil';
+import { PropertyUriUtil } from './PropertyUriUtil';
+import { ComponentPropertyUtil } from './ComponentPropertyUtil';
 
 export class PropertyUtil {
-    static hasDslPropertyValueChanged(property: PropertyMeta, value: any): boolean {
-        const isSet = value !== undefined && !['id', 'uri', 'nodePrefixId'].includes(property.name);
-        const defaultValue =
-            property.type === 'boolean' ? property.defaultValue?.toString() || 'false' : property.defaultValue;
-        const isDefault = defaultValue !== undefined && value?.toString() === defaultValue?.toString();
-        return isSet && !isDefault;
-    }
+    static hasDslPropertyValueChanged = PropertyValueUtil.hasDslPropertyValueChanged;
+    static hasComponentPropertyValueChanged = PropertyValueUtil.hasComponentPropertyValueChanged;
+    static hasKameletPropertyValueChanged = PropertyValueUtil.hasKameletPropertyValueChanged;
 
-    static hasComponentPropertyValueChanged(property: ComponentProperty, value: any): boolean {
-        const isSet = value !== undefined;
-        const defaultValue =
-            property.type === 'boolean' ? property.defaultValue?.toString() || 'false' : property.defaultValue;
-        const isDefault = defaultValue !== undefined && value?.toString() === defaultValue?.toString();
-        return isSet && !isDefault;
-    }
+    static isVariableProperty = PropertyTypeUtil.isVariableProperty;
+    static isParameter = PropertyTypeUtil.isParameter;
+    static isKeyValueObject = PropertyTypeUtil.isKeyValueObject;
+    static isMultiValueField = PropertyTypeUtil.isMultiValueField;
+    static javaTypeGenerated = PropertyTypeUtil.javaTypeGenerated;
 
-    static hasKameletPropertyValueChanged(property: Property, value: any): boolean {
-        const isSet = value !== undefined;
-        const isDefault = property.default !== undefined && value?.toString() === property.default?.toString();
-        return isSet && !isDefault;
-    }
+    static canBeInternalUri = PropertyUriUtil.canBeInternalUri;
+    static canBeMediaType = PropertyUriUtil.canBeMediaType;
+    static isUriReadOnly = PropertyUriUtil.isUriReadOnly;
+
+    static canBeInternalUriComponent = ComponentPropertyUtil.canBeInternalUriComponent;
+    static checkUriComponent = ComponentPropertyUtil.checkUriComponent;
 }

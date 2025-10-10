@@ -43,7 +43,7 @@ import { usePropertiesHook } from './usePropertiesHook';
 import { CamelDisplayUtil } from 'karavan-core/lib/api/CamelDisplayUtil';
 import { PropertiesHeader } from './PropertiesHeader';
 import { PropertyUtil } from './property/PropertyUtil';
-import { usePropertiesStore } from './PropertyStore';
+import { usePropertiesStore, usePropertySelectorChanged } from './PropertyStore';
 
 interface Props {
     designerType: 'routes' | 'rest' | 'beans';
@@ -69,6 +69,7 @@ export function DslProperties(props: Props) {
             ],
             shallow,
         );
+    const propertySelectorChanged = usePropertiesStore(usePropertySelectorChanged, shallow);
 
     function getClonableElementHeader(): React.JSX.Element {
         const title = selectedStep && CamelDisplayUtil.getTitle(selectedStep);
@@ -211,10 +212,6 @@ export function DslProperties(props: Props) {
         );
     }
 
-    function getPropertySelectorChanged(): boolean {
-        return requiredOnly || changedOnly || propertyFilter?.trim().length > 0;
-    }
-
     return (
         <div key={selectedStep ? selectedStep.uuid : 'integration'} className='properties'>
             <Form autoComplete='off' onSubmit={(event) => event.preventDefault()}>
@@ -234,7 +231,7 @@ export function DslProperties(props: Props) {
                 {selectedStep && propertiesAdvanced.length > 0 && (
                     <ExpandableSectionWrapper
                         toggleText={'EIP advanced properties'}
-                        strictExpanded={getPropertySelectorChanged()}
+                        strictExpanded={propertySelectorChanged}
                     >
                         <div className='parameters'>{getPropertyFields(propertiesAdvanced)}</div>
                     </ExpandableSectionWrapper>
