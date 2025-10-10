@@ -52,8 +52,9 @@ interface Props {
 export function DslProperties(props: Props) {
     const [integration] = useIntegrationStore((s) => [s.integration], shallow);
 
-    const { cloneElement, onDataFormatChange, onPropertyChange, onParametersChange, onExpressionChange } =
-        usePropertiesHook(props.designerType);
+    const { cloneElement, onDataFormatChange, onPropertyChange, onExpressionChange } = usePropertiesHook(
+        props.designerType,
+    );
 
     const [selectedStep, dark] = useDesignerStore((s) => [s.selectedStep, s.dark], shallow);
 
@@ -134,8 +135,6 @@ export function DslProperties(props: Props) {
                         element={selectedStep}
                         value={getPropertyValue(property)}
                         onExpressionChange={onExpressionChange}
-                        onParameterChange={onParametersChange}
-                        onDataFormatChange={onDataFormatChange}
                         onPropertyChange={onPropertyChange}
                     />
                 ))}

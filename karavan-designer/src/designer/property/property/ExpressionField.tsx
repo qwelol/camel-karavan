@@ -173,8 +173,6 @@ export function ExpressionField(props: Props) {
                         value={value ? (value as any)[exp.name] : undefined}
                         dslLanguage={dslLanguage}
                         onExpressionChange={(_exp) => {}}
-                        onParameterChange={(_parameter) => {}}
-                        onDataFormatChange={(_dataFormat) => {}}
                         onPropertyChange={propertyChanged}
                     />
                 )}
@@ -187,8 +185,6 @@ export function ExpressionField(props: Props) {
                                 value={value ? (value as any)[property.name] : undefined}
                                 dslLanguage={dslLanguage}
                                 onExpressionChange={(_exp) => {}}
-                                onParameterChange={(_parameter) => {}}
-                                onDataFormatChange={(_dataFormat) => {}}
                                 onPropertyChange={propertyChanged}
                             />
                         ))}

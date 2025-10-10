@@ -35,7 +35,6 @@ import {
     DebouncedTextArea,
     ManagedSelect,
     InfrastructureDebouncedTextInput,
-    ExpandableSectionWrapper,
     MultiValueField,
 } from '../../utils/components';
 import { SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
@@ -49,23 +48,18 @@ import { CamelMetadataApi, PropertyMeta } from 'karavan-core/lib/model/CamelMeta
 import { CamelDefinitionApiExt } from 'karavan-core/lib/api/CamelDefinitionApiExt';
 import { ExpressionField } from './ExpressionField';
 import { CamelUi, RouteToCreate } from '../../utils/CamelUi';
-import { ComponentPropertyField } from './ComponentPropertyField';
 import { CamelElement } from 'karavan-core/lib/model/IntegrationDefinition';
-import { KameletPropertyField } from './KameletPropertyField';
+import { KameletParameters } from './KameletParameters';
+import { ComponentParameters } from './ComponentParameters';
 import PlusIcon from '@patternfly/react-icons/dist/esm/icons/plus-icon';
 import { ObjectField } from './ObjectField';
 import { CamelDefinitionApi } from 'karavan-core/lib/api/CamelDefinitionApi';
 import AddIcon from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import { MediaTypes } from '../../utils/MediaTypes';
-import { ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
 import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
 import { useDesignerStore, useIntegrationStore } from '../../DesignerStore';
 import { shallow } from 'zustand/shallow';
-import {
-    DataFormatDefinition,
-    ExpressionDefinition,
-    BeanFactoryDefinition,
-} from 'karavan-core/lib/model/CamelDefinition';
+import { ExpressionDefinition, BeanFactoryDefinition } from 'karavan-core/lib/model/CamelDefinition';
 import { BeanProperties } from './BeanProperties';
 import { PropertyPlaceholderDropdown } from './PropertyPlaceholderDropdown';
 import { VariablesDropdown } from './VariablesDropdown';
@@ -73,8 +67,6 @@ import { ROUTE, GLOBAL } from 'karavan-core/lib/api/VariableUtil';
 import { SpiBeanApi } from 'karavan-core/lib/api/SpiBeanApi';
 import { SelectField } from './SelectField';
 import { PropertyUtil } from './PropertyUtil';
-import { usePropertiesStore, usePropertySelectorChanged } from '../PropertyStore';
-import { Property } from 'karavan-core/lib/model/KameletModels';
 import { isNumeric } from '../../utils/commonUtils';
 
 const beanPrefix = '#bean:';
@@ -86,13 +78,6 @@ interface Props {
     value: any;
     onPropertyChange?: (fieldId: string, value: string | number | boolean | any, newRoute?: RouteToCreate) => void;
     onExpressionChange?: (propertyName: string, exp: ExpressionDefinition) => void;
-    onDataFormatChange?: (value: DataFormatDefinition) => void;
-    onParameterChange?: (
-        parameter: string,
-        value: string | number | boolean | any,
-        pathParameter?: boolean,
-        newRoute?: RouteToCreate,
-    ) => void;
     hideLabel?: boolean;
     dslLanguage?: [string, string, string];
 }
@@ -103,15 +88,10 @@ export function DslPropertyField(props: Props) {
         shallow,
     );
     const [setSelectedStep, beans] = useDesignerStore((s) => [s.setSelectedStep, s.beans], shallow);
-    const [propertyFilter, changedOnly, requiredOnly] = usePropertiesStore(
-        (s) => [s.propertyFilter, s.changedOnly, s.requiredOnly],
-        shallow,
-    );
-
-    const propertySelectorChanged = usePropertiesStore(usePropertySelectorChanged, shallow);
+    const { element, property, value, hideLabel, onExpressionChange, onPropertyChange } = props;
 
     function propertyChanged(fieldId: string, value: string | number | boolean | any, newRoute?: RouteToCreate) {
-        props.onPropertyChange?.(fieldId, value, newRoute);
+        onPropertyChange?.(fieldId, value, newRoute);
         if (isVariable) {
             addVariable(value);
         }
@@ -137,7 +117,7 @@ export function DslPropertyField(props: Props) {
                     <Tooltip position={'top'} content={<div>{tooltip}</div>}>
                         <button
                             className={className}
-                            onClick={(_e) => props.onPropertyChange?.(property.name, x)}
+                            onClick={(_e) => onPropertyChange?.(property.name, x)}
                             aria-label='Add element'
                         >
                             {icon}
@@ -377,22 +357,6 @@ export function DslPropertyField(props: Props) {
         );
     }
 
-    function getExpressionField(property: PropertyMeta, value: any) {
-        return (
-            <div className='expression'>
-                <ExpressionField property={property} value={value} onExpressionChange={props.onExpressionChange} />
-            </div>
-        );
-    }
-
-    function getObjectField(property: PropertyMeta, value: any) {
-        return (
-            <div className='object'>
-                {value && <ObjectField property={property} value={value} onPropertyUpdate={propertyChanged} />}
-            </div>
-        );
-    }
-
     function getBooleanInput(property: PropertyMeta, value: any) {
         const isValueBoolean = value?.toString() === 'true' || value?.toString() === 'false';
         const isDisabled = value?.toString().includes('{') || value?.toString().includes('}');
@@ -573,10 +537,10 @@ export function DslPropertyField(props: Props) {
         );
     }
 
-    function onMultiValueObjectUpdate(index: number, fieldId: string, value: CamelElement) {
-        const mValue = [...props.value];
-        mValue[index] = value;
-        props.onPropertyChange?.(fieldId, mValue);
+    function onMultiValueObjectUpdate(index: number, fieldId: string, newValue: CamelElement) {
+        const mValue = [...value];
+        mValue[index] = newValue;
+        onPropertyChange?.(fieldId, mValue);
     }
 
     function getMultiObjectFieldProps(
@@ -648,93 +612,6 @@ export function DslPropertyField(props: Props) {
         );
     }
 
-    function getMultiValueField(property: PropertyMeta, value: any) {
-        return (
-            <MultiValueField value={value || []} onChange={(newValue) => propertyChanged(property.name, newValue)} />
-        );
-    }
-
-    function getKameletPropertyValue(property: Property) {
-        const element = props.element;
-        return CamelDefinitionApiExt.getParametersValue(element, property.id);
-    }
-
-    function getFilteredKameletProperties(): Property[] {
-        const element = props.element;
-        const requiredParameters = CamelUtil.getKameletRequiredParameters(element);
-        let properties = CamelUtil.getKameletProperties(element);
-        const filter = propertyFilter.toLocaleLowerCase();
-        properties = properties.filter(
-            (p) => p.title?.toLocaleLowerCase().includes(filter) || p.id?.toLocaleLowerCase().includes(filter),
-        );
-        if (requiredOnly) {
-            properties = properties.filter((p) => requiredParameters.includes(p.id));
-        }
-        if (changedOnly) {
-            properties = properties.filter((p) =>
-                PropertyUtil.hasKameletPropertyValueChanged(p, getKameletPropertyValue(p)),
-            );
-        }
-        return properties;
-    }
-
-    function getKameletParameters() {
-        const element = props.element;
-        const requiredParameters = CamelUtil.getKameletRequiredParameters(element);
-        return (
-            <div className='parameters'>
-                {getFilteredKameletProperties().map((property) => (
-                    <KameletPropertyField
-                        key={property.id}
-                        property={property}
-                        value={getKameletPropertyValue(property)}
-                        required={requiredParameters?.includes(property.id)}
-                    />
-                ))}
-            </div>
-        );
-    }
-
-    function getComponentPropertyValue(kp: ComponentProperty) {
-        const element = props.element;
-        return CamelDefinitionApiExt.getParametersValue(element, kp.name, kp.kind === 'path');
-    }
-
-    function getMainComponentParameters(properties: ComponentProperty[]) {
-        return (
-            <div className='parameters'>
-                {properties.map((kp) => {
-                    return (
-                        <ComponentPropertyField
-                            key={kp.name}
-                            property={kp}
-                            value={getComponentPropertyValue(kp)}
-                            element={props.element}
-                            onParameterChange={props.onParameterChange}
-                        />
-                    );
-                })}
-            </div>
-        );
-    }
-
-    function getExpandableComponentProperties(properties: ComponentProperty[], label: string) {
-        return (
-            <ExpandableSectionWrapper toggleText={label} strictExpanded={propertySelectorChanged}>
-                <div className='parameters'>
-                    {properties.map((kp) => (
-                        <ComponentPropertyField
-                            key={kp.name}
-                            property={kp}
-                            value={getComponentPropertyValue(kp)}
-                            onParameterChange={props.onParameterChange}
-                        />
-                    ))}
-                </div>
-            </ExpandableSectionWrapper>
-        );
-    }
-
     function getLabelIcon(property: PropertyMeta) {
         return property.description ? (
             <PropertyHelpIcon
@@ -763,59 +640,6 @@ export function DslPropertyField(props: Props) {
         setSelectedStep(bean);
     }
 
-    function getBeanProperties(type: 'constructors' | 'properties') {
-        return <BeanProperties type={type} onChange={changeBean} onClone={changeBean} />;
-    }
-
-    function getFilteredComponentProperties(): ComponentProperty[] {
-        let componentProperties = CamelUtil.getComponentProperties(element);
-        const filter = propertyFilter.toLocaleLowerCase();
-        componentProperties = componentProperties.filter(
-            (p) =>
-                p.name?.toLocaleLowerCase().includes(filter) ||
-                p.label.toLocaleLowerCase().includes(filter) ||
-                p.displayName.toLocaleLowerCase().includes(filter),
-        );
-        if (requiredOnly) {
-            componentProperties = componentProperties.filter((p) => p.required);
-        }
-        if (changedOnly) {
-            componentProperties = componentProperties.filter((p) =>
-                PropertyUtil.hasComponentPropertyValueChanged(p, getComponentPropertyValue(p)),
-            );
-        }
-        return componentProperties;
-    }
-
-    function getComponentParameters(property: PropertyMeta) {
-        const element = props.element;
-        const properties = getFilteredComponentProperties();
-        const propertiesMain = properties.filter(
-            (p) => !p.label.includes('advanced') && !p.label.includes('security') && !p.label.includes('scheduler'),
-        );
-        const propertiesAdvanced = properties.filter((p) => p.label.includes('advanced'));
-        const propertiesScheduler = properties.filter((p) => p.label.includes('scheduler'));
-        const propertiesSecurity = properties.filter((p) => p.label.includes('security'));
-        return (
-            <>
-                {property.name === 'parameters' && getMainComponentParameters(propertiesMain)}
-                {property.name === 'parameters' &&
-                    element &&
-                    propertiesScheduler.length > 0 &&
-                    getExpandableComponentProperties(propertiesScheduler, 'Component scheduler properties')}
-                {property.name === 'parameters' &&
-                    element &&
-                    propertiesSecurity.length > 0 &&
-                    getExpandableComponentProperties(propertiesSecurity, 'Component security properties')}
-                {property.name === 'parameters' &&
-                    element &&
-                    propertiesAdvanced.length > 0 &&
-                    getExpandableComponentProperties(propertiesAdvanced, 'Component advanced properties')}
-            </>
-        );
-    }
-
-    const { element, property, value } = props;
     const isKamelet = CamelUtil.isKameletComponent(element);
     const isVariable = useMemo(
         () => PropertyUtil.isVariableProperty(property.name, element?.dslName),
@@ -851,17 +675,28 @@ export function DslPropertyField(props: Props) {
         <div>
             <FormGroup
                 className='dsl-property-form-group'
-                label={props.hideLabel ? undefined : getLabel(property, value, isKamelet)}
+                label={hideLabel ? undefined : getLabel(property, value, isKamelet)}
                 isRequired={property.required}
                 labelIcon={isParameter ? undefined : getLabelIcon(property)}
             >
                 {value !== undefined &&
-                    ['ExpressionDefinition', 'ExpressionSubElementDefinition'].includes(property.type) &&
-                    getExpressionField(property, value)}
+                    ['ExpressionDefinition', 'ExpressionSubElementDefinition'].includes(property.type) && (
+                        <div className='expression'>
+                            <ExpressionField
+                                property={property}
+                                value={value}
+                                onExpressionChange={onExpressionChange}
+                            />
+                        </div>
+                    )}
                 {property.isObject &&
                     !property.isArray &&
                     !['ExpressionDefinition', 'ExpressionSubElementDefinition'].includes(property.type) &&
-                    getObjectField(property, value)}
+                    value && (
+                        <div className='object'>
+                            <ObjectField property={property} value={value} onPropertyUpdate={propertyChanged} />
+                        </div>
+                    )}
                 {property.isObject &&
                     property.isArray &&
                     !isMultiValueField &&
@@ -899,13 +734,18 @@ export function DslPropertyField(props: Props) {
                     !property.isArray &&
                     !property.enumVals &&
                     getSelectBean(property, value)}
-                {isMultiValueField && getMultiValueField(property, value)}
+                {isMultiValueField && (
+                    <MultiValueField
+                        value={value || []}
+                        onChange={(newValue) => propertyChanged(property.name, newValue)}
+                    />
+                )}
                 {property.type === 'boolean' && getBooleanInput(property, value)}
                 {property.enumVals && getSelect(property, value)}
-                {isKamelet && property.name === 'parameters' && getKameletParameters()}
-                {!isKamelet && property.name === 'parameters' && getComponentParameters(property)}
-                {beanConstructors && getBeanProperties('constructors')}
-                {beanProperties && getBeanProperties('properties')}
+                {isKamelet && property.name === 'parameters' && <KameletParameters element={element} />}
+                {!isKamelet && property.name === 'parameters' && <ComponentParameters element={element} />}
+                {beanConstructors && <BeanProperties type='constructors' onChange={changeBean} onClone={changeBean} />}
+                {beanProperties && <BeanProperties type='properties' onChange={changeBean} onClone={changeBean} />}
             </FormGroup>
         </div>
     );

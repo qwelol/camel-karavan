@@ -31,12 +31,12 @@ import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
 import { PropertyHelpIcon, PropertyHelpFooter, PropertyLabel, EditorButton } from '../../utils/components';
 import { ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
-import { CamelUi, RouteToCreate } from '../../utils/CamelUi';
+import { CamelUi } from '../../utils/CamelUi';
 import { CamelElement } from 'karavan-core/lib/model/IntegrationDefinition';
 import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
 import PlusIcon from '@patternfly/react-icons/dist/esm/icons/plus-icon';
 import { usePropertiesHook } from '../usePropertiesHook';
-import { useDesignerStore, useIntegrationStore } from '../../DesignerStore';
+import { useIntegrationStore } from '../../DesignerStore';
 import { shallow } from 'zustand/shallow';
 import { PropertyPlaceholderDropdown } from './PropertyPlaceholderDropdown';
 import { PropertyUtil } from './PropertyUtil';
@@ -48,40 +48,32 @@ interface Props {
     property: ComponentProperty;
     element?: CamelElement;
     value: any;
-    onParameterChange?: (
-        parameter: string,
-        value: string | number | boolean | any,
-        pathParameter?: boolean,
-        newRoute?: RouteToCreate,
-    ) => void;
 }
 
 export function ComponentPropertyField(props: Props) {
     const { onParametersChange, getInternalComponentName } = usePropertiesHook();
+    const { property, value, element } = props;
 
     const [integration, files] = useIntegrationStore((state) => [state.integration, state.files], shallow);
-    const [beans] = useDesignerStore((s) => [s.beans], shallow);
+    const beans = useMemo(() => CamelUi.getBeans(integration), [integration]);
 
     const id = useId();
 
     const canBeInternalUri = useMemo(
-        () => PropertyUtil.canBeInternalUriComponent(props.property, props.element),
-        [props.property, props.element],
+        () => PropertyUtil.canBeInternalUriComponent(property, element),
+        [property, element],
     );
 
     const checkUriDirect = useMemo(
-        () => PropertyUtil.checkUriComponent(props.property, props.element, 'direct'),
-        [props.property, props.element],
+        () => PropertyUtil.checkUriComponent(property, element, 'direct'),
+        [property, element],
     );
 
-    const checkUriSeda = useMemo(
-        () => PropertyUtil.checkUriComponent(props.property, props.element, 'seda'),
-        [props.property, props.element],
-    );
+    const checkUriSeda = useMemo(() => PropertyUtil.checkUriComponent(property, element, 'seda'), [property, element]);
 
     const checkUriVertx = useMemo(
-        () => PropertyUtil.checkUriComponent(props.property, props.element, 'vertx'),
-        [props.property, props.element],
+        () => PropertyUtil.checkUriComponent(property, element, 'vertx'),
+        [property, element],
     );
 
     function getSelectBean(property: ComponentProperty, value: any) {
@@ -97,7 +89,7 @@ export function ComponentPropertyField(props: Props) {
         return (
             <ManagedSelect
                 id={id}
-                name={props.property.name}
+                name={property.name}
                 variant={SelectVariant.typeahead}
                 aria-label={property.name}
                 onSelect={(_e, value, isPlaceholder) =>
@@ -116,7 +108,7 @@ export function ComponentPropertyField(props: Props) {
 
     function getInternalUriSelect(property: ComponentProperty, value: any) {
         const selectOptions: JSX.Element[] = [];
-        const componentName = getInternalComponentName(property.name, props.element);
+        const componentName = getInternalComponentName(property.name, element);
         const internalUris = CamelUi.getInternalRouteUris(integration, componentName, false);
         let uris: string[] = CamelUi.getInternalUris(files, checkUriDirect, checkUriSeda, checkUriVertx);
         uris.push(...internalUris);
@@ -134,7 +126,7 @@ export function ComponentPropertyField(props: Props) {
                 <InputGroupItem isFill>
                     <ManagedSelect
                         id={id}
-                        name={props.property.name}
+                        name={property.name}
                         placeholderText='Select or type an URI'
                         variant={SelectVariant.typeahead}
                         aria-label={property.name}
@@ -191,7 +183,7 @@ export function ComponentPropertyField(props: Props) {
                     isSecret={property.secret}
                     autoComplete='off'
                     id={id}
-                    name={props.property.name}
+                    name={property.name}
                     value={value !== undefined ? value : property.defaultValue}
                     onChange={(_, v) => {
                         onParametersChange(property.name, v, property.kind === 'path');
@@ -233,7 +225,7 @@ export function ComponentPropertyField(props: Props) {
                         type={property.secret ? 'password' : 'text'}
                         autoComplete='off'
                         id={id}
-                        name={props.property.name}
+                        name={property.name}
                         value={value !== undefined ? value : property.defaultValue}
                         onChange={(_, v) => {
                             onParametersChange(property.name, v, property.kind === 'path');
@@ -264,7 +256,7 @@ export function ComponentPropertyField(props: Props) {
         return (
             <ManagedSelect
                 id={id}
-                name={props.property.name}
+                name={property.name}
                 variant={SelectVariant.single}
                 aria-label={property.name}
                 onSelect={(e, value, isPlaceholder) =>
@@ -291,7 +283,7 @@ export function ComponentPropertyField(props: Props) {
                 <InputGroupItem>
                     <Switch
                         id={id}
-                        name={props.property.name}
+                        name={property.name}
                         isDisabled={isDisabled}
                         className='switch-placeholder'
                         aria-label={property.name}
@@ -328,8 +320,6 @@ export function ComponentPropertyField(props: Props) {
         );
     }
 
-    const property: ComponentProperty = props.property;
-    const value = props.value;
     return (
         <FormGroup
             key={id}
