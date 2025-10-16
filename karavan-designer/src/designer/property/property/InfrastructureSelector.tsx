@@ -31,7 +31,7 @@ import {
     TextInput,
 } from '@patternfly/react-core';
 import '../../karavan.css';
-import { Table /* data-codemods */, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
 
 interface Props {

@@ -14,23 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useId } from 'react';
-import { FormGroup, Switch, InputGroup, Text, TextVariants, InputGroupItem } from '@patternfly/react-core';
+import React, { useId, useMemo, useCallback } from 'react';
+import { FormGroup } from '@patternfly/react-core';
 import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
-import { PropertyHelpIcon, PropertyHelpFooter, PropertyLabel, EditorButton } from '../../utils/components';
+import { PropertyHelpIcon, PropertyHelpFooter, PropertyLabel } from '../../utils/components';
 import { Property } from 'karavan-core/lib/model/KameletModels';
-import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
 import { usePropertiesHook } from '../usePropertiesHook';
-import { SelectDirection, SelectOption, SelectVariant } from '@patternfly/react-core/deprecated';
-import { PropertyPlaceholderDropdown } from './PropertyPlaceholderDropdown';
-import {
-    InfrastructureManagedSelect,
-    WithInfrastructureProps,
-    PasswordInfrastructureDebouncedTextInput,
-} from '../../utils/components';
-import { isNumeric } from '../../utils/commonUtils';
 import { PropertyUtil } from './PropertyUtil';
+import { useKameletFieldRendererFactory } from './kamelet/hooks/useKameletFieldRendererFactory';
 
 interface Props {
     property: Property;
@@ -43,132 +35,42 @@ export function KameletPropertyField(props: Props) {
     const { onParametersChange } = usePropertiesHook();
     const id = useId();
 
-    function getSpecialStringInput() {
-        const inInfrastructure = InfrastructureAPI.infrastructure !== 'local';
-        const noInfraSelectorButton = ['uri', 'id', 'description', 'group'].includes(property.id);
+    const { getRenderer } = useKameletFieldRendererFactory();
+    const renderer = useMemo(() => getRenderer(property), [getRenderer, property]);
 
-        const showInfraSelectorButton = inInfrastructure && !noInfraSelectorButton;
-        const showEditorButton = property.type === 'string' && property.format !== 'password';
-        const selectFromList: boolean = property.enum !== undefined && property?.enum?.length > 0;
-        const selectOptions: JSX.Element[] = [];
-
-        if (selectFromList && property.enum) {
-            selectOptions.push(
-                ...property.enum.map((value: string) => (
-                    <SelectOption key={value} value={value ? value.trim() : value} />
-                )),
-            );
-        }
-
-        const infrastructureProps: WithInfrastructureProps = {
-            showInfrastructureButton: showInfraSelectorButton,
-            currentValue: value,
-            onInfrastructureSelect: (val) => {
-                onParametersChange(property.id, val);
-            },
-        };
-
-        return (
-            <InputGroup>
-                {selectFromList ? (
-                    <InfrastructureManagedSelect
-                        id={id}
-                        name={id}
-                        placeholderText='Select or type an URI'
-                        variant={SelectVariant.typeahead}
-                        aria-label={property.id}
-                        onSelect={(_e, value, _isPlaceholder) => {
-                            onParametersChange(property.id, value);
-                        }}
-                        selections={value}
-                        isCreatable={true}
-                        createText=''
-                        isInputFilterPersisted={true}
-                        aria-labelledby={property.id}
-                        direction={SelectDirection.down}
-                        {...infrastructureProps}
-                    >
-                        {selectOptions}
-                    </InfrastructureManagedSelect>
-                ) : (
-                    <PasswordInfrastructureDebouncedTextInput
-                        className='text-field'
-                        isRequired
-                        isSecret={property.format === 'password'}
-                        autoComplete='off'
-                        id={id}
-                        name={id}
-                        value={value}
-                        onChange={(_: React.FormEvent<HTMLInputElement>, v: string) => {
-                            if (isNumeric(v)) {
-                                onParametersChange(property.id, Number(v));
-                            } else {
-                                onParametersChange(property.id, v);
-                            }
-                        }}
-                        customIcon={
-                            property.type !== 'string' ? (
-                                <Text component={TextVariants.p}>{property.type}</Text>
-                            ) : undefined
-                        }
-                        debounceDelay={700}
-                        {...infrastructureProps}
-                    />
-                )}
-
-                {showEditorButton && (
-                    <EditorButton
-                        propertyId={property.id}
-                        value={value}
-                        title={property.title}
-                        onValueChange={onParametersChange}
-                    />
-                )}
-                <InputGroupItem>
-                    <PropertyPlaceholderDropdown
-                        property={property}
-                        value={value}
-                        onDslPropertyChange={(_, v, _newRoute) => {
-                            onParametersChange(property.id, v);
-                        }}
-                    />
-                </InputGroupItem>
-            </InputGroup>
-        );
-    }
+    const handleChange = useCallback(
+        (newValue: any) => {
+            onParametersChange(property.id, newValue);
+        },
+        [onParametersChange, property.id],
+    );
 
     return (
-        <div>
-            <FormGroup
-                key={id}
-                label={
-                    <PropertyLabel
-                        text={property.title}
-                        hasValueChanged={PropertyUtil.hasKameletPropertyValueChanged(property, value)}
-                    />
-                }
-                fieldId={id}
-                isRequired={required}
-                labelIcon={
-                    <PropertyHelpIcon
-                        title={property.title}
-                        description={property.description}
-                        footerContent={<PropertyHelpFooter default={property.default} example={property.example} />}
-                    />
-                }
-            >
-                {['string', 'integer', 'int', 'number'].includes(property.type) && getSpecialStringInput()}
-                {property.type === 'boolean' && (
-                    <Switch
-                        id={id}
-                        name={id}
-                        value={value?.toString()}
-                        aria-label={id}
-                        isChecked={Boolean(value) === true}
-                        onChange={(_e) => onParametersChange(property.id, !value)}
-                    />
-                )}
-            </FormGroup>
-        </div>
+        <FormGroup
+            key={id}
+            label={
+                <PropertyLabel
+                    text={property.title}
+                    hasValueChanged={PropertyUtil.hasKameletPropertyValueChanged(property, value)}
+                />
+            }
+            fieldId={id}
+            isRequired={required}
+            labelIcon={
+                <PropertyHelpIcon
+                    title={property.title}
+                    description={property.description}
+                    footerContent={<PropertyHelpFooter default={property.default} example={property.example} />}
+                />
+            }
+        >
+            {renderer.render({
+                property,
+                value,
+                onChange: handleChange,
+                fieldId: id,
+                required,
+            })}
+        </FormGroup>
     );
 }
