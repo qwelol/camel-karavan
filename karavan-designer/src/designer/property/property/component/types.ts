@@ -15,12 +15,15 @@
  * limitations under the License.
  */
 
-import { useMemo } from 'react';
-import { KameletFieldRendererFactory } from '../KameletFieldRendererFactory';
-import { useBaseFieldRendererFactory } from '../../shared/useBaseFieldRendererFactory';
+import { ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
+import { CamelElement } from 'karavan-core/lib/model/IntegrationDefinition';
+import { FieldRenderer, BaseRenderProps } from '../shared/types';
 
-export const useKameletFieldRendererFactory = () => {
-    const factory = useMemo(() => new KameletFieldRendererFactory(), []);
+export interface ComponentRendererProps extends BaseRenderProps<ComponentProperty, any> {
+    fieldId: string;
+    required: boolean;
+    element?: CamelElement;
+    onChange: (value: any, pathParameter?: boolean, newRoute?: any) => void;
+}
 
-    return useBaseFieldRendererFactory(factory);
-};
+export type ComponentRenderer = FieldRenderer<ComponentProperty, any, ComponentRendererProps>;

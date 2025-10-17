@@ -17,7 +17,7 @@
 
 import React from 'react';
 import { InputGroup, InputGroupItem, Text, TextVariants } from '@patternfly/react-core';
-import { useShowInfrastructureButton } from '../hooks/useShowInfrastructureButton';
+import { useShowInfrastructureButton } from '../../shared/hooks/useShowInfrastructureButton';
 import { isNumeric } from '../../../../utils/commonUtils';
 import { PropertyPlaceholderDropdown } from '../../PropertyPlaceholderDropdown';
 import { EditorButton, PasswordInfrastructureDebouncedTextInput } from '../../../../utils/components';
@@ -30,7 +30,7 @@ export const KameletStringField: React.FC<KameletRendererProps> = ({
     onChange,
     required,
 }) => {
-    const showInfrastructureButton = useShowInfrastructureButton(property);
+    const showInfrastructureButton = useShowInfrastructureButton(property.id);
     const showEditorButton = property.type === 'string' && property.format !== 'password';
 
     return (

@@ -15,12 +15,19 @@
  * limitations under the License.
  */
 
-import { useMemo } from 'react';
-import { KameletFieldRendererFactory } from '../KameletFieldRendererFactory';
-import { useBaseFieldRendererFactory } from '../../shared/useBaseFieldRendererFactory';
+import React from 'react';
+import { ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
+import { ComponentRenderer, ComponentRendererProps } from '../types';
+import { ComponentEnumField } from '../components/ComponentEnumField';
 
-export const useKameletFieldRendererFactory = () => {
-    const factory = useMemo(() => new KameletFieldRendererFactory(), []);
+export class ComponentEnumFieldRenderer implements ComponentRenderer {
+    canRender(property: ComponentProperty): boolean {
+        return property.enum && property.enum.length > 0;
+    }
 
-    return useBaseFieldRendererFactory(factory);
-};
+    render(props: ComponentRendererProps): React.ReactElement {
+        return React.createElement(ComponentEnumField, props);
+    }
+
+    priority = 90;
+}

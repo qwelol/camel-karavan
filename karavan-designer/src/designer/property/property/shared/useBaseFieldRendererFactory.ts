@@ -15,12 +15,23 @@
  * limitations under the License.
  */
 
-import { useMemo } from 'react';
-import { KameletFieldRendererFactory } from '../KameletFieldRendererFactory';
-import { useBaseFieldRendererFactory } from '../../shared/useBaseFieldRendererFactory';
+import { useCallback } from 'react';
+import { BaseFieldRendererFactory } from './BaseFieldRendererFactory';
+import { FieldRenderer } from './types';
 
-export const useKameletFieldRendererFactory = () => {
-    const factory = useMemo(() => new KameletFieldRendererFactory(), []);
+export const useBaseFieldRendererFactory = <TProperty, TValue, TRenderProps>(
+    factory: BaseFieldRendererFactory<TProperty, TValue, TRenderProps>,
+) => {
+    const getRenderer = useCallback(
+        (property: TProperty, props: TRenderProps): FieldRenderer<TProperty, TValue, TRenderProps> => {
+            return factory.getRenderer(property, props);
+        },
+        [factory],
+    );
 
-    return useBaseFieldRendererFactory(factory);
+    return {
+        getRenderer,
+        getAvailableRenderers: factory.getAvailableRenderers.bind(factory),
+        clearCache: factory.clearCache.bind(factory),
+    };
 };

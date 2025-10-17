@@ -15,15 +15,19 @@
  * limitations under the License.
  */
 
-import { useMemo } from 'react';
-import { Property } from 'karavan-core/lib/model/KameletModels';
-import { InfrastructureAPI } from '../../../../utils/InfrastructureAPI';
+import React from 'react';
+import { ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
+import { ComponentRenderer, ComponentRendererProps } from '../types';
+import { ComponentBooleanField } from '../components/ComponentBooleanField';
 
-export const useShowInfrastructureButton = (property: Property): boolean => {
-    return useMemo(() => {
-        const inInfrastructure = InfrastructureAPI.infrastructure !== 'local';
-        const noInfraSelectorButton = ['uri', 'id', 'description', 'group'].includes(property.id);
+export class ComponentBooleanFieldRenderer implements ComponentRenderer {
+    canRender(property: ComponentProperty): boolean {
+        return property.type === 'boolean';
+    }
 
-        return inInfrastructure && !noInfraSelectorButton;
-    }, [property.id]);
-};
+    render(props: ComponentRendererProps): React.ReactElement {
+        return <ComponentBooleanField {...props} />;
+    }
+
+    priority = 100;
+}

@@ -15,12 +15,20 @@
  * limitations under the License.
  */
 
-import { useMemo } from 'react';
-import { KameletFieldRendererFactory } from '../KameletFieldRendererFactory';
-import { useBaseFieldRendererFactory } from '../../shared/useBaseFieldRendererFactory';
+import React from 'react';
+import { ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
+import { ComponentRenderer, ComponentRendererProps } from '../types';
+import { ComponentInternalUriField } from '../components/ComponentInternalUriField';
+import { PropertyUtil } from '../../PropertyUtil';
 
-export const useKameletFieldRendererFactory = () => {
-    const factory = useMemo(() => new KameletFieldRendererFactory(), []);
+export class ComponentInternalUriFieldRenderer implements ComponentRenderer {
+    canRender(property: ComponentProperty, props: ComponentRendererProps): boolean {
+        return PropertyUtil.canBeInternalUriComponent(property, props.element);
+    }
 
-    return useBaseFieldRendererFactory(factory);
-};
+    render(props: ComponentRendererProps): React.ReactElement {
+        return <ComponentInternalUriField {...props} />;
+    }
+
+    priority = 110; // Высший приоритет для internal URI
+}

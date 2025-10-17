@@ -16,11 +16,13 @@
  */
 
 import { useMemo } from 'react';
-import { KameletFieldRendererFactory } from '../KameletFieldRendererFactory';
-import { useBaseFieldRendererFactory } from '../../shared/useBaseFieldRendererFactory';
+import { InfrastructureAPI } from '../../../../utils/InfrastructureAPI';
 
-export const useKameletFieldRendererFactory = () => {
-    const factory = useMemo(() => new KameletFieldRendererFactory(), []);
+export const useShowInfrastructureButton = (propertyName: string): boolean => {
+    return useMemo(() => {
+        const inInfrastructure = InfrastructureAPI.infrastructure !== 'local';
+        const noInfraSelectorButton = ['uri', 'id', 'description', 'group'].includes(propertyName);
 
-    return useBaseFieldRendererFactory(factory);
+        return inInfrastructure && !noInfraSelectorButton;
+    }, [propertyName]);
 };

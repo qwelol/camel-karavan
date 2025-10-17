@@ -14,35 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useId, useMemo } from 'react';
-import {
-    FormGroup,
-    Switch,
-    InputGroup,
-    Tooltip,
-    Button,
-    InputGroupItem,
-    TextInputGroup,
-    TextVariants,
-    Text,
-} from '@patternfly/react-core';
-import { SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
+
+import React, { useId, useMemo, useCallback } from 'react';
+import { FormGroup } from '@patternfly/react-core';
 import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
-import { PropertyHelpIcon, PropertyHelpFooter, PropertyLabel, EditorButton } from '../../utils/components';
+import { PropertyHelpIcon, PropertyHelpFooter, PropertyLabel } from '../../utils/components';
 import { ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
-import { CamelUi } from '../../utils/CamelUi';
 import { CamelElement } from 'karavan-core/lib/model/IntegrationDefinition';
-import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
-import PlusIcon from '@patternfly/react-icons/dist/esm/icons/plus-icon';
 import { usePropertiesHook } from '../usePropertiesHook';
-import { useIntegrationStore } from '../../DesignerStore';
-import { shallow } from 'zustand/shallow';
-import { PropertyPlaceholderDropdown } from './PropertyPlaceholderDropdown';
 import { PropertyUtil } from './PropertyUtil';
-import { DebouncedTextInput, ManagedSelect, PasswordInfrastructureDebouncedTextInput } from '../../utils/components';
-
-const beanPrefix = '#bean:';
+import { useComponentFieldRendererFactory } from './component/hooks/useComponentFieldRendererFactory';
+import { ComponentRendererProps } from './component/types';
 
 interface Props {
     property: ComponentProperty;
@@ -51,274 +34,34 @@ interface Props {
 }
 
 export function ComponentPropertyField(props: Props) {
-    const { onParametersChange, getInternalComponentName } = usePropertiesHook();
+    const { onParametersChange } = usePropertiesHook();
     const { property, value, element } = props;
-
-    const [integration, files] = useIntegrationStore((state) => [state.integration, state.files], shallow);
-    const beans = useMemo(() => CamelUi.getBeans(integration), [integration]);
-
     const id = useId();
 
-    const canBeInternalUri = useMemo(
-        () => PropertyUtil.canBeInternalUriComponent(property, element),
-        [property, element],
+    const { getRenderer } = useComponentFieldRendererFactory();
+
+    const handleChange = useCallback(
+        (newValue: any, pathParameter?: boolean, newRoute?: any) => {
+            onParametersChange(property.name, newValue, pathParameter, newRoute);
+        },
+        [onParametersChange, property.name],
     );
 
-    const checkUriDirect = useMemo(
-        () => PropertyUtil.checkUriComponent(property, element, 'direct'),
-        [property, element],
+    const renderProps: ComponentRendererProps = useMemo(
+        () => ({
+            property,
+            value,
+            onChange: handleChange,
+            fieldId: id,
+            required: property.required,
+            element,
+        }),
+        [property, value, handleChange, id, element],
     );
 
-    const checkUriSeda = useMemo(() => PropertyUtil.checkUriComponent(property, element, 'seda'), [property, element]);
-
-    const checkUriVertx = useMemo(
-        () => PropertyUtil.checkUriComponent(property, element, 'vertx'),
-        [property, element],
-    );
-
-    function getSelectBean(property: ComponentProperty, value: any) {
-        const selectOptions: React.JSX.Element[] = [];
-        if (beans) {
-            selectOptions.push(<SelectOption key={0} value={'Select...'} isPlaceholder />);
-            selectOptions.push(
-                ...beans.map((bean) => (
-                    <SelectOption key={bean.name} value={beanPrefix + bean.name} description={bean.type} />
-                )),
-            );
-        }
-        return (
-            <ManagedSelect
-                id={id}
-                name={property.name}
-                variant={SelectVariant.typeahead}
-                aria-label={property.name}
-                onSelect={(_e, value, isPlaceholder) =>
-                    onParametersChange(property.name, !isPlaceholder ? value : undefined)
-                }
-                selections={value}
-                isCreatable={true}
-                createText=''
-                aria-labelledby={property.name}
-                direction={SelectDirection.down}
-            >
-                {selectOptions}
-            </ManagedSelect>
-        );
-    }
-
-    function getInternalUriSelect(property: ComponentProperty, value: any) {
-        const selectOptions: JSX.Element[] = [];
-        const componentName = getInternalComponentName(property.name, element);
-        const internalUris = CamelUi.getInternalRouteUris(integration, componentName, false);
-        let uris: string[] = CamelUi.getInternalUris(files, checkUriDirect, checkUriSeda, checkUriVertx);
-        uris.push(...internalUris);
-        uris = [...new Set(uris.map((e) => (e.includes(':') ? e.split(':')?.at(1) || '' : e)))];
-        if (value && value.length > 0 && !uris.includes(value)) {
-            uris.unshift(value);
-        }
-        if (uris && uris.length > 0) {
-            selectOptions.push(
-                ...uris.map((value: string) => <SelectOption key={value} value={value ? value.trim() : value} />),
-            );
-        }
-        return (
-            <InputGroup>
-                <InputGroupItem isFill>
-                    <ManagedSelect
-                        id={id}
-                        name={property.name}
-                        placeholderText='Select or type an URI'
-                        variant={SelectVariant.typeahead}
-                        aria-label={property.name}
-                        onSelect={(e, value, isPlaceholder) => {
-                            onParametersChange(
-                                property.name,
-                                !isPlaceholder ? value : undefined,
-                                property.kind === 'path',
-                                undefined,
-                            );
-                        }}
-                        selections={value}
-                        isCreatable={true}
-                        createText=''
-                        isInputFilterPersisted={true}
-                        aria-labelledby={property.name}
-                        direction={SelectDirection.down}
-                    >
-                        {selectOptions}
-                    </ManagedSelect>
-                </InputGroupItem>
-                <InputGroupItem>
-                    <Tooltip position='bottom-end' content={'Create route'}>
-                        <Button
-                            isDisabled={value === undefined}
-                            variant='control'
-                            onClick={(_e) => {
-                                if (value) {
-                                    const newRoute = !internalUris.includes(value.toString())
-                                        ? CamelUi.createNewInternalRoute(componentName.concat(...':', value.toString()))
-                                        : undefined;
-                                    onParametersChange(property.name, value, property.kind === 'path', newRoute);
-                                }
-                            }}
-                        >
-                            {<PlusIcon />}
-                        </Button>
-                    </Tooltip>
-                </InputGroupItem>
-            </InputGroup>
-        );
-    }
-
-    function getStringInput(property: ComponentProperty) {
-        const inInfrastructure = InfrastructureAPI.infrastructure !== 'local';
-        const noInfraSelectorButton = ['uri', 'id', 'description', 'group'].includes(property.name);
-        const showInfraSelectorButton = inInfrastructure && !noInfraSelectorButton;
-
-        return (
-            <InputGroup>
-                <PasswordInfrastructureDebouncedTextInput
-                    className='text-field'
-                    isRequired
-                    isSecret={property.secret}
-                    autoComplete='off'
-                    id={id}
-                    name={property.name}
-                    value={value !== undefined ? value : property.defaultValue}
-                    onChange={(_, v) => {
-                        onParametersChange(property.name, v, property.kind === 'path');
-                    }}
-                    debounceDelay={700}
-                    showInfrastructureButton={showInfraSelectorButton}
-                    currentValue={value}
-                    onInfrastructureSelect={(val: string) => {
-                        onParametersChange(property.name, val);
-                    }}
-                />
-
-                <EditorButton
-                    propertyId={property.name}
-                    value={value}
-                    title={property.displayName}
-                    onValueChange={onParametersChange}
-                />
-                <InputGroupItem>
-                    <PropertyPlaceholderDropdown
-                        property={property}
-                        value={value}
-                        onComponentPropertyChange={(parameter, v) => {
-                            onParametersChange(parameter, v);
-                        }}
-                    />
-                </InputGroupItem>
-            </InputGroup>
-        );
-    }
-
-    function getSpecialStringInput(property: ComponentProperty) {
-        return (
-            <InputGroup>
-                <InputGroupItem isFill>
-                    <DebouncedTextInput
-                        className='text-field'
-                        isRequired
-                        type={property.secret ? 'password' : 'text'}
-                        autoComplete='off'
-                        id={id}
-                        name={property.name}
-                        value={value !== undefined ? value : property.defaultValue}
-                        onChange={(_, v) => {
-                            onParametersChange(property.name, v, property.kind === 'path');
-                        }}
-                        customIcon={<Text component={TextVariants.p}>{property.type}</Text>}
-                        debounceDelay={700}
-                    />
-                </InputGroupItem>
-                <InputGroupItem>
-                    <PropertyPlaceholderDropdown
-                        property={property}
-                        value={value}
-                        onComponentPropertyChange={(_, v) => {
-                            onParametersChange(property.name, v);
-                        }}
-                    />
-                </InputGroupItem>
-            </InputGroup>
-        );
-    }
-
-    function getSelect(property: ComponentProperty, value: any) {
-        const selectOptions: JSX.Element[] = [];
-        if (property.enum && property.enum.length > 0) {
-            selectOptions.push(<SelectOption key={0} value={'Select ...'} isPlaceholder />);
-            property.enum.forEach((v) => selectOptions.push(<SelectOption key={v} value={v} />));
-        }
-        return (
-            <ManagedSelect
-                id={id}
-                name={property.name}
-                variant={SelectVariant.single}
-                aria-label={property.name}
-                onSelect={(e, value, isPlaceholder) =>
-                    onParametersChange(property.name, !isPlaceholder ? value : undefined, property.kind === 'path')
-                }
-                selections={value !== undefined ? value.toString() : property.defaultValue}
-                aria-labelledby={property.name}
-                direction={SelectDirection.down}
-            >
-                {selectOptions}
-            </ManagedSelect>
-        );
-    }
-
-    function getSwitch(property: ComponentProperty, value: any) {
-        const isValueBoolean = value?.toString() === 'true' || value?.toString() === 'false';
-        const isDisabled = value?.toString().includes('{') || value?.toString().includes('}');
-        const isChecked =
-            value !== undefined
-                ? Boolean(value)
-                : property.defaultValue !== undefined && ['true', true].includes(property.defaultValue);
-        return (
-            <TextInputGroup className='input-group'>
-                <InputGroupItem>
-                    <Switch
-                        id={id}
-                        name={property.name}
-                        isDisabled={isDisabled}
-                        className='switch-placeholder'
-                        aria-label={property.name}
-                        isChecked={isChecked}
-                        value={value?.toString()}
-                        onChange={(_, v) => {
-                            onParametersChange(property.name, v);
-                        }}
-                    />
-                </InputGroupItem>
-                <InputGroupItem isFill>
-                    <DebouncedTextInput
-                        id={property.name + '-placeholder'}
-                        name={property.name + '-placeholder'}
-                        type='text'
-                        aria-label='placeholder'
-                        value={!isValueBoolean ? value?.toString() : undefined}
-                        onChange={(_, v) => {
-                            onParametersChange(property.name, v);
-                        }}
-                        debounceDelay={700}
-                    />
-                </InputGroupItem>
-                <InputGroupItem>
-                    <PropertyPlaceholderDropdown
-                        property={property}
-                        value={value}
-                        onDslPropertyChange={(_, v) => {
-                            onParametersChange(property.name, v);
-                        }}
-                    />
-                </InputGroupItem>
-            </TextInputGroup>
-        );
-    }
+    const renderer = useMemo(() => {
+        return getRenderer(property, renderProps);
+    }, [getRenderer, property, renderProps]);
 
     return (
         <FormGroup
@@ -343,15 +86,7 @@ export function ComponentPropertyField(props: Props) {
                 />
             }
         >
-            {canBeInternalUri && getInternalUriSelect(property, value)}
-            {property.type === 'string' && property.enum === undefined && !canBeInternalUri && getStringInput(property)}
-            {['duration', 'integer', 'int', 'number'].includes(property.type) &&
-                property.enum === undefined &&
-                !canBeInternalUri &&
-                getSpecialStringInput(property)}
-            {['object'].includes(property.type) && !property.enum && getSelectBean(property, value)}
-            {['string', 'object', 'integer'].includes(property.type) && property.enum && getSelect(property, value)}
-            {property.type === 'boolean' && getSwitch(property, value)}
+            {renderer.render(renderProps)}
         </FormGroup>
     );
 }

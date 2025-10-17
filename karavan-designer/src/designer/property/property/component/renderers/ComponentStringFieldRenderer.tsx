@@ -15,12 +15,22 @@
  * limitations under the License.
  */
 
-import { Property } from 'karavan-core/lib/model/KameletModels';
-import { FieldRenderer, BaseRenderProps } from '../shared/types';
+import React from 'react';
+import { ComponentProperty } from 'karavan-core/lib/model/ComponentModels';
+import { ComponentRenderer, ComponentRendererProps } from '../types';
+import { ComponentStringField } from '../components/ComponentStringField';
+import { PropertyUtil } from '../../PropertyUtil';
 
-export interface KameletRendererProps extends BaseRenderProps<Property, any> {
-    fieldId: string;
-    required: boolean;
+export class ComponentStringFieldRenderer implements ComponentRenderer {
+    canRender(property: ComponentProperty, props: ComponentRendererProps): boolean {
+        const canBeInternalUri = PropertyUtil.canBeInternalUriComponent(property, props.element);
+
+        return property.type === 'string' && property.enum === undefined && !canBeInternalUri;
+    }
+
+    render(props: ComponentRendererProps): React.ReactElement {
+        return <ComponentStringField {...props} />;
+    }
+
+    priority = 100;
 }
-
-export type KameletRenderer = FieldRenderer<Property, any, KameletRendererProps>;

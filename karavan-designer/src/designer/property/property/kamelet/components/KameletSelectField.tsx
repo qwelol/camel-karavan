@@ -18,13 +18,13 @@
 import React from 'react';
 import { SelectOption } from '@patternfly/react-core/deprecated';
 import { SelectVariant, SelectDirection } from '@patternfly/react-core/deprecated';
-import { useShowInfrastructureButton } from '../hooks/useShowInfrastructureButton';
+import { useShowInfrastructureButton } from '../../shared/hooks/useShowInfrastructureButton';
 import { InfrastructureManagedSelect } from '../../../../utils/components';
 import { KameletRendererProps } from '../types';
 
 export const KameletSelectField: React.FC<KameletRendererProps> = React.memo(
     ({ property, value, fieldId, onChange }) => {
-        const showInfrastructureButton = useShowInfrastructureButton(property);
+        const showInfrastructureButton = useShowInfrastructureButton(property.id);
         const selectOptions: JSX.Element[] = [];
 
         if (property.enum) {

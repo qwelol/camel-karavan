@@ -23,6 +23,7 @@ import { Property } from 'karavan-core/lib/model/KameletModels';
 import { usePropertiesHook } from '../usePropertiesHook';
 import { PropertyUtil } from './PropertyUtil';
 import { useKameletFieldRendererFactory } from './kamelet/hooks/useKameletFieldRendererFactory';
+import { KameletRendererProps } from './kamelet/types';
 
 interface Props {
     property: Property;
@@ -36,7 +37,6 @@ export function KameletPropertyField(props: Props) {
     const id = useId();
 
     const { getRenderer } = useKameletFieldRendererFactory();
-    const renderer = useMemo(() => getRenderer(property), [getRenderer, property]);
 
     const handleChange = useCallback(
         (newValue: any) => {
@@ -44,6 +44,19 @@ export function KameletPropertyField(props: Props) {
         },
         [onParametersChange, property.id],
     );
+
+    const renderProps: KameletRendererProps = useMemo(
+        () => ({
+            property,
+            value,
+            onChange: handleChange,
+            fieldId: id,
+            required,
+        }),
+        [property, value, handleChange, id, required],
+    );
+
+    const renderer = useMemo(() => getRenderer(property, renderProps), [getRenderer, property, renderProps]);
 
     return (
         <FormGroup
@@ -64,13 +77,7 @@ export function KameletPropertyField(props: Props) {
                 />
             }
         >
-            {renderer.render({
-                property,
-                value,
-                onChange: handleChange,
-                fieldId: id,
-                required,
-            })}
+            {renderer.render(renderProps)}
         </FormGroup>
     );
 }

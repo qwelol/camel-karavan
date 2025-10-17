@@ -15,12 +15,20 @@
  * limitations under the License.
  */
 
-import { useMemo } from 'react';
-import { KameletFieldRendererFactory } from '../KameletFieldRendererFactory';
-import { useBaseFieldRendererFactory } from '../../shared/useBaseFieldRendererFactory';
+export interface FieldRenderer<TProperty = any, TValue = any, TRenderProps = any> {
+    canRender(property: TProperty, props?: TRenderProps): boolean;
+    render(props: TRenderProps): React.ReactElement;
+    validate?(value: TValue, property: TProperty): ValidationResult;
+    priority?: number;
+}
 
-export const useKameletFieldRendererFactory = () => {
-    const factory = useMemo(() => new KameletFieldRendererFactory(), []);
+export interface BaseRenderProps<TProperty, TValue> {
+    property: TProperty;
+    value: TValue;
+    onChange: (value: TValue) => void;
+}
 
-    return useBaseFieldRendererFactory(factory);
-};
+interface ValidationResult {
+    isValid: boolean;
+    errors: string[];
+}

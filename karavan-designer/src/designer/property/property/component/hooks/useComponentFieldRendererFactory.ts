@@ -16,11 +16,11 @@
  */
 
 import { useMemo } from 'react';
-import { KameletFieldRendererFactory } from '../KameletFieldRendererFactory';
+import { ComponentFieldRendererFactory } from '../ComponentFieldRendererFactory';
 import { useBaseFieldRendererFactory } from '../../shared/useBaseFieldRendererFactory';
 
-export const useKameletFieldRendererFactory = () => {
-    const factory = useMemo(() => new KameletFieldRendererFactory(), []);
+export const useComponentFieldRendererFactory = () => {
+    const factory = useMemo(() => new ComponentFieldRendererFactory(), []);
 
     return useBaseFieldRendererFactory(factory);
 };

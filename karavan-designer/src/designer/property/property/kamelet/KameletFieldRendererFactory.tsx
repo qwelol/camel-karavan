@@ -15,65 +15,31 @@
  * limitations under the License.
  */
 
-import React from 'react';
 import { Property } from 'karavan-core/lib/model/KameletModels';
 import { KameletSelectFieldRenderer } from './renderers/KameletSelectFieldRenderer';
 import { KameletStringFieldRenderer } from './renderers/KameletStringFieldRenderer';
 import { KameletBooleanFieldRenderer } from './renderers/KameletBooleanFieldRenderer';
-import { KameletRenderer } from './types';
-import { Skeleton } from '@patternfly/react-core';
+import { KameletRendererProps } from './types';
+import { BaseFieldRendererFactory } from '../shared/BaseFieldRendererFactory';
 
-class KameletDefaultFieldRenderer implements KameletRenderer {
-    canRender(): boolean {
-        return true;
-    }
-
-    render(): React.ReactElement {
-        return <Skeleton height='33px' />;
-    }
-
-    priority = 0;
-}
-
-export class KameletFieldRendererFactory {
-    private renderers: KameletRenderer[] = [];
-    private rendererCache = new Map<string, KameletRenderer>();
-
+export class KameletFieldRendererFactory extends BaseFieldRendererFactory<Property, any, KameletRendererProps> {
     constructor() {
+        super();
+
         this.registerRenderer(new KameletSelectFieldRenderer());
         this.registerRenderer(new KameletStringFieldRenderer());
         this.registerRenderer(new KameletBooleanFieldRenderer());
     }
 
-    registerRenderer(renderer: KameletRenderer): void {
-        this.renderers.push(renderer);
-        this.renderers.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+    protected getCacheKey(property: Property): string {
+        return `${property.type}-${property.id}-${property.enum ? 'enum' : 'no-enum'}`;
     }
 
-    getRenderer(property: Property): KameletRenderer {
-        const cacheKey = `${property.type}-${property.id}-${property.enum ? 'enum' : 'no-enum'}`;
-
-        if (this.rendererCache.has(cacheKey)) {
-            return this.rendererCache.get(cacheKey)!;
-        }
-
-        const renderer = this.renderers.find((r) => r.canRender(property));
-        const finalRenderer = renderer || new KameletDefaultFieldRenderer();
-
-        this.rendererCache.set(cacheKey, finalRenderer);
-
-        if (!renderer) {
-            console.warn(`No Kamelet renderer found for property: ${property.id} (${property.type})`);
-        }
-
-        return finalRenderer;
+    protected getPropertyName(property: Property): string {
+        return property.id;
     }
 
-    getAvailableRenderers(property: Property): KameletRenderer[] {
-        return this.renderers.filter((r) => r.canRender(property));
-    }
-
-    clearCache(): void {
-        this.rendererCache.clear();
+    protected getPropertyType(property: Property): string {
+        return property.type;
     }
 }
