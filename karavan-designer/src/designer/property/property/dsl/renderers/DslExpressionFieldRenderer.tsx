@@ -19,7 +19,7 @@ import React from 'react';
 import { PropertyMeta } from 'karavan-core/lib/model/CamelMetadata';
 import { DslRenderer } from '../types';
 import { DslRendererProps } from '../types';
-import { DslExpressionField } from '../components/DslExpressionField';
+import { ExpressionField } from '../../ExpressionField';
 
 export class DslExpressionFieldRenderer implements DslRenderer {
     canRender(property: PropertyMeta, props: DslRendererProps): boolean {
@@ -30,7 +30,13 @@ export class DslExpressionFieldRenderer implements DslRenderer {
     }
 
     render(props: DslRendererProps): React.ReactElement {
-        return <DslExpressionField {...props} />;
+        const { property, value, onExpressionChange } = props;
+
+        return (
+            <div className='expression'>
+                <ExpressionField property={property} value={value} onExpressionChange={onExpressionChange} />
+            </div>
+        );
     }
 
     priority = 120; // Высший приоритет для выражений

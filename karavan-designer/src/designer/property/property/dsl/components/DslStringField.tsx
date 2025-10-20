@@ -80,9 +80,7 @@ export const DslStringField: React.FC<DslRendererProps> = ({
                 <PropertyPlaceholderDropdown
                     property={property}
                     value={value}
-                    onDslPropertyChange={(_, v, _newRoute) => {
-                        onChange(v);
-                    }}
+                    onDslPropertyChange={(v) => onChange(v)}
                 />
             </InputGroupItem>
         </InputGroup>

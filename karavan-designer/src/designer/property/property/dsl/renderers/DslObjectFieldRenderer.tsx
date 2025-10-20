@@ -22,14 +22,11 @@ import { DslRendererProps } from '../types';
 import { DslObjectField } from '../components/DslObjectField';
 
 export class DslObjectFieldRenderer implements DslRenderer {
-    canRender(property: PropertyMeta, props: DslRendererProps): boolean {
-        const { value } = props;
-
+    canRender(property: PropertyMeta): boolean {
         return (
             property.isObject &&
             !property.isArray &&
-            !['ExpressionDefinition', 'ExpressionSubElementDefinition'].includes(property.type) &&
-            value
+            !['ExpressionDefinition', 'ExpressionSubElementDefinition'].includes(property.type)
         );
     }
 

@@ -66,7 +66,7 @@ const SYNTAX_EXAMPLES = [
 interface Props {
     property: ComponentProperty | PropertyMeta | Property;
     value: any;
-    onDslPropertyChange?: (fieldId: string, value: string | number | boolean | any, newRoute?: RouteToCreate) => void;
+    onDslPropertyChange?: (value: string | number | boolean | any, newRoute?: RouteToCreate) => void;
     onComponentPropertyChange?: (
         parameter: string,
         value: string | number | boolean | any,
@@ -107,9 +107,9 @@ export function PropertyPlaceholderDropdown(props: Props) {
         if (property instanceof ComponentProperty) {
             props.onComponentPropertyChange?.(property.name, `{{${value}}}`, property.kind === 'path');
         } else if (property instanceof PropertyMeta) {
-            props.onDslPropertyChange?.(property.name, `{{${value}}}`);
+            props.onDslPropertyChange?.(`{{${value}}}`);
         } else {
-            props.onDslPropertyChange?.((property as Property).id, `{{${value}}}`);
+            props.onDslPropertyChange?.(`{{${value}}}`);
         }
     }
 

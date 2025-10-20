@@ -22,11 +22,13 @@ import { DslRendererProps } from '../types';
 export const DslObjectField: React.FC<DslRendererProps> = ({ property, value, onPropertyChange }) => {
     return (
         <div className='object'>
-            <ObjectField
-                property={property}
-                value={value}
-                onPropertyUpdate={(fieldId: string, value: any) => onPropertyChange?.(fieldId, value)}
-            />
+            {value && (
+                <ObjectField
+                    property={property}
+                    value={value}
+                    onPropertyUpdate={(fieldId: string, value: any) => onPropertyChange?.(fieldId, value)}
+                />
+            )}
         </div>
     );
 };

@@ -20,7 +20,7 @@ import { FormGroup } from '@patternfly/react-core';
 import '../../karavan.css';
 import './DslPropertyField.css';
 import '@patternfly/patternfly/patternfly.css';
-import { PropertyHelpIcon, PropertyHelpFooter, PropertyLabel } from '../../utils/components';
+import { PropertyHelpIcon, PropertyHelpFooter } from '../../utils/components';
 import { PropertyMeta } from 'karavan-core/lib/model/CamelMetadata';
 import { CamelElement } from 'karavan-core/lib/model/IntegrationDefinition';
 import { PropertyUtil } from './PropertyUtil';
@@ -29,6 +29,7 @@ import { DslRendererProps } from './dsl/types';
 import { RouteToCreate } from '../../utils/CamelUi';
 import { ExpressionDefinition } from 'karavan-core/lib/model/CamelDefinition';
 import { CamelUtil } from 'karavan-core/lib/api/CamelUtil';
+import { PropertyLabel } from './dsl/components/PropertyLabel';
 
 interface Props {
     property: PropertyMeta;
@@ -75,22 +76,21 @@ export function DslPropertyField(props: Props) {
 
     const isKamelet = CamelUtil.isKameletComponent(element);
     const isParameter = PropertyUtil.isParameter(property);
+    const isMultiValueField = PropertyUtil.isMultiValueField(property);
 
     return (
         <div>
             <FormGroup
                 className='dsl-property-form-group'
                 label={
-                    hideLabel ? undefined : isParameter ? (
-                        isKamelet ? (
-                            'Kamelet properties:'
-                        ) : (
-                            'Component properties:'
-                        )
-                    ) : (
+                    hideLabel ? undefined : (
                         <PropertyLabel
-                            text={CamelUtil.capitalizeName(property.displayName)}
-                            hasValueChanged={PropertyUtil.hasDslPropertyValueChanged(property, value)}
+                            property={property}
+                            value={value}
+                            isKamelet={isKamelet}
+                            isParameter={isParameter}
+                            isMultiValueField={isMultiValueField}
+                            onPropertyChange={onPropertyChange}
                         />
                     )
                 }

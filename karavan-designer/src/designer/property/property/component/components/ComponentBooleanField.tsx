@@ -62,9 +62,7 @@ export const ComponentBooleanField: React.FC<ComponentRendererProps> = ({ proper
                 <PropertyPlaceholderDropdown
                     property={property}
                     value={value}
-                    onDslPropertyChange={(_, v) => {
-                        onChange(v);
-                    }}
+                    onDslPropertyChange={(v) => onChange(v)}
                 />
             </InputGroupItem>
         </TextInputGroup>

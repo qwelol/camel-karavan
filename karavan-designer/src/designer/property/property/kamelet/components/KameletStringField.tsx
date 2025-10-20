@@ -64,13 +64,7 @@ export const KameletStringField: React.FC<KameletRendererProps> = ({
             )}
 
             <InputGroupItem>
-                <PropertyPlaceholderDropdown
-                    property={property}
-                    value={value}
-                    onDslPropertyChange={(_, v) => {
-                        onChange(v);
-                    }}
-                />
+                <PropertyPlaceholderDropdown property={property} value={value} onDslPropertyChange={onChange} />
             </InputGroupItem>
         </InputGroup>
     );

@@ -64,7 +64,7 @@ export const DslBooleanField: React.FC<DslRendererProps> = ({ property, value, f
                 <PropertyPlaceholderDropdown
                     property={property}
                     value={value}
-                    onDslPropertyChange={(_, v, newRoute) => {
+                    onDslPropertyChange={(v, newRoute) => {
                         onChange(v, false, newRoute);
                     }}
                 />
