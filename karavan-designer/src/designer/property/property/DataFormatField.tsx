@@ -14,158 +14,70 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React from 'react';
-import { ExpandableSectionWrapper, ManagedSelect } from '../../utils/components';
-import { SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
+import React, { useState, useCallback } from 'react';
 import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
-import { CamelMetadataApi, PropertyMeta } from 'karavan-core/lib/model/CamelMetadata';
+import { CamelMetadataApi } from 'karavan-core/lib/model/CamelMetadata';
 import { CamelDefinitionApiExt } from 'karavan-core/lib/api/CamelDefinitionApiExt';
 import { DataFormatDefinition } from 'karavan-core/lib/model/CamelDefinition';
-import { Integration, CamelElement } from 'karavan-core/lib/model/IntegrationDefinition';
+import { CamelElement } from 'karavan-core/lib/model/IntegrationDefinition';
 import { CamelDefinitionApi } from 'karavan-core/lib/api/CamelDefinitionApi';
-import { DslPropertyField } from './DslPropertyField';
-import { DataFormats } from 'karavan-core/lib/model/CamelMetadata';
-import { usePropertiesStore, usePropertySelectorChanged } from '../PropertyStore';
-import { shallow } from 'zustand/shallow';
-import { PropertyUtil } from './PropertyUtil';
+import { DataFormatSelector } from './DataFormatSelector';
+import { DataFormatPropertiesPanel } from './DataFormatPropertiesPanel';
 
 interface Props {
     dslName: string;
     value: CamelElement;
     onDataFormatChange?: (value: DataFormatDefinition) => void;
-    integration: Integration;
-    dark: boolean;
 }
 
-export function DataFormatField(props: Props) {
-    const [propertyFilter, changedOnly, requiredOnly] = usePropertiesStore(
-        (s) => [s.propertyFilter, s.changedOnly, s.requiredOnly],
-        shallow,
+export function DataFormatField({ dslName, value, onDataFormatChange }: Props) {
+    const [currentDataFormat, setCurrentDataFormat] = useState(
+        () => CamelDefinitionApiExt.getDataFormat(value)?.name || 'json',
     );
-    const propertySelectorChanged = usePropertiesStore(usePropertySelectorChanged, shallow);
 
-    function getDataFormatString() {
-        return CamelDefinitionApiExt.getDataFormat(props.value)?.name || 'json';
-    }
+    const handleDataFormatChange = useCallback(
+        (dataFormat: string) => {
+            setCurrentDataFormat(dataFormat);
 
-    function dataFormatChanged(dataFormat: string, value?: CamelElement) {
-        if (dataFormat !== (value as any).dataFormatName) {
             const className = CamelMetadataApi.getCamelDataFormatMetadataByName(dataFormat)?.className;
-            value = CamelDefinitionApi.createDataFormat(className || '', {}); // perhaps copy other similar fields later
-        }
-        const df = CamelDefinitionApi.createStep(props.dslName, {});
-        (df as any)[dataFormat] = value;
-        (df as any)['uuid'] = props.value.uuid;
-        (df as any)['id'] = (props.value as any)['id'];
+            const newDataFormatValue = CamelDefinitionApi.createDataFormat(className || '', {});
 
-        props.onDataFormatChange?.(df);
-    }
+            const df = CamelDefinitionApi.createStep(dslName, {});
+            (df as any)[dataFormat] = newDataFormatValue;
+            (df as any)['uuid'] = value.uuid;
+            (df as any)['id'] = (value as any)['id'];
 
-    function propertyChanged(fieldId: string, value: string | number | boolean | any) {
-        const df = getDataFormatValue();
-        if (df) {
-            (df as any)[fieldId] = value;
-            dataFormatChanged(getDataFormatString(), df);
-        }
-    }
+            onDataFormatChange?.(df);
+        },
+        [dslName, value, onDataFormatChange],
+    );
+
+    const handlePropertyChange = useCallback(
+        (fieldId: string, propertyValue: string | number | boolean | any) => {
+            const dataFormatValue = getDataFormatValue();
+            if (dataFormatValue) {
+                (dataFormatValue as any)[fieldId] = propertyValue;
+                handleDataFormatChange(currentDataFormat);
+            }
+        },
+        [currentDataFormat, handleDataFormatChange],
+    );
 
     function getDataFormatValue(): CamelElement {
-        const dataFormatString = getDataFormatString();
-        return (props.value as any)[dataFormatString]
-            ? (props.value as any)[dataFormatString]
-            : CamelDefinitionApi.createDataFormat(dataFormatString, (props.value as any)[dataFormatString]);
+        return (value as any)[currentDataFormat]
+            ? (value as any)[currentDataFormat]
+            : CamelDefinitionApi.createDataFormat(currentDataFormat, (value as any)[currentDataFormat]);
     }
 
-    function getPropertyValue(property: PropertyMeta) {
-        const value = getDataFormatValue();
-        return value ? (value as any)[property.name] : undefined;
-    }
-
-    function getFilteredProperties(): PropertyMeta[] {
-        let propertyMetas = CamelDefinitionApiExt.getElementPropertiesByName(dataFormatString).sort((a, _b) =>
-            a.name === 'library' ? -1 : 1,
-        );
-        const filter = propertyFilter.toLocaleLowerCase();
-        propertyMetas = propertyMetas.filter(
-            (p) =>
-                p.name === 'parameters' ||
-                p.name.toLocaleLowerCase().includes(filter) ||
-                p.label.toLocaleLowerCase().includes(filter) ||
-                p.displayName.toLocaleLowerCase().includes(filter),
-        );
-        if (requiredOnly) {
-            propertyMetas = propertyMetas.filter((p) => p.name === 'parameters' || p.required);
-        }
-        if (changedOnly) {
-            propertyMetas = propertyMetas.filter(
-                (p) => p.name === 'parameters' || PropertyUtil.hasDslPropertyValueChanged(p, getPropertyValue(p)),
-            );
-        }
-        return propertyMetas;
-    }
-
-    function getPropertyFields(value: any, properties: PropertyMeta[]) {
-        return (
-            <>
-                {value &&
-                    properties?.map((property: PropertyMeta) => (
-                        <DslPropertyField
-                            key={property.name}
-                            property={property}
-                            value={value ? (value as any)[property.name] : undefined}
-                            onPropertyChange={propertyChanged}
-                        />
-                    ))}
-            </>
-        );
-    }
-
-    const value = getDataFormatValue();
-    const dataFormatString = getDataFormatString();
-    const dataFormat = DataFormats.find((l: [string, string, string]) => l[0] === dataFormatString);
-    const properties = getFilteredProperties();
-    const propertiesMain = properties.filter((p) => !p.label.includes('advanced'));
-    const propertiesAdvanced = properties.filter((p) => p.label.includes('advanced'));
-    const selectOptions: JSX.Element[] = [];
-    DataFormats.forEach((lang: [string, string, string]) => {
-        const s = <SelectOption key={lang[0]} value={lang[0]} description={lang[2]} />;
-        selectOptions.push(s);
-    });
     return (
         <div>
-            <div>
-                <label className='pf-v5-c-form__label' htmlFor='expression'>
-                    <span className='pf-v5-c-form__label-text'>{'Data Format'}</span>
-                    <span className='pf-v5-c-form__label-required' aria-hidden='true'>
-                        {' '}
-                        *
-                    </span>
-                </label>
-                <ManagedSelect
-                    variant={SelectVariant.typeahead}
-                    aria-label={'dataFormat'}
-                    onSelect={(_, dataFormat, _isPlaceholder) => dataFormatChanged(dataFormat.toString(), value)}
-                    selections={dataFormat}
-                    aria-labelledby={'dataFormat'}
-                    direction={SelectDirection.down}
-                >
-                    {selectOptions}
-                </ManagedSelect>
-            </div>
-            <div className='object'>
-                <div>
-                    {getPropertyFields(value, propertiesMain)}
-                    {propertiesAdvanced.length > 0 && (
-                        <ExpandableSectionWrapper
-                            toggleText={'Advanced data format properties'}
-                            strictExpanded={propertySelectorChanged}
-                        >
-                            {getPropertyFields(value, propertiesAdvanced)}
-                        </ExpandableSectionWrapper>
-                    )}
-                </div>
-            </div>
+            <DataFormatSelector value={currentDataFormat} onDataFormatChange={handleDataFormatChange} />
+            <DataFormatPropertiesPanel
+                dataFormat={currentDataFormat}
+                value={value}
+                onPropertyChange={handlePropertyChange}
+            />
         </div>
     );
 }

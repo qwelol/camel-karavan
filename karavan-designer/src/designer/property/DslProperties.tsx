@@ -37,7 +37,7 @@ import { CamelUi } from '../utils/CamelUi';
 import { CamelMetadataApi, DataFormats, PropertyMeta } from 'karavan-core/lib/model/CamelMetadata';
 import { IntegrationHeader } from '../utils/IntegrationHeader';
 import CloneIcon from '@patternfly/react-icons/dist/esm/icons/clone-icon';
-import { useDesignerStore, useIntegrationStore } from '../DesignerStore';
+import { useDesignerStore } from '../DesignerStore';
 import { shallow } from 'zustand/shallow';
 import { usePropertiesHook } from './usePropertiesHook';
 import { CamelDisplayUtil } from 'karavan-core/lib/api/CamelDisplayUtil';
@@ -50,13 +50,11 @@ interface Props {
 }
 
 export function DslProperties(props: Props) {
-    const [integration] = useIntegrationStore((s) => [s.integration], shallow);
-
     const { cloneElement, onDataFormatChange, onPropertyChange, onExpressionChange } = usePropertiesHook(
         props.designerType,
     );
 
-    const [selectedStep, dark] = useDesignerStore((s) => [s.selectedStep, s.dark], shallow);
+    const [selectedStep] = useDesignerStore((s) => [s.selectedStep], shallow);
 
     const [propertyFilter, changedOnly, requiredOnly, setChangedOnly, setPropertyFilter, setRequiredOnly] =
         usePropertiesStore(
@@ -220,11 +218,9 @@ export function DslProperties(props: Props) {
                 {getPropertyFields(propertiesMain)}
                 {selectedStep && ['MarshalDefinition', 'UnmarshalDefinition'].includes(selectedStep.dslName) && (
                     <DataFormatField
-                        integration={integration}
                         dslName={selectedStep.dslName}
                         value={selectedStep}
                         onDataFormatChange={onDataFormatChange}
-                        dark={dark}
                     />
                 )}
                 {selectedStep && propertiesAdvanced.length > 0 && (
