@@ -16,7 +16,8 @@
  */
 
 import React from 'react';
-import { BeanProperties } from '../../BeanProperties';
+import { PropertyEditor } from '../../editors/PropertyEditor';
+import { ConstructorEditor } from '../../editors/ConstructorEditor';
 import { DslRendererProps } from '../types';
 import { useIntegrationStore, useDesignerStore } from '../../../../DesignerStore';
 import { shallow } from 'zustand/shallow';
@@ -26,9 +27,10 @@ import { BeanFactoryDefinition } from 'karavan-core/lib/model/CamelDefinition';
 
 export const DslBeanPropertiesField: React.FC<DslRendererProps> = ({ property }) => {
     const [integration, setIntegration] = useIntegrationStore((s) => [s.integration, s.setIntegration], shallow);
-    const [setSelectedStep] = useDesignerStore((s) => [s.setSelectedStep], shallow);
+    const [selectedStep, setSelectedStep] = useDesignerStore((s) => [s.selectedStep, s.setSelectedStep], shallow);
 
     const type = property.name === 'constructors' ? 'constructors' : 'properties';
+    const bean = selectedStep as BeanFactoryDefinition;
 
     const changeBean = (bean: BeanFactoryDefinition) => {
         const clone = CamelUtil.cloneIntegration(integration);
@@ -37,5 +39,10 @@ export const DslBeanPropertiesField: React.FC<DslRendererProps> = ({ property })
         setSelectedStep(bean);
     };
 
-    return <BeanProperties type={type} onChange={changeBean} onClone={changeBean} />;
+    return (
+        <div className='properties'>
+            {type === 'constructors' && <ConstructorEditor bean={bean} onChange={changeBean} />}
+            {type === 'properties' && <PropertyEditor bean={bean} onChange={changeBean} />}
+        </div>
+    );
 };
