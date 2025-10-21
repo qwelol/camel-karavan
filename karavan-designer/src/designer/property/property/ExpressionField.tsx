@@ -14,23 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { FormGroup } from '@patternfly/react-core';
-import { ExpandableSectionWrapper, ManagedSelect } from '../../utils/components';
-import { SelectVariant, SelectDirection, SelectOption } from '@patternfly/react-core/deprecated';
 import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
 import { PropertyHelpIcon } from '../../utils/components';
-import { CamelMetadataApi, Languages, PropertyMeta } from 'karavan-core/lib/model/CamelMetadata';
+import { CamelMetadataApi, PropertyMeta } from 'karavan-core/lib/model/CamelMetadata';
 import { CamelDefinitionApiExt } from 'karavan-core/lib/api/CamelDefinitionApiExt';
 import { ExpressionDefinition } from 'karavan-core/lib/model/CamelDefinition';
 import { CamelElement } from 'karavan-core/lib/model/IntegrationDefinition';
 import { CamelDefinitionApi } from 'karavan-core/lib/api/CamelDefinitionApi';
-import { DslPropertyField } from './DslPropertyField';
-import { CamelUi } from '../../utils/CamelUi';
-import { usePropertiesStore, usePropertySelectorChanged } from '../PropertyStore';
-import { shallow } from 'zustand/shallow';
-import { PropertyUtil } from './PropertyUtil';
+import { LanguageSelector } from './LanguageSelector';
+import { ExpressionInput } from './ExpressionInput';
+import { ExpressionPropertiesSection } from './ExpressionPropertiesSection';
+import { useExpressionClassName, useDslLanguage } from './useExpressionHelpers';
 
 interface Props {
     property: PropertyMeta;
@@ -38,157 +35,81 @@ interface Props {
     onExpressionChange?: (propertyName: string, exp: ExpressionDefinition) => void;
 }
 
-export function ExpressionField(props: Props) {
-    const [propertyFilter, changedOnly, requiredOnly] = usePropertiesStore(
-        (s) => [s.propertyFilter, s.changedOnly, s.requiredOnly],
-        shallow,
+export function ExpressionField({ property, value, onExpressionChange }: Props) {
+    const currentLanguage = useMemo(() => CamelDefinitionApiExt.getExpressionLanguageName(value) || 'groovy', [value]);
+
+    const className = useExpressionClassName(value);
+
+    const expressionValue = useMemo(() => {
+        return value && (value as any)[currentLanguage]
+            ? (value as any)[currentLanguage]
+            : CamelDefinitionApi.createExpression(className, value);
+    }, [value, currentLanguage, className]);
+
+    const dslLanguage = useDslLanguage(currentLanguage);
+
+    const expressionChanged = useCallback(
+        (language: string, expressionValue: CamelElement) => {
+            if (language !== (expressionValue as any).expressionName) {
+                const languageClassName = CamelMetadataApi.getCamelLanguageMetadataByName(language)?.className;
+                expressionValue = CamelDefinitionApi.createExpression(languageClassName || '', {
+                    expression: (expressionValue as any).expression,
+                });
+            }
+            const exp = new ExpressionDefinition();
+            (exp as any)[language] = expressionValue;
+            if (value) {
+                (exp as any).uuid = value.uuid;
+            }
+            onExpressionChange?.(property.name, exp);
+        },
+        [value, property.name, onExpressionChange],
     );
-    const propertySelectorChanged = usePropertiesStore(usePropertySelectorChanged, shallow);
 
-    function expressionChanged(language: string, value: CamelElement) {
-        if (language !== (value as any).expressionName) {
-            const className = CamelMetadataApi.getCamelLanguageMetadataByName(language)?.className;
-            value = CamelDefinitionApi.createExpression(className || '', {
-                expression: (value as any).expression,
-            }); // perhaps copy other similar fields later
-        }
-        const exp = new ExpressionDefinition();
-        (exp as any)[language] = value;
-        if (props.value) {
-            (exp as any).uuid = props.value.uuid;
-        }
-        props.onExpressionChange?.(props.property.name, exp);
-    }
+    const propertyChanged = useCallback(
+        (fieldId: string, propertyValue: string | number | boolean | any) => {
+            if (expressionValue) {
+                (expressionValue as any)[fieldId] = propertyValue;
+                expressionChanged(currentLanguage, expressionValue);
+            }
+        },
+        [expressionValue, currentLanguage, expressionChanged],
+    );
 
-    function propertyChanged(fieldId: string, value: string | number | boolean | any) {
-        const expression = getExpressionValue();
-        if (expression) {
-            (expression as any)[fieldId] = value;
-            expressionChanged(getValueLanguage(), expression);
-        }
-    }
+    const handleLanguageChange = useCallback(
+        (language: string) => {
+            expressionChanged(language, expressionValue);
+        },
+        [expressionValue, expressionChanged],
+    );
 
-    function getValueClassName(): string {
-        return CamelDefinitionApiExt.getExpressionLanguageClassName(props.value) || 'GroovyExpression';
-    }
-
-    function getValueLanguage(): string {
-        return CamelDefinitionApiExt.getExpressionLanguageName(props.value) || 'groovy';
-    }
-
-    function getExpressionValue(): CamelElement {
-        const language = getValueLanguage();
-        return props.value && (props.value as any)[language]
-            ? (props.value as any)[language]
-            : CamelDefinitionApi.createExpression(getValueClassName(), props.value);
-    }
-
-    function getProps(): PropertyMeta[] {
-        const dslName = getValueClassName();
-        const filter = propertyFilter.toLocaleLowerCase();
-        let propertyMetas = CamelDefinitionApiExt.getElementProperties(dslName)
-            .filter((p) => p.name !== 'id')
-            .filter((p) => p.name !== 'expression')
-            .filter(
-                (p) =>
-                    !p.isObject ||
-                    (p.isObject && !CamelUi.dslHasSteps(p.type)) ||
-                    (dslName === 'CatchDefinition' && p.name === 'onWhen'),
-            )
-            .filter(
-                (p) =>
-                    p.name === 'parameters' ||
-                    p.name.toLocaleLowerCase().includes(filter) ||
-                    p.label.toLocaleLowerCase().includes(filter) ||
-                    p.displayName.toLocaleLowerCase().includes(filter),
-            );
-        if (requiredOnly) {
-            propertyMetas = propertyMetas.filter((p) => p.name === 'parameters' || p.required);
-        }
-        if (changedOnly) {
-            propertyMetas = propertyMetas.filter(
-                (p) => p.name === 'parameters' || PropertyUtil.hasDslPropertyValueChanged(p, getPropertyValue(p)),
-            );
-        }
-        return propertyMetas;
-    }
-
-    function getPropertyValue(property: PropertyMeta) {
-        const value = getExpressionValue();
-        return value ? (value as any)[property.name] : undefined;
-    }
-
-    function getExpressionProps(): PropertyMeta | undefined {
-        const dslName = getValueClassName();
-        return CamelDefinitionApiExt.getElementProperties(dslName)
-            .filter((p) => p.name === 'expression')
-            .at(0);
-    }
-
-    const property: PropertyMeta = props.property;
-    const value = getExpressionValue();
-    const dslLanguage = Languages.find((l: [string, string, string]) => l[0] === getValueLanguage());
-    const selectOptions: JSX.Element[] = [];
-    Languages.forEach((lang: [string, string, string]) => {
-        const s = <SelectOption key={lang[0]} value={lang[0]} description={lang[2]} />;
-        selectOptions.push(s);
-    });
-    const exp = getExpressionProps();
     return (
         <div>
-            <label className='pf-v5-c-form__label' htmlFor='expression'>
-                <span className='pf-v5-c-form__label-text'>Language</span>
-                <span className='pf-v5-c-form__label-required' aria-hidden='true'>
-                    {' '}
-                    *
-                </span>
-            </label>
-            <ManagedSelect
-                variant={SelectVariant.typeahead}
-                aria-label={property.name}
-                onSelect={(_e, lang, _isPlaceholder) => {
-                    expressionChanged(lang.toString(), value);
-                }}
-                selections={dslLanguage}
-                aria-labelledby={property.name}
-                direction={SelectDirection.down}
-            >
-                {selectOptions}
-            </ManagedSelect>
+            <LanguageSelector
+                language={currentLanguage}
+                propertyName={property.name}
+                onLanguageChange={handleLanguageChange}
+            />
             <FormGroup
-                key={property.name}
                 fieldId={property.name}
                 labelIcon={
                     property.description ? (
                         <PropertyHelpIcon title={property.displayName} description={property.description} />
-                    ) : (
-                        <div></div>
-                    )
+                    ) : undefined
                 }
             >
-                {exp && (
-                    <DslPropertyField
-                        key={exp.name + props.value?.uuid}
-                        property={exp}
-                        value={value ? (value as any)[exp.name] : undefined}
-                        dslLanguage={dslLanguage}
-                        onExpressionChange={(_exp) => {}}
-                        onPropertyChange={propertyChanged}
-                    />
-                )}
-                <ExpandableSectionWrapper toggleText={'Expression properties'} strictExpanded={propertySelectorChanged}>
-                    {value &&
-                        getProps().map((property: PropertyMeta) => (
-                            <DslPropertyField
-                                key={property.name + props.value?.uuid}
-                                property={property}
-                                value={value ? (value as any)[property.name] : undefined}
-                                dslLanguage={dslLanguage}
-                                onExpressionChange={(_exp) => {}}
-                                onPropertyChange={propertyChanged}
-                            />
-                        ))}
-                </ExpandableSectionWrapper>
+                <ExpressionInput
+                    expressionDefinition={value}
+                    expressionValue={expressionValue}
+                    dslLanguage={dslLanguage}
+                    onPropertyChange={propertyChanged}
+                />
+                <ExpressionPropertiesSection
+                    expressionDefinition={value}
+                    expressionValue={expressionValue}
+                    dslLanguage={dslLanguage}
+                    onPropertyChange={propertyChanged}
+                />
             </FormGroup>
         </div>
     );
