@@ -58,4 +58,3 @@ export function LanguageSelector({ language, propertyName, onLanguageChange }: P
         </div>
     );
 }
-

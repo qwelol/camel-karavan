@@ -15,24 +15,10 @@
  * limitations under the License.
  */
 import React, { useState } from 'react';
-import {
-    Badge,
-    Button,
-    capitalize,
-    Flex,
-    FlexItem,
-    Form,
-    FormGroup,
-    Modal,
-    PageSection,
-    Tab,
-    Tabs,
-    TabTitleText,
-    TextInput,
-} from '@patternfly/react-core';
+import { capitalize, Flex, FlexItem, Modal, PageSection, Tab, Tabs, TabTitleText } from '@patternfly/react-core';
 import '../../karavan.css';
-import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { InfrastructureAPI } from '../../utils/InfrastructureAPI';
+import { SearchInput, InfrastructureTable, useInfrastructureFilter } from './infrastructure';
 
 interface Props {
     onSelect: (value: string) => void;
@@ -44,176 +30,25 @@ interface Props {
 export function InfrastructureSelector(props: Props) {
     const tabs = InfrastructureAPI.infrastructure === 'kubernetes' ? ['configMap', 'secret', 'services'] : ['services'];
     const [tabIndex, setTabIndex] = useState<string | number>(tabs[0]);
-    const [filter, setFilter] = useState<string>();
 
-    function checkFilter(name: string): boolean {
-        if (filter !== undefined && name) {
-            return name.toLowerCase().includes(filter.toLowerCase());
-        } else {
-            return true;
+    const configMapsFilter = useInfrastructureFilter(InfrastructureAPI.configMaps);
+    const secretsFilter = useInfrastructureFilter(InfrastructureAPI.secrets);
+    const servicesFilter = useInfrastructureFilter(InfrastructureAPI.services);
+
+    const getCurrentFilter = () => {
+        switch (tabIndex) {
+            case 'configMap':
+                return configMapsFilter;
+            case 'secret':
+                return secretsFilter;
+            case 'services':
+                return servicesFilter;
+            default:
+                return servicesFilter;
         }
-    }
+    };
 
-    function searchInput() {
-        return (
-            <Form isHorizontal className='search' autoComplete='off'>
-                <FormGroup fieldId='search'>
-                    <TextInput
-                        className='text-field'
-                        type='text'
-                        id='search'
-                        name='search'
-                        value={filter}
-                        onChange={(_, value) => setFilter(value)}
-                    />
-                </FormGroup>
-            </Form>
-        );
-    }
-
-    function getConfigMapTable() {
-        const configMaps = InfrastructureAPI.configMaps;
-        return (
-            <Table variant='compact' borders={false}>
-                <Thead>
-                    <Tr>
-                        <Th />
-                        <Th key='name'>Name</Th>
-                        <Th key='data'>Data</Th>
-                    </Tr>
-                </Thead>
-                <Tbody>
-                    {configMaps
-                        .filter((name) => checkFilter(name))
-                        .map((name, _idx: number) => {
-                            const configMapName = name.split('/')[0];
-                            const data = name.split('/')[1];
-                            return (
-                                <Tr key={name}>
-                                    <Td noPadding isActionCell>
-                                        <Badge>CM</Badge>
-                                    </Td>
-                                    <Td noPadding>{configMapName}</Td>
-                                    <Td noPadding>
-                                        <Button
-                                            style={{ padding: '6px' }}
-                                            variant={'link'}
-                                            onClick={(_e) => props.onSelect?.('configmap:' + name)}
-                                        >
-                                            {data}
-                                        </Button>
-                                    </Td>
-                                </Tr>
-                            );
-                        })}
-                </Tbody>
-            </Table>
-        );
-    }
-
-    function getSecretsTable() {
-        const secrets = InfrastructureAPI.secrets;
-        return (
-            <Table variant='compact' borders={false}>
-                <Thead>
-                    <Tr>
-                        <Th />
-                        <Th key='name'>Name</Th>
-                        <Th key='data'>Data</Th>
-                    </Tr>
-                </Thead>
-                <Tbody>
-                    {secrets
-                        .filter((name) => checkFilter(name))
-                        .map((name, _idx: number) => {
-                            const configMapName = name.split('/')[0];
-                            const data = name.split('/')[1];
-                            return (
-                                <Tr key={name}>
-                                    <Td noPadding isActionCell>
-                                        <Badge>S</Badge>
-                                    </Td>
-                                    <Td noPadding>{configMapName}</Td>
-                                    <Td noPadding>
-                                        <Button
-                                            style={{ padding: '6px' }}
-                                            variant={'link'}
-                                            onClick={(_e) => props.onSelect?.('secret:' + name)}
-                                        >
-                                            {data}
-                                        </Button>
-                                    </Td>
-                                </Tr>
-                            );
-                        })}
-                </Tbody>
-            </Table>
-        );
-    }
-
-    function getServicesTable() {
-        const services = InfrastructureAPI.services;
-        return (
-            <Table variant='compact' borders={false}>
-                <Thead>
-                    <Tr>
-                        <Th />
-                        <Th key='name'>Name</Th>
-                        {/*<Th key='hostPort'>Host:Port</Th>*/}
-                        <Th key='host'>Host</Th>
-                        <Th key='port'>Port</Th>
-                    </Tr>
-                </Thead>
-                <Tbody>
-                    {services
-                        .filter((name) => checkFilter(name))
-                        .map((name, _idx: number) => {
-                            const serviceName = name.split('|')[0];
-                            const hostPort = name.split('|')[1];
-                            const host = hostPort.split(':')[0];
-                            const port = hostPort.split(':')[1];
-                            return (
-                                <Tr key={name}>
-                                    <Td noPadding isActionCell>
-                                        <Badge>S</Badge>
-                                    </Td>
-                                    {/*<Td noPadding>*/}
-                                    {/*    {serviceName}*/}
-                                    {/*</Td>*/}
-                                    <Td noPadding>
-                                        <Button
-                                            style={{ padding: '6px' }}
-                                            variant={'link'}
-                                            onClick={(_e) => props.onSelect?.(hostPort)}
-                                        >
-                                            {serviceName}
-                                        </Button>
-                                    </Td>
-                                    <Td noPadding>
-                                        <Button
-                                            style={{ padding: '6px' }}
-                                            variant={'link'}
-                                            onClick={(_e) => props.onSelect?.(host)}
-                                        >
-                                            {host}
-                                        </Button>
-                                    </Td>
-                                    <Td noPadding>
-                                        <Button
-                                            style={{ padding: '6px' }}
-                                            variant={'link'}
-                                            onClick={(_e) => props.onSelect?.(port)}
-                                        >
-                                            {port}
-                                        </Button>
-                                    </Td>
-                                </Tr>
-                            );
-                        })}
-                </Tbody>
-            </Table>
-        );
-    }
+    const currentFilter = getCurrentFilter();
 
     return (
         <Modal
@@ -226,7 +61,7 @@ export function InfrastructureSelector(props: Props) {
                 <Flex direction={{ default: 'column' }}>
                     <FlexItem>
                         <h3>{'Select from ' + capitalize(InfrastructureAPI.infrastructure)}</h3>
-                        {searchInput()}
+                        <SearchInput value={currentFilter.filter} onChange={currentFilter.setFilter} />
                     </FlexItem>
                     <FlexItem>
                         <Tabs
@@ -244,10 +79,24 @@ export function InfrastructureSelector(props: Props) {
             actions={{}}
         >
             <PageSection variant={props.dark ? 'darker' : 'light'}>
-                {searchInput()}
-                {tabIndex === 'configMap' && getConfigMapTable()}
-                {tabIndex === 'secret' && getSecretsTable()}
-                {tabIndex === 'services' && getServicesTable()}
+                <SearchInput value={currentFilter.filter} onChange={currentFilter.setFilter} />
+                {tabIndex === 'configMap' && (
+                    <InfrastructureTable
+                        type='configMap'
+                        items={configMapsFilter.filteredItems}
+                        onSelect={props.onSelect}
+                    />
+                )}
+                {tabIndex === 'secret' && (
+                    <InfrastructureTable type='secret' items={secretsFilter.filteredItems} onSelect={props.onSelect} />
+                )}
+                {tabIndex === 'services' && (
+                    <InfrastructureTable
+                        type='services'
+                        items={servicesFilter.filteredItems}
+                        onSelect={props.onSelect}
+                    />
+                )}
             </PageSection>
         </Modal>
     );

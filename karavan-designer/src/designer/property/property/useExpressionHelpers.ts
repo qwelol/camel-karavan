@@ -33,9 +33,5 @@ export function useExpressionClassName(expressionDefinition: CamelElement): stri
  * Хук для получения объекта языка из списка Languages по имени
  */
 export function useDslLanguage(languageName: string): [string, string, string] | undefined {
-    return useMemo(
-        () => Languages.find((l: [string, string, string]) => l[0] === languageName),
-        [languageName],
-    );
+    return useMemo(() => Languages.find((l: [string, string, string]) => l[0] === languageName), [languageName]);
 }
-
