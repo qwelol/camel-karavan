@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import '../../karavan.css';
 import '@patternfly/patternfly/patternfly.css';
 import { DslPropertyField } from './DslPropertyField';
@@ -32,44 +32,51 @@ interface Props {
 }
 
 export function ObjectField(props: Props) {
-    const [value, setValue] = useState<CamelElement | undefined>(props.value);
+    const { property, onPropertyUpdate, hideLabel, value } = props;
 
-    function propertyChanged(fieldId: string, value: string | number | boolean | any) {
-        if (props.value) {
-            const clone = CamelUtil.cloneStep(props.value);
-            (clone as any)[fieldId] = value;
-            setStep(clone);
-            props.onPropertyUpdate(props.property.name, clone);
+    const propertyChanged = useCallback(
+        (fieldId: string, newValue: string | number | boolean | any) => {
+            if (value) {
+                const clone = CamelUtil.cloneStep(value);
+                (clone as any)[fieldId] = newValue;
+                onPropertyUpdate(property.name, clone);
+            }
+        },
+        [value, onPropertyUpdate, property.name],
+    );
+
+    const expressionChanged = useCallback(
+        (propertyName: string, newValue: ExpressionDefinition) => {
+            if (value) {
+                const clone = CamelUtil.cloneStep(value);
+                (clone as any)[propertyName] = newValue;
+                onPropertyUpdate(property.name, clone);
+            }
+        },
+        [value, onPropertyUpdate, property.name],
+    );
+
+    const elementProperties = useMemo(() => {
+        if (!value?.dslName) {
+            return [];
         }
-    }
 
-    function expressionChanged(propertyName: string, value: ExpressionDefinition) {
-        if (props.value) {
-            const clone = CamelUtil.cloneStep(props.value);
-            (clone as any)[propertyName] = value;
-            setStep(clone);
-            props.onPropertyUpdate(props.property.name, clone);
-        }
-    }
+        return CamelDefinitionApiExt.getElementProperties(value.dslName);
+    }, [value?.dslName]);
 
-    function setStep(step?: CamelElement) {
-        setValue(step);
-    }
-
-    const val = props.value;
     return (
         <div className='object-field'>
-            {val &&
-                CamelDefinitionApiExt.getElementProperties(val.dslName).map((property: PropertyMeta) => (
-                    <DslPropertyField
-                        key={property.name}
-                        property={property}
-                        element={value}
-                        onExpressionChange={expressionChanged}
-                        onPropertyChange={(_fieldId, value) => propertyChanged(property.name, value)}
-                        value={val ? (val as any)[property.name] : undefined}
-                    />
-                ))}
+            {elementProperties.map((propertyMeta: PropertyMeta) => (
+                <DslPropertyField
+                    key={propertyMeta.name}
+                    property={propertyMeta}
+                    element={value}
+                    onExpressionChange={expressionChanged}
+                    onPropertyChange={(_fieldId, newValue) => propertyChanged(propertyMeta.name, newValue)}
+                    value={value ? (value as any)[propertyMeta.name] : undefined}
+                    hideLabel={hideLabel}
+                />
+            ))}
         </div>
     );
 }
