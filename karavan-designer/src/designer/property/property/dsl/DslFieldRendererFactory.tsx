@@ -35,6 +35,7 @@ import { DslMultiValueObjectFieldRenderer } from './renderers/DslMultiValueObjec
 import { DslKameletParametersFieldRenderer } from './renderers/DslKameletParametersFieldRenderer';
 import { DslComponentParametersFieldRenderer } from './renderers/DslComponentParametersFieldRenderer';
 import { DslBeanPropertiesFieldRenderer } from './renderers/DslBeanPropertiesFieldRenderer';
+import { EmptyCreatableFiledRenderer } from './renderers/EmptyCreatableFiledRenderer';
 
 export class DslFieldRendererFactory extends BaseFieldRendererFactory<PropertyMeta, any, DslRendererProps> {
     constructor() {
@@ -58,10 +59,27 @@ export class DslFieldRendererFactory extends BaseFieldRendererFactory<PropertyMe
         this.registerRenderer(new DslKameletParametersFieldRenderer()); // Приоритет 80
         this.registerRenderer(new DslComponentParametersFieldRenderer()); // Приоритет 80
         this.registerRenderer(new DslBeanPropertiesFieldRenderer()); // Приоритет 80
+        this.registerRenderer(new EmptyCreatableFiledRenderer()); // Приоритет 70
     }
 
-    protected getCacheKey(property: PropertyMeta): string {
-        return `${property.type}-${property.name}-${property.isObject ? 'object' : 'primitive'}-${property.isArray ? 'array' : 'single'}`;
+    protected getCacheKey(property: PropertyMeta, props?: DslRendererProps): string {
+        let baseKey = `${property.type}-${property.name}-${property.isObject ? 'object' : 'primitive'}-${property.isArray ? 'array' : 'single'}`;
+
+        if (props?.value !== undefined) {
+            baseKey += `-hasValue`;
+        } else {
+            baseKey += `-noValue`;
+        }
+
+        if (props?.element?.dslName) {
+            baseKey += `-element:${props.element.dslName}`;
+        }
+
+        if (props?.dslLanguage) {
+            baseKey += `-dsl:${props.dslLanguage.join(',')}`;
+        }
+
+        return baseKey;
     }
 
     protected getPropertyName(property: PropertyMeta): string {

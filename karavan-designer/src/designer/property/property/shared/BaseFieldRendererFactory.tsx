@@ -48,10 +48,16 @@ export class BaseFieldRendererFactory<TProperty = any, TValue = any, TRenderProp
     }
 
     getRenderer(property: TProperty, props: TRenderProps): FieldRenderer<TProperty, TValue, TRenderProps> {
-        const cacheKey = this.getCacheKey(property);
+        const cacheKey = this.getCacheKey(property, props);
 
         if (this.rendererCache.has(cacheKey)) {
-            return this.rendererCache.get(cacheKey)!;
+            const cachedRenderer = this.rendererCache.get(cacheKey)!;
+
+            if (cachedRenderer.canRender(property, props)) {
+                return cachedRenderer;
+            } else {
+                this.rendererCache.delete(cacheKey);
+            }
         }
 
         const renderer = this.renderers.find((r) => r.canRender(property, props));
@@ -76,7 +82,7 @@ export class BaseFieldRendererFactory<TProperty = any, TValue = any, TRenderProp
         this.rendererCache.clear();
     }
 
-    protected getCacheKey(property: TProperty): string {
+    protected getCacheKey(property: TProperty, _props?: TRenderProps): string {
         return `${this.getPropertyType(property)}-${this.getPropertyName(property)}`;
     }
 
