@@ -18,8 +18,8 @@
 import React from 'react';
 import { InputGroupItem, Switch, TextInputGroup } from '@patternfly/react-core';
 import { DebouncedTextInput } from '../../../../utils/components';
-import { PropertyPlaceholderDropdown } from '../../PropertyPlaceholderDropdown';
 import { ComponentRendererProps } from '../types';
+import { ComponentPropertyPlaceholderDropdown } from '../../PropertyPlaceholderDropdown/ComponentPropertyPlaceholderDropdown';
 
 export const ComponentBooleanField: React.FC<ComponentRendererProps> = ({ property, value, fieldId, onChange }) => {
     const isValueBoolean = value?.toString() === 'true' || value?.toString() === 'false';
@@ -59,10 +59,10 @@ export const ComponentBooleanField: React.FC<ComponentRendererProps> = ({ proper
                 />
             </InputGroupItem>
             <InputGroupItem>
-                <PropertyPlaceholderDropdown
+                <ComponentPropertyPlaceholderDropdown
                     property={property}
                     value={value}
-                    onDslPropertyChange={(v) => onChange(v)}
+                    onComponentPropertyChange={(v) => onChange(v)}
                 />
             </InputGroupItem>
         </TextInputGroup>

@@ -19,9 +19,9 @@ import React from 'react';
 import { InputGroup, InputGroupItem, Text, TextVariants } from '@patternfly/react-core';
 import { useShowInfrastructureButton } from '../../shared/hooks/useShowInfrastructureButton';
 import { isNumeric } from '../../../../utils/commonUtils';
-import { PropertyPlaceholderDropdown } from '../../PropertyPlaceholderDropdown';
 import { EditorButton, PasswordInfrastructureDebouncedTextInput } from '../../../../utils/components';
 import { KameletRendererProps } from '../types';
+import { KameletPropertyPlaceholderDropdown } from '../../PropertyPlaceholderDropdown/KameletPropertyPlaceholderDropdown';
 
 export const KameletStringField: React.FC<KameletRendererProps> = ({
     property,
@@ -64,7 +64,7 @@ export const KameletStringField: React.FC<KameletRendererProps> = ({
             )}
 
             <InputGroupItem>
-                <PropertyPlaceholderDropdown property={property} value={value} onDslPropertyChange={onChange} />
+                <KameletPropertyPlaceholderDropdown value={value} onDslPropertyChange={onChange} />
             </InputGroupItem>
         </InputGroup>
     );

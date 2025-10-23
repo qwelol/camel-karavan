@@ -18,9 +18,9 @@
 import React from 'react';
 import { InputGroup, InputGroupItem, Text, TextVariants } from '@patternfly/react-core';
 import { DebouncedTextInput } from '../../../../utils/components';
-import { PropertyPlaceholderDropdown } from '../../PropertyPlaceholderDropdown';
 import { DslRendererProps } from '../types';
 import { isNumeric } from '../../../../utils/commonUtils';
+import { DslPropertyPlaceholderDropdown } from '../../PropertyPlaceholderDropdown/DslPropertyPlaceholderDropdown';
 
 export const DslNumberField: React.FC<DslRendererProps> = ({ property, value, fieldId, onChange, required }) => {
     return (
@@ -47,11 +47,7 @@ export const DslNumberField: React.FC<DslRendererProps> = ({ property, value, fi
                 />
             </InputGroupItem>
             <InputGroupItem>
-                <PropertyPlaceholderDropdown
-                    property={property}
-                    value={value}
-                    onDslPropertyChange={(v) => onChange(v)}
-                />
+                <DslPropertyPlaceholderDropdown value={value} onDslPropertyChange={(v) => onChange(v)} />
             </InputGroupItem>
         </InputGroup>
     );

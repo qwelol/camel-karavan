@@ -18,8 +18,8 @@
 import React from 'react';
 import { TextInputGroup, InputGroupItem, Switch } from '@patternfly/react-core';
 import { DebouncedTextInput } from '../../../../utils/components';
-import { PropertyPlaceholderDropdown } from '../../PropertyPlaceholderDropdown';
 import { DslRendererProps } from '../types';
+import { DslPropertyPlaceholderDropdown } from '../../PropertyPlaceholderDropdown/DslPropertyPlaceholderDropdown';
 
 export const DslBooleanField: React.FC<DslRendererProps> = ({ property, value, fieldId, onChange }) => {
     const isValueBoolean = value?.toString() === 'true' || value?.toString() === 'false';
@@ -61,8 +61,7 @@ export const DslBooleanField: React.FC<DslRendererProps> = ({ property, value, f
                 />
             </InputGroupItem>
             <InputGroupItem>
-                <PropertyPlaceholderDropdown
-                    property={property}
+                <DslPropertyPlaceholderDropdown
                     value={value}
                     onDslPropertyChange={(v, newRoute) => {
                         onChange(v, false, newRoute);

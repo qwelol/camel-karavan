@@ -18,8 +18,8 @@
 import React from 'react';
 import { InputGroup, InputGroupItem, Text, TextVariants } from '@patternfly/react-core';
 import { DebouncedTextInput } from '../../../../utils/components';
-import { PropertyPlaceholderDropdown } from '../../PropertyPlaceholderDropdown';
 import { ComponentRendererProps } from '../types';
+import { ComponentPropertyPlaceholderDropdown } from '../../PropertyPlaceholderDropdown/ComponentPropertyPlaceholderDropdown';
 
 export const ComponentNumberField: React.FC<ComponentRendererProps> = ({
     property,
@@ -52,7 +52,7 @@ export const ComponentNumberField: React.FC<ComponentRendererProps> = ({
                 />
             </InputGroupItem>
             <InputGroupItem>
-                <PropertyPlaceholderDropdown
+                <ComponentPropertyPlaceholderDropdown
                     property={property}
                     value={value}
                     onComponentPropertyChange={handleParametersChange}

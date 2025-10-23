@@ -18,9 +18,9 @@
 import React from 'react';
 import { InputGroup, InputGroupItem } from '@patternfly/react-core';
 import { PasswordInfrastructureDebouncedTextInput, EditorButton } from '../../../../utils/components';
-import { PropertyPlaceholderDropdown } from '../../PropertyPlaceholderDropdown';
 import { ComponentRendererProps } from '../types';
 import { useShowInfrastructureButton } from '../../shared/hooks/useShowInfrastructureButton';
+import { ComponentPropertyPlaceholderDropdown } from '../../PropertyPlaceholderDropdown/ComponentPropertyPlaceholderDropdown';
 
 export const ComponentStringField: React.FC<ComponentRendererProps> = ({
     property,
@@ -65,7 +65,7 @@ export const ComponentStringField: React.FC<ComponentRendererProps> = ({
             />
 
             <InputGroupItem>
-                <PropertyPlaceholderDropdown
+                <ComponentPropertyPlaceholderDropdown
                     property={property}
                     value={value}
                     onComponentPropertyChange={handleParametersChange}

@@ -18,11 +18,11 @@
 import React from 'react';
 import { InputGroup, InputGroupItem, Text, TextVariants } from '@patternfly/react-core';
 import { InfrastructureDebouncedTextInput, EditorButton } from '../../../../utils/components';
-import { PropertyPlaceholderDropdown } from '../../PropertyPlaceholderDropdown';
 import { DslRendererProps } from '../types';
 import { useShowInfrastructureButton } from '../../shared/hooks/useShowInfrastructureButton';
 import { isNumeric } from '../../../../utils/commonUtils';
 import { PropertyUtil } from '../../PropertyUtil';
+import { DslPropertyPlaceholderDropdown } from '../../PropertyPlaceholderDropdown/DslPropertyPlaceholderDropdown';
 
 export const DslStringField: React.FC<DslRendererProps> = ({
     property,
@@ -77,11 +77,7 @@ export const DslStringField: React.FC<DslRendererProps> = ({
             )}
 
             <InputGroupItem>
-                <PropertyPlaceholderDropdown
-                    property={property}
-                    value={value}
-                    onDslPropertyChange={(v) => onChange(v)}
-                />
+                <DslPropertyPlaceholderDropdown value={value} onDslPropertyChange={(v) => onChange(v)} />
             </InputGroupItem>
         </InputGroup>
     );
