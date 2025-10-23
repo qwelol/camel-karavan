@@ -32,14 +32,10 @@ interface IntegrationState {
     files: IntegrationFile[];
     setFiles: (files: IntegrationFile[]) => void;
     resetFiles: (files: IntegrationFile[]) => void;
-    variables: string[];
-    setVariables: (variables: string[]) => void;
-    addVariable: (variable: string) => void;
-    getVariables: () => string[];
 }
 
 export const useIntegrationStore = createWithEqualityFn<IntegrationState>(
-    (set, get) => ({
+    (set, _get) => ({
         integration: Integration.createNew('demo', 'plain'),
         propertyOnly: false,
         json: '{}',
@@ -80,31 +76,19 @@ export const useIntegrationStore = createWithEqualityFn<IntegrationState>(
                 return { files: [...files] };
             });
         },
-        variables: [],
-        setVariables: (variables: string[]) => {
-            set(() => {
-                return { variables: [...variables] };
-            });
-        },
-        addVariable: (variable: string) => {
-            set((state: IntegrationState) => {
-                const vars = VariableUtil.findVariables(state.files);
-                if (!vars.includes(variable)) vars.push(variable);
-                return { variables: VariableUtil.sortVariables(vars) };
-            });
-        },
-        getVariables: () => {
-            const files = get().files;
-            const integration = get().integration;
-            const otherFiles = files.filter((file) => file.name !== integration.metadata.name);
-            const currentVariables = VariableUtil.findVariablesInIntegrations([integration]);
-            const otherVariables = VariableUtil.findVariables(otherFiles);
-            currentVariables.concat(otherVariables);
-            return currentVariables;
-        },
     }),
     shallow,
 );
+
+export const useVariables = (s: IntegrationState) => {
+    const { files, integration } = s;
+
+    const otherFiles = files.filter((file: IntegrationFile) => file.name !== integration.metadata.name);
+    const currentVariables = VariableUtil.findVariablesInIntegrations([integration]);
+    const otherVariables = VariableUtil.findVariables(otherFiles);
+
+    return VariableUtil.sortVariables([...currentVariables, ...otherVariables]);
+};
 
 interface SelectorStateState {
     showSelector: boolean;

@@ -15,18 +15,11 @@
  * limitations under the License.
  */
 import React, { useState } from 'react';
-import {
-    Dropdown,
-    MenuToggleElement,
-    MenuToggle,
-    DropdownList,
-    DropdownItem,
-    DropdownGroup,
-} from '@patternfly/react-core';
+import { Dropdown, MenuToggle, DropdownList, DropdownItem, DropdownGroup } from '@patternfly/react-core';
 import '../../karavan.css';
 import './VariablesDropdown.css';
 import '@patternfly/patternfly/patternfly.css';
-import { useIntegrationStore } from '../../DesignerStore';
+import { useIntegrationStore, useVariables } from '../../DesignerStore';
 import { shallow } from 'zustand/shallow';
 import EllipsisVIcon from '@patternfly/react-icons/dist/esm/icons/ellipsis-v-icon';
 
@@ -35,32 +28,14 @@ interface Props {
 }
 
 export function VariablesDropdown(props: Props) {
-    const [variables, getVariables] = useIntegrationStore((s) => [s.variables, s.getVariables], shallow);
+    const { onVariableChange } = props;
+    const variables = useIntegrationStore(useVariables, shallow);
     const [isOpenVariablesDropdown, setOpenVariablesDropdown] = useState<boolean>(false);
 
     const hasVariables = variables && variables.length > 0;
 
-    function parametersChanged(name: string) {
-        props.onVariableChange(name);
-    }
-
     function onMenuToggleClick() {
-        setOpenVariablesDropdown(!isOpenVariablesDropdown);
-    }
-
-    function getToggle(toggleRef: React.Ref<MenuToggleElement>) {
-        return (
-            <MenuToggle
-                className='variables-toggle'
-                ref={toggleRef}
-                aria-label='variables menu'
-                variant='default'
-                onClick={() => onMenuToggleClick()}
-                isExpanded={isOpenVariablesDropdown}
-            >
-                <EllipsisVIcon />
-            </MenuToggle>
-        );
+        setOpenVariablesDropdown((prev) => !prev);
     }
 
     return (
@@ -69,18 +44,28 @@ export function VariablesDropdown(props: Props) {
             isOpen={isOpenVariablesDropdown}
             onSelect={(_, value) => {
                 if (value) {
-                    parametersChanged(value?.toString());
+                    onVariableChange(value?.toString());
                     setOpenVariablesDropdown(false);
                 }
             }}
             onOpenChange={(isOpen: boolean) => setOpenVariablesDropdown(isOpen)}
-            toggle={(toggleRef: React.Ref<MenuToggleElement>) => getToggle(toggleRef)}
+            toggle={() => (
+                <MenuToggle
+                    className='variables-toggle'
+                    aria-label='variables menu'
+                    variant='default'
+                    onClick={onMenuToggleClick}
+                    isExpanded={isOpenVariablesDropdown}
+                >
+                    <EllipsisVIcon />
+                </MenuToggle>
+            )}
             shouldFocusToggleOnSelect
         >
             <DropdownList>
                 {hasVariables && (
                     <DropdownGroup label='Variables'>
-                        {getVariables().map((pp, index) => (
+                        {variables.map((pp, index) => (
                             <DropdownItem value={pp} key={index}>
                                 {pp}
                             </DropdownItem>

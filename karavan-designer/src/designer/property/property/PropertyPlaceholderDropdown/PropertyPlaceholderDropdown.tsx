@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 import React from 'react';
-import '../../karavan.css';
-import './PropertyPlaceholderDropdown.css';
+import '../../../karavan.css';
+import '../PropertyPlaceholderDropdown.css';
 import '@patternfly/patternfly/patternfly.css';
 import { useDesignerStore } from '../../../DesignerStore';
 import { shallow } from 'zustand/shallow';

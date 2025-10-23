@@ -39,7 +39,6 @@ import { EventBus, IntegrationUpdate } from './utils/EventBus';
 import { CodeEditor } from './editor/CodeEditor';
 import BellIcon from '@patternfly/react-icons/dist/esm/icons/bell-icon';
 import { BeanFactoryDefinition } from 'karavan-core/lib/model/CamelDefinition';
-import { VariableUtil } from 'karavan-core/lib/api/VariableUtil';
 
 interface Props {
     onSave: (filename: string, yaml: string, propertyOnly: boolean) => void;
@@ -71,8 +70,8 @@ export function KaravanDesigner(props: Props) {
         ],
         shallow,
     );
-    const [integration, setIntegration, resetFiles, setVariables] = useIntegrationStore(
-        (s) => [s.integration, s.setIntegration, s.resetFiles, s.setVariables],
+    const [integration, setIntegration, resetFiles] = useIntegrationStore(
+        (s) => [s.integration, s.setIntegration, s.resetFiles],
         shallow,
     );
 
@@ -96,7 +95,6 @@ export function KaravanDesigner(props: Props) {
             reset();
             setDark(props.dark);
             setPropertyPlaceholders(props.propertyPlaceholders);
-            setVariables(VariableUtil.findVariables(props.files));
             setBeans(props.beans);
             resetFiles(props.files);
         } catch (e: any) {
